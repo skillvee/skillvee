@@ -6,8 +6,219 @@ generator client {
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
 }
 
-// Add your models here
+// User model - synced with Clerk
+model User {
+    id           String   @id @default(cuid())
+    clerkId      String   @unique
+    email        String   @unique
+    firstName    String?
+    lastName     String?
+    profileImage String?
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    deletedAt    DateTime?
+
+    // Relationships
+    jobDescriptions JobDescription[]
+    interviews      Interview[]
+    interviewNotes  InterviewNote[]
+
+    @@map("users")
+    @@index([clerkId])
+    @@index([email])
+    @@index([deletedAt])
+}
+
+// Job descriptions and templates
+model JobDescription {
+    id          String   @id @default(cuid())
+    title       String
+    company     String?
+    description String
+    requirements String[]
+    focusAreas  String[] // AI-derived focus areas
+    isTemplate  Boolean  @default(false)
+    userId      String?  // Nullable for system templates
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    deletedAt   DateTime?
+
+    // Relationships
+    user       User?       @relation(fields: [userId], references: [id])
+    interviews Interview[]
+
+    @@map("job_descriptions")
+    @@index([userId])
+    @@index([isTemplate])
+    @@index([deletedAt])
+}
+
+// Interview sessions
+model Interview {
+    id              String           @id @default(cuid())
+    userId          String
+    jobDescriptionId String
+    status          InterviewStatus  @default(SCHEDULED)
+    scheduledAt     DateTime?
+    startedAt       DateTime?
+    completedAt     DateTime?
+    duration        Int?             // Duration in minutes
+    geminiSessionId String?          // For Gemini Live session tracking
+    notes           String?          // General user notes
+    createdAt       DateTime         @default(now())
+    updatedAt       DateTime         @updatedAt
+    deletedAt       DateTime?
+
+    // Relationships
+    user           User              @relation(fields: [userId], references: [id])
+    jobDescription JobDescription    @relation(fields: [jobDescriptionId], references: [id])
+    questions      Question[]
+    assessment     Assessment?
+    mediaRecordings MediaRecording[]
+    interviewNotes InterviewNote[]
+
+    @@map("interviews")
+    @@index([userId])
+    @@index([jobDescriptionId])
+    @@index([status])
+    @@index([scheduledAt])
+    @@index([deletedAt])
+}
+
+// AI-generated interview questions
+model Question {
+    id             String       @id @default(cuid())
+    interviewId    String
+    questionText   String
+    questionType   QuestionType @default(TECHNICAL)
+    difficulty     Difficulty   @default(MEDIUM)
+    expectedAnswer String?      // AI-generated ideal answer
+    userAnswer     String?      // Transcribed user response
+    orderIndex     Int          // For sequencing questions
+    timeAsked      DateTime?
+    timeAnswered   DateTime?
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @updatedAt
+
+    // Relationships
+    interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+
+    @@map("questions")
+    @@index([interviewId])
+    @@index([questionType])
+    @@index([orderIndex])
+}
+
+// AI-generated performance assessments
+model Assessment {
+    id                    String   @id @default(cuid())
+    interviewId           String   @unique
+    overallScore          Int      // 1-10 scale
+    technicalScore        Int      // 1-10 scale
+    communicationScore    Int      // 1-10 scale
+    problemSolvingScore   Int      // 1-10 scale
+    strengthsAnalysis     String
+    improvementAreas      String
+    detailedFeedback      String
+    recommendedNextSteps  String
+    createdAt             DateTime @default(now())
+    updatedAt             DateTime @updatedAt
+
+    // Relationships
+    interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+
+    @@map("assessments")
+    @@index([interviewId])
+    @@index([overallScore])
+}
+
+// Media recordings (screen + audio)
+model MediaRecording {
+    id                   String              @id @default(cuid())
+    interviewId          String
+    recordingType        RecordingType       @default(SCREEN_AND_AUDIO)
+    filePath             String
+    fileSize             BigInt              // File size in bytes
+    duration             Int?                // Duration in seconds
+    uploadStatus         UploadStatus        @default(UPLOADING)
+    transcriptionStatus  TranscriptionStatus @default(PENDING)
+    transcriptionText    String?
+    createdAt            DateTime            @default(now())
+    updatedAt            DateTime            @updatedAt
+
+    // Relationships
+    interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+
+    @@map("media_recordings")
+    @@index([interviewId])
+    @@index([uploadStatus])
+    @@index([transcriptionStatus])
+}
+
+// User notes during interviews
+model InterviewNote {
+    id          String   @id @default(cuid())
+    interviewId String
+    userId      String
+    content     String
+    timestamp   DateTime // When note was taken during interview
+    positionX   Float?   // X coordinate for positioned notes
+    positionY   Float?   // Y coordinate for positioned notes
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relationships
+    interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+    user      User      @relation(fields: [userId], references: [id])
+
+    @@map("interview_notes")
+    @@index([interviewId])
+    @@index([userId])
+    @@index([timestamp])
+}
+
+// Enums
+enum InterviewStatus {
+    SCHEDULED
+    IN_PROGRESS
+    COMPLETED
+    CANCELLED
+}
+
+enum QuestionType {
+    TECHNICAL
+    BEHAVIORAL
+    CASE_STUDY
+    PROBLEM_SOLVING
+    SYSTEM_DESIGN
+}
+
+enum Difficulty {
+    EASY
+    MEDIUM
+    HARD
+}
+
+enum RecordingType {
+    SCREEN
+    AUDIO
+    SCREEN_AND_AUDIO
+}
+
+enum UploadStatus {
+    UPLOADING
+    COMPLETED
+    FAILED
+}
+
+enum TranscriptionStatus {
+    PENDING
+    IN_PROGRESS
+    COMPLETED
+    FAILED
+}
