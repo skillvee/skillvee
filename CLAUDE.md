@@ -138,8 +138,8 @@ Currently clean slate with Prisma schema ready for custom models.
 #### Setup
 ✅ **Already configured** with access token in `.env`
 ```bash
-# Token stored in .env file
-SUPABASE_ACCESS_TOKEN="sbp_75519fedd00796c5a6526518c9a6252b934f6553"
+# Token stored in .env file (never commit actual token!)
+SUPABASE_ACCESS_TOKEN="sbp_***" # Actual token in .env only
 
 # Project linked to: buyxawgqsxvmxbzooekf (skillvee)
 # Helper script available: ./scripts/supabase.sh
