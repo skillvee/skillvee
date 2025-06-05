@@ -1,202 +1,115 @@
 # Claude Memory for Skillvee Project
 
 ## Project Overview
-**Name**: Skillvee  
+**Name**: Skillvee - AI-Powered Technical Interview Platform  
 **Type**: T3 Stack Application  
 **Owner**: Matias (@matiashoyld)  
 **Repository**: https://github.com/matiashoyld/skillvee  
 **Live URL**: https://skillvee-73r7zusqs-matiashoyls-projects.vercel.app  
 
+## What Skillvee Does
+AI-powered mock interview platform for data science roles:
+1. **Job Description Input** → User pastes JD or selects template
+2. **AI Case Generation** → Gemini 2.5 Pro creates realistic interview case (3-5 questions)
+3. **Live Interview Session** → Screen + audio recording with real-time AI conversation via Gemini Live
+4. **AI Assessment** → Video processing, transcription, and detailed performance evaluation
+5. **SkillVee Platform Hook** → Connects to job matching platform
+
 ## Tech Stack & Architecture
 
 ### Core Framework
-- **Next.js 15.2.3** with App Router
-- **TypeScript** for type safety
-- **React 19** (latest version)
-- **tRPC** for type-safe API routes
+- **Next.js 15.2.3** with App Router, **TypeScript**, **React 19**, **tRPC**
 
-### Authentication
-- **Clerk** for user authentication
-- Sign-in/Sign-up pages configured at `/sign-in` and `/sign-up`
-- Environment variables properly configured
+### Key Services
+- **Clerk** for authentication
+- **Supabase** PostgreSQL + **Prisma** ORM
+- **Gemini 2.5 Pro** for case generation + **Gemini Live API** for real-time conversation
+- **Shadcn/ui** + **Tailwind CSS v4** for UI
+- **Vercel** for deployment
 
-### UI & Styling
-- **Shadcn/ui** for component library
-- **Tailwind CSS v4** for styling
-- **Radix UI** primitives for accessibility
-- **Lucide React** for icons
-- Custom CSS variables for theming (light/dark mode ready)
-
-### Database
-- **Supabase** as PostgreSQL database provider
-- **Prisma** as ORM
-- Connection pooling configured
-- Environment variables set up for both direct and pooled connections
-
-### Deployment & DevOps
-- **Vercel** for hosting and deployment
-- **GitHub** for version control
-- Automatic deployments from main branch
-- Environment variables synced between local and production
-
-## Project Structure
-```
-src/
-├── app/                    # Next.js App Router
-│   ├── _components/        # App-specific components
-│   ├── api/trpc/          # tRPC API routes
-│   ├── sign-in/           # Clerk sign-in pages
-│   ├── sign-up/           # Clerk sign-up pages
-│   ├── layout.tsx         # Root layout with Clerk provider
-│   └── page.tsx           # Homepage
-├── components/ui/         # Shadcn UI components
-├── lib/                   # Utility functions
-│   ├── utils.ts          # cn() utility for class merging
-│   └── supabase.ts       # Supabase client configuration
-├── server/               # Server-side code
-│   ├── api/              # tRPC routers and configuration
-│   └── db.ts             # Database connection
-├── styles/               # Global styles
-└── trpc/                 # tRPC client configuration
-```
-
-## Development Setup
-
-### Environment Variables Required
+## Environment Variables Required
 ```bash
 # Clerk Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
-NEXT_PUBLIC_CLERK_SIGN_IN_URL="/sign-in"
-NEXT_PUBLIC_CLERK_SIGN_UP_URL="/sign-up"
+CLERK_WEBHOOK_SECRET=whsec_... # For user sync
 
-# Supabase Database
+# Supabase Database  
 DATABASE_URL="postgresql://postgres.xyz:password@aws-0-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
 DIRECT_URL="postgresql://postgres.xyz:password@aws-0-us-east-2.pooler.supabase.com:5432/postgres"
-NEXT_PUBLIC_SUPABASE_URL="https://xyz.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJ..."
+SUPABASE_ACCESS_TOKEN="sbp_***" # For CLI access
+
+# AI Services (TODO: Add when implementing)
+GEMINI_API_KEY="" # For case generation and assessment
+NEXT_PUBLIC_GEMINI_API_KEY="" # For Gemini Live client-side
 ```
 
-### Key Commands
+## Key Commands
 - `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run typecheck` - TypeScript type checking
+- `npm run typecheck` - TypeScript checking  
 - `npm run lint` - ESLint checking
 - `npx prisma db push` - Push schema to database
 - `npx prisma studio` - Database management UI
+- `supabase db pull` - Pull remote schema changes
 
-## User Preferences & Development Style
-
-### Code Style Preferences
+## Development Guidelines
 - **Clean, minimal approach** - Remove unnecessary boilerplate
-- **Modern tooling** - Prefers latest versions and best practices
-- **Type safety** - Strong preference for TypeScript
-- **Component-based architecture** - Shadcn/ui for consistent UI
-- **Environment-driven** - Proper separation of development/production configs
-
-### Workflow Preferences
-- **CLI-first approach** - Comfortable with command-line tools
-- **Automated deployment** - Vercel for seamless deployments
-- **GitHub integration** - Standard Git workflow
+- **Type safety first** - Strong TypeScript usage
+- **Modern tooling** - Latest versions and best practices  
 - **Testing before deployment** - Verify connections and builds
+- **Conventional Commits** - Use format: `type(scope): short description`
+  - Examples: `feat(auth): add Clerk integration`, `fix(db): resolve connection pooling issue`
 
-### Architecture Decisions Made
-1. **Removed T3 boilerplate "post" examples** - Clean slate approach
-2. **Clerk over NextAuth** - Preference for managed auth solution
-3. **Supabase over PlanetScale** - PostgreSQL preference
-4. **Shadcn over other UI libraries** - Modern, customizable components
-5. **Vercel deployment** - Seamless Next.js integration
+## GitHub Issues - Development Roadmap
+**Status**: ✅ 12 comprehensive issues created covering full MVP
 
-## Database Schema
-Currently clean slate with Prisma schema ready for custom models.
+### Foundation Issues (Start Here)
+1. **Database Schema** - Core data models with Prisma
+2. **Authentication** - Clerk integration with protected routes  
+3. **tRPC API** - Type-safe API routes and procedures
 
-## API Structure
-- **tRPC router**: `src/server/api/root.ts`
-- **Example router**: Basic hello endpoint for testing
-- **Type-safe**: Full end-to-end type safety between client and server
+### Core Features  
+4. **Job Description Input** - AI-powered focus area detection
+5. **Media Capture** - Screen recording & audio capture
+6. **Gemini Live Integration** - Real-time AI conversation
+7. **AI Case Generation** - Interview case creation engine
+8. **Note-Taking Component** - Interactive notes with auto-save
+9. **Video Processing & Assessment** - AI-powered evaluation
+10. **Assessment Dashboard** - Results visualization & feedback
 
-## Deployment Notes
-- **Vercel project**: Connected to GitHub repo
-- **Automatic deployments**: Push to main triggers deployment
-- **Environment variables**: Synced between local `.env` and Vercel dashboard
-- **Build command**: `npm run build`
-- **Output**: Next.js static optimization enabled
+### Quality & Scale
+11. **Testing Strategy** - Comprehensive testing implementation
+12. **Performance Optimization** - Monitoring & optimization
 
-## Next Steps & Recommendations
-1. Define database schema in `prisma/schema.prisma`
-2. Run `npx prisma db push` to create tables
-3. Build core features using tRPC routers
-4. Add Shadcn components as needed
-5. Configure Clerk webhooks if user data persistence needed
+**Estimated Timeline**: 10-14 weeks for 2-3 developers working in parallel
 
-## CLI Tools for Enhanced Control
+## Key Technical Insights
 
-### Supabase CLI
-**Status**: ✅ Installed via Homebrew  
-**Version**: 2.24.3
+### Gemini Live API Constraints & Solutions
+- **Constraint**: 15-minute session limit for audio-only mode
+- **Solution**: Session renewal every 14 minutes with seamless context preservation
+- **Benefits**: Full 20-30 minute real-time AI conversation for interviews
 
-#### Setup
-✅ **Already configured** with access token in `.env`
+### Critical Architecture Decisions
+- **AI Services**: Gemini 2.5 Pro for case generation, Gemini Live for real-time conversation
+- **Media Handling**: Browser MediaRecorder API for screen/audio capture
+- **Processing Pipeline**: Background job queues for video processing and AI assessment
+- **Real-time Features**: WebSocket connections for live AI interaction
+
+## Supabase CLI Essentials
+**Status**: ✅ Configured with project ID: buyxawgqsxvmxbzooekf
+
 ```bash
-# Token stored in .env file (never commit actual token!)
-SUPABASE_ACCESS_TOKEN="sbp_***" # Actual token in .env only
-
-# Project linked to: buyxawgqsxvmxbzooekf (skillvee)
-# Helper script available: ./scripts/supabase.sh
+# Essential commands
+supabase db pull                    # Pull remote schema changes  
+supabase db push                    # Push local schema changes
+supabase gen types typescript       # Generate TypeScript types
+supabase migration new <name>       # Create new migration
 ```
-
-#### Key Commands
-```bash
-supabase projects list                    # List all projects
-supabase link --project-ref your-ref     # Link local project
-supabase db pull                          # Pull remote schema
-supabase db push                          # Push local schema
-supabase functions deploy                 # Deploy edge functions
-supabase storage ls                       # List storage buckets
-supabase gen types typescript            # Generate TypeScript types
-```
-
-#### Migration Workflow
-```bash
-supabase migration new create_table_name  # Create new migration
-supabase db reset                         # Reset local DB
-supabase db push                          # Apply to remote
-```
-
-### Clerk CLI
-**Status**: ❌ No official CLI available  
-**Alternative**: Use Clerk Dashboard + Admin API
-
-#### Clerk Admin API via curl
-```bash
-# List users
-curl -H "Authorization: Bearer $CLERK_SECRET_KEY" \
-     https://api.clerk.com/v1/users
-
-# Create user
-curl -X POST -H "Authorization: Bearer $CLERK_SECRET_KEY" \
-     -H "Content-Type: application/json" \
-     -d '{"email_address": "user@example.com"}' \
-     https://api.clerk.com/v1/users
-```
-
-## Enhanced Development Workflow
-
-### Database Management
-1. **Local Development**: Use `supabase start` for local Supabase instance
-2. **Schema Changes**: Create migrations with `supabase migration new`
-3. **Type Generation**: Auto-generate types with `supabase gen types typescript`
-4. **Production Sync**: Use `supabase db pull` to sync from production
-
-### Authentication Management
-1. **User Management**: Use Clerk Dashboard
-2. **Webhooks**: Configure via Clerk Dashboard for user sync
-3. **API Access**: Use Clerk Admin API for programmatic access
 
 ## Troubleshooting Notes
 - **TypeScript errors**: Ensure tRPC routers are not empty
-- **Database connection**: Use `npx prisma studio` to verify connection
-- **Build failures**: Check environment variables in Vercel dashboard
-- **Auth issues**: Verify Clerk keys and callback URLs
-- **Supabase CLI**: Requires access token from dashboard for authentication
+- **Database connection**: Use `npx prisma studio` to verify connection  
+- **Auth issues**: Verify Clerk keys and callback URLs in Vercel dashboard
 - **Schema sync**: Use `supabase db pull` if local/remote schemas drift
+- **Gemini API**: Rate limits may affect development - implement proper error handling
