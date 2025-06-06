@@ -5,9 +5,12 @@ import {
   richTextSchema,
   questionTypeSchema,
   difficultySchema,
+  experienceLevelSchema,
   scoreSchema,
   skillsSchema,
   focusAreasSchema,
+  jobTitleSchema,
+  companyNameSchema,
 } from "./common";
 
 /**
@@ -30,6 +33,28 @@ export const regenerateQuestionSchema = z.object({
   newDifficulty: difficultySchema.optional(),
   newQuestionType: questionTypeSchema.optional(),
   customInstructions: textContentSchema.optional(),
+});
+
+// Job description parsing schemas
+export const parseJobDescriptionSchema = z.object({
+  description: richTextSchema,
+});
+
+export const jobDescriptionParseResultSchema = z.object({
+  title: jobTitleSchema.optional(),
+  company: companyNameSchema.optional(),
+  difficulty: experienceLevelSchema.optional(),
+  requirements: skillsSchema.optional(),
+  focusAreas: focusAreasSchema.optional(),
+  extractedInfo: z.object({
+    summary: z.string().optional(),
+    keyResponsibilities: z.array(z.string()).optional(),
+    requiredSkills: z.array(z.string()).optional(),
+    preferredSkills: z.array(z.string()).optional(),
+    experienceLevel: z.string().optional(),
+    location: z.string().optional(),
+    employmentType: z.string().optional(),
+  }).optional(),
 });
 
 // Assessment generation schemas
@@ -252,8 +277,10 @@ export type GenerateAssessmentInput = z.infer<typeof generateAssessmentSchema>;
 export type StartAIConversationInput = z.infer<typeof startAIConversationSchema>;
 export type TranscribeAudioInput = z.infer<typeof transcribeAudioSchema>;
 export type AnalyzeResponseInput = z.infer<typeof analyzeResponseSchema>;
+export type ParseJobDescriptionInput = z.infer<typeof parseJobDescriptionSchema>;
 export type GeneratedCaseOutput = z.infer<typeof generatedCaseOutputSchema>;
 export type AssessmentOutput = z.infer<typeof assessmentOutputSchema>;
 export type TranscriptionOutput = z.infer<typeof transcriptionOutputSchema>;
 export type AISuggestionsOutput = z.infer<typeof aiSuggestionsOutputSchema>;
 export type AnswerValidationOutput = z.infer<typeof answerValidationOutputSchema>;
+export type JobDescriptionParseResult = z.infer<typeof jobDescriptionParseResultSchema>;

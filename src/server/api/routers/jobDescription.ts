@@ -10,6 +10,7 @@ import {
 } from "~/server/api/trpc";
 
 import { createError } from "../types/errors";
+import { generateFocusAreaSuggestions } from "../utils/gemini";
 import {
   createPaginationArgs,
   processPaginationResults,
@@ -428,57 +429,89 @@ export const jobDescriptionRouter = createTRPCRouter({
     }),
 
   /**
-   * AI-powered focus area detection
+   * AI-powered focus area detection using Gemini 2.5 Flash
    */
   detectFocusAreas: aiProcedure
     .input(detectFocusAreasSchema)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const { description, requirements } = input;
 
-      // This would integrate with your AI service (Gemini, OpenAI, etc.)
-      // For now, return a mock response
-      
-      // Simulate AI processing
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Mock AI response based on common data science focus areas
-      const allFocusAreas = [
-        "Machine Learning",
-        "Data Analysis",
-        "Statistics",
-        "Python Programming",
-        "SQL",
-        "Data Visualization",
-        "Deep Learning",
-        "Natural Language Processing",
-        "Computer Vision",
-        "Big Data",
-        "Cloud Computing",
-        "A/B Testing",
-        "Business Intelligence",
-        "Data Engineering",
-        "MLOps",
-      ];
-
-      // Simple keyword matching (replace with actual AI logic)
-      const detectedAreas = allFocusAreas.filter(area => {
-        const lowerArea = area.toLowerCase();
-        const lowerDesc = description.toLowerCase();
-        const lowerReqs = requirements.join(" ").toLowerCase();
+      try {
+        // Use Gemini 2.5 Flash for focus area detection
+        const detectedAreas = await generateFocusAreaSuggestions(description, requirements);
         
-        return lowerDesc.includes(lowerArea) || 
-               lowerReqs.includes(lowerArea) ||
-               (lowerArea.includes("python") && (lowerDesc.includes("python") || lowerReqs.includes("python"))) ||
-               (lowerArea.includes("sql") && (lowerDesc.includes("sql") || lowerReqs.includes("database")));
-      });
+        // Predefined focus areas for fallback and suggestions
+        const allFocusAreas = [
+          "Machine Learning",
+          "Data Analysis", 
+          "Statistics",
+          "Python Programming",
+          "SQL",
+          "Data Visualization",
+          "Deep Learning",
+          "Natural Language Processing",
+          "Computer Vision",
+          "Big Data",
+          "Cloud Computing",
+          "A/B Testing",
+          "Business Intelligence",
+          "Data Engineering",
+          "MLOps",
+          "Product Sense",
+          "Problem Solving",
+          "System Design",
+        ];
 
-      const result: FocusAreasOutput = {
-        focusAreas: detectedAreas.slice(0, 8), // Limit to 8 focus areas
-        confidence: 0.85,
-        suggestions: allFocusAreas.filter(area => !detectedAreas.includes(area)).slice(0, 5),
-      };
+        const result: FocusAreasOutput = {
+          focusAreas: detectedAreas.slice(0, 8), // Limit to 8 focus areas
+          confidence: 0.90, // Higher confidence with AI
+          suggestions: allFocusAreas
+            .filter(area => !detectedAreas.includes(area))
+            .slice(0, 5),
+        };
 
-      return result;
+        return result;
+      } catch (error) {
+        console.error("Focus area detection error:", error);
+        
+        // Fallback to basic keyword matching if AI fails
+        const allFocusAreas = [
+          "Machine Learning",
+          "Data Analysis",
+          "Statistics", 
+          "Python Programming",
+          "SQL",
+          "Data Visualization",
+          "Deep Learning",
+          "Natural Language Processing",
+          "Computer Vision",
+          "Big Data",
+          "Cloud Computing",
+          "A/B Testing",
+          "Business Intelligence",
+          "Data Engineering",
+          "MLOps",
+        ];
+
+        const detectedAreas = allFocusAreas.filter(area => {
+          const lowerArea = area.toLowerCase();
+          const lowerDesc = description.toLowerCase();
+          const lowerReqs = requirements.join(" ").toLowerCase();
+          
+          return lowerDesc.includes(lowerArea) || 
+                 lowerReqs.includes(lowerArea) ||
+                 (lowerArea.includes("python") && (lowerDesc.includes("python") || lowerReqs.includes("python"))) ||
+                 (lowerArea.includes("sql") && (lowerDesc.includes("sql") || lowerReqs.includes("database")));
+        });
+
+        const result: FocusAreasOutput = {
+          focusAreas: detectedAreas.slice(0, 8),
+          confidence: 0.70, // Lower confidence for fallback
+          suggestions: allFocusAreas.filter(area => !detectedAreas.includes(area)).slice(0, 5),
+        };
+
+        return result;
+      }
     }),
 
   /**

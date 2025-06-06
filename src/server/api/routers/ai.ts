@@ -16,14 +16,36 @@ import {
   getAISuggestionsSchema,
   validateAnswerSchema,
   updateAIConfigSchema,
+  parseJobDescriptionSchema,
   type GeneratedCaseOutput,
   type AssessmentOutput,
   type TranscriptionOutput,
   type AISuggestionsOutput,
   type AnswerValidationOutput,
+  type JobDescriptionParseResult,
 } from "../schemas/ai";
 
+import { parseJobDescriptionWithGemini, generateFocusAreaSuggestions } from "../utils/gemini";
+
 export const aiRouter = createTRPCRouter({
+  /**
+   * Parse job description using Gemini 2.5 Flash
+   */
+  parseJobDescription: protectedProcedure
+    .input(parseJobDescriptionSchema)
+    .mutation(async ({ input }): Promise<JobDescriptionParseResult> => {
+      const { description } = input;
+
+      // Call Gemini 2.5 Flash for parsing
+      const result = await parseJobDescriptionWithGemini(description);
+
+      if (!result.success) {
+        throw createError.internal(`Failed to parse job description: ${result.error}`);
+      }
+
+      return result.data;
+    }),
+
   /**
    * Generate AI interview case based on job description
    */
