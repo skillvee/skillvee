@@ -13,6 +13,7 @@ export default {
         moduleResolution: 'node',
         allowSyntheticDefaultImports: true,
         esModuleInterop: true,
+        jsx: 'react-jsx',
       },
     }],
   },

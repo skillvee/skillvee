@@ -9,10 +9,10 @@
 
 ## What Skillvee Does
 AI-powered mock interview platform for data science roles:
-1. **Job Description Input** → User pastes JD or selects template
-2. **AI Case Generation** → Gemini 2.5 Pro creates realistic interview case (3-5 questions)
-3. **Live Interview Session** → Screen + audio recording with real-time AI conversation via Gemini Live
-4. **AI Assessment** → Video processing, transcription, and detailed performance evaluation
+1. **Job Description Input** → AI-powered parsing with Gemini 2.5 Flash
+2. **AI Case Generation** → Gemini 2.5 Pro creates realistic interview questions
+3. **Live Interview Session** → Full screen + audio recording with MediaRecorder API
+4. **AI Assessment** → Video processing, transcription, and performance evaluation
 5. **SkillVee Platform Hook** → Connects to job matching platform
 
 ## Tech Stack & Architecture
@@ -23,7 +23,8 @@ AI-powered mock interview platform for data science roles:
 ### Key Services
 - **Clerk** for authentication
 - **Supabase** PostgreSQL + **Prisma** ORM
-- **Gemini 2.5 Pro** for case generation + **Gemini Live API** for real-time conversation
+- **Gemini 2.5** Flash/Pro for AI processing
+- **MediaRecorder API** for screen/audio capture
 - **Shadcn/ui** + **Tailwind CSS v4** for UI
 - **Vercel** for deployment
 
@@ -55,10 +56,43 @@ AI-powered mock interview platform for data science roles:
 ## Key Technical Insights
 
 ### Critical Architecture Decisions
-- **AI Services**: Gemini 2.5 Flash for job description parsing, Gemini 2.5 Pro for case generation, Gemini Live for real-time conversation
-- **Media Handling**: Browser MediaRecorder API for screen/audio capture
+- **AI Services**: Gemini 2.5 Flash for job description parsing, Gemini 2.5 Pro for case generation
+- **Media Capture**: Browser MediaRecorder API with cross-browser compatibility (Chrome, Firefox, Safari, Edge)
 - **Processing Pipeline**: Background job queues for video processing and AI assessment
-- **Real-time Features**: WebSocket connections for live AI interaction
+- **Upload Strategy**: Chunked uploads via tRPC with progress tracking and error recovery
+
+## Media Capture Implementation
+**Status**: ✅ Complete with comprehensive browser support
+
+### Core Components
+- **`useMediaCapture`**: Screen/audio recording with MediaRecorder API
+- **`usePermissions`**: Unified permission management for camera/mic/screen
+- **`useMediaUpload`**: tRPC integration with chunked uploads and progress tracking
+- **`InterviewRecorder`**: Complete recording UI with controls and real-time feedback
+- **Media Compatibility**: Cross-browser MIME type detection and Safari fallbacks
+
+### Key Features
+- **Recording Types**: Screen-only, audio-only, or combined screen+audio
+- **Real-time Controls**: Start/stop/pause/resume with live duration and file size
+- **Permission Flow**: Graceful permission requests with detailed error handling
+- **Upload Integration**: Auto-upload with progress tracking and cancellation
+- **Browser Support**: Optimized constraints and bitrates per browser
+- **Error Recovery**: Comprehensive error handling for all failure modes
+
+### File Structure
+```bash
+src/hooks/
+├── useMediaCapture.ts     # Core recording functionality
+├── usePermissions.ts      # Permission management
+└── useMediaUpload.ts      # Upload integration
+
+src/components/ui/
+├── interview-recorder.tsx # Complete recording interface
+└── media-recorder.tsx     # Basic recorder component
+
+src/lib/
+└── media-compatibility.ts # Cross-browser compatibility
+```
 
 ## tRPC API Implementation
 **Status**: ✅ Complete with comprehensive testing framework
@@ -84,42 +118,25 @@ AI-powered mock interview platform for data science roles:
 - **Assessment System**: Comprehensive evaluation with analytics and benchmarking
 
 ## Testing Framework
-**Status**: ✅ Jest configured with 67 passing tests
+**Status**: ✅ Jest configured with 120+ comprehensive tests
 
 ### Testing Infrastructure
-- **Framework**: Jest 29.7.0 with TypeScript support
-- **Configuration**: ESM modules, proper mocking for external dependencies
-- **Coverage**: Test utilities, middleware validation, rate limiting functionality
-- **Mock Strategy**: Database mocking, environment isolation, type-safe test helpers
+- **Framework**: Jest 29.7.0 with TypeScript + React Testing Library
+- **Coverage**: API middleware, media capture hooks, React components, integration flows
+- **Mock Strategy**: MediaRecorder API, tRPC endpoints, browser permissions, DOM environment
 
 ### Test Coverage Areas
-- **Rate Limiting Middleware**: 19 comprehensive tests covering all scenarios
-  - Request limiting, user separation, IP-based tracking
-  - Custom key generation, success/failure handling
-  - Sliding window behavior, utility functions
-- **Validation Middleware**: 48 detailed tests for security and data integrity
-  - XSS sanitization (script, iframe, javascript: URLs, event handlers)
-  - Input size validation, required field checking, string length constraints
-  - File upload validation, email/URL validation, date range validation
-  - Business rule validation, Zod schema integration
+- **API Layer**: Rate limiting, validation, tRPC routers (67 tests)
+- **Media Capture**: Hooks, components, browser compatibility, error scenarios (56+ tests)
+- **Integration**: Full interview flow, job description creation, recording lifecycle
+- **Error Handling**: Permission denied, device failures, network timeouts, upload failures
 
-### Test Organization
+### Key Test Suites
 ```bash
-src/test/
-├── __mocks__/              # External dependency mocks
-│   ├── superjson.js        # tRPC serialization mock
-│   └── env.js              # Environment variables mock
-├── helpers/                # Test utilities
-│   └── trpc.ts            # tRPC test context and callers
-└── setup.ts               # Jest configuration and globals
-```
-
-### Running Tests
-```bash
-npm test                           # Run all tests
-npm run test:watch                # Watch mode for development
-npm run test:coverage             # Generate coverage reports
-npm test -- --testPathPattern=middleware  # Run specific test patterns
+src/hooks/__tests__/           # Hook testing with mocked APIs
+src/components/ui/__tests__/   # Component integration tests  
+src/app/interview/__tests__/   # End-to-end flow testing
+src/lib/__tests__/            # Utility and compatibility tests
 ```
 
 ## Supabase CLI Essentials
