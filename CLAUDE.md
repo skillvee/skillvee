@@ -5,7 +5,7 @@
 **Type**: T3 Stack Application  
 **Owner**: Matias (@matiashoyld)  
 **Repository**: https://github.com/matiashoyld/skillvee  
-**Live URL**: https://skillvee-73r7zusqs-matiashoyls-projects.vercel.app  
+**Live URL**: https://skillvee.vercel.app  
 
 ## What Skillvee Does
 AI-powered mock interview platform for data science roles:
@@ -59,13 +59,28 @@ NEXT_PUBLIC_GEMINI_API_KEY="" # For Gemini Live client-side
 - **Testing before deployment** - Verify connections and builds
 - **Conventional Commits** - Use format: `type(scope): short description`
   - Examples: `feat(auth): add Clerk integration`, `fix(db): resolve connection pooling issue`
+- **NO Claude attribution** - Do not add "Generated with Claude Code" or "Co-Authored-By: Claude" to commits or PRs
+- **NO secrets in PRs** - Never include actual secrets, tokens, or API keys in pull request descriptions or commit messages
+
+## Clerk Webhook Configuration
+**Status**: ✅ Configured for both development and production
+
+### Development Webhook
+- **URL**: `https://[ngrok-url].ngrok-free.app/api/webhooks/clerk`
+- **Secret**: `whsec_chnDvDvykgZcHkHf9ZwXOIxdaSBtpGzh`
+- **Events**: `user.created`, `user.updated`, `user.deleted`
+
+### Production Webhook  
+- **URL**: `https://skillvee.vercel.app/api/webhooks/clerk`
+- **Secret**: `whsec_k4b36EKlZjLfVM/ivjnbtsPPQ3rtYWdM`
+- **Events**: `user.created`, `user.updated`, `user.deleted`
 
 ## GitHub Issues - Development Roadmap
 **Status**: ✅ 12 comprehensive issues created covering full MVP
 
 ### Foundation Issues (Start Here)
-1. **Database Schema** - Core data models with Prisma
-2. **Authentication** - Clerk integration with protected routes  
+1. **Database Schema** - ✅ Core data models with Prisma
+2. **Authentication** - ✅ Clerk integration with protected routes  
 3. **tRPC API** - Type-safe API routes and procedures
 
 ### Core Features  
