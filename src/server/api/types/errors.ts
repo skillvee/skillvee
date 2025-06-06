@@ -127,6 +127,13 @@ export const createError = {
       context: { limit, window },
     }),
 
+  internal: (message: string, context?: Record<string, unknown>) =>
+    new SkillVeeError({
+      code: "INTERNAL_SERVER_ERROR",
+      message,
+      context,
+    }),
+
   aiService: (service: string, details?: string) =>
     new SkillVeeError({
       code: SKILLVEE_ERROR_CODES.AI_SERVICE_UNAVAILABLE,

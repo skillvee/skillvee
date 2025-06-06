@@ -88,6 +88,8 @@ export const questionTypeSchema = z.enum([
 
 export const difficultySchema = z.enum(["EASY", "MEDIUM", "HARD"]);
 
+export const experienceLevelSchema = z.enum(["JUNIOR", "MEDIUM", "SENIOR"]);
+
 export const recordingTypeSchema = z.enum([
   "SCREEN",
   "AUDIO",
@@ -177,9 +179,9 @@ export const jobTitleSchema = z.string()
 export const skillsSchema = z.array(
   z.string()
     .min(1)
-    .max(50)
+    .max(255)
     .transform((str) => str.trim())
-).min(1).max(50);
+).min(1).max(100);
 
 // Focus areas validation
 export const focusAreasSchema = z.array(

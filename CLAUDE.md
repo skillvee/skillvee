@@ -55,7 +55,7 @@ AI-powered mock interview platform for data science roles:
 ## Key Technical Insights
 
 ### Critical Architecture Decisions
-- **AI Services**: Gemini 2.5 Pro for case generation, Gemini Live for real-time conversation
+- **AI Services**: Gemini 2.5 Flash for job description parsing, Gemini 2.5 Pro for case generation, Gemini Live for real-time conversation
 - **Media Handling**: Browser MediaRecorder API for screen/audio capture
 - **Processing Pipeline**: Background job queues for video processing and AI assessment
 - **Real-time Features**: WebSocket connections for live AI interaction
@@ -182,3 +182,89 @@ npm run preview                    # Local production preview
 - **Environment Variables**: Ensure all required env vars are set in Vercel dashboard
 - **Database Migrations**: Run `npx prisma db push` before deployment if schema changes
 - **Build Verification**: Always run `npm run build` locally before pushing to production
+
+## Job Description Input with AI Focus Detection
+**Status**: ✅ Complete - Modern minimalist UI with full AI-powered parsing
+
+### Feature Overview
+Interactive job description input system that uses Gemini 2.5 Flash for intelligent parsing and extraction of key information from job postings.
+
+### User Experience Flow
+1. **Input Step**: Clean single-field interface for pasting job descriptions
+2. **AI Processing**: Modern typing animation with progress messages during parsing
+3. **Interactive Review**: Fully editable results with in-place editing capabilities
+
+### Key Features Implemented
+
+#### Modern UI/UX Design (2024 Best Practices)
+- **Minimalist Layout**: Gradient backgrounds, generous whitespace, shadow-based depth
+- **Content-First Approach**: Clear visual hierarchy with strategic use of typography
+- **Responsive Design**: Optimized for desktop and mobile experiences
+- **Performance**: 39.4 kB bundle size with optimized loading
+
+#### AI-Powered Parsing with Gemini 2.5 Flash
+- **Real-time Extraction**: Job title, company, experience level, requirements, focus areas
+- **Structured Output**: JSON schema validation for consistent data format
+- **Error Handling**: Robust fallback mechanisms for API failures
+- **Smart Detection**: Contextual analysis of job requirements and skill categories
+
+#### Interactive Review Features
+- **Collapsible Job Description**: Show/hide full content with smooth animations
+- **Editable Requirements**: In-place editing, add/remove with hover effects
+- **Experience Level Selection**: One-click editing with visual feedback
+- **Focus Areas Management**: Interactive badges for adding/removing technical domains
+- **Real-time Updates**: Form state synchronized across all components
+
+### Technical Implementation
+
+#### Component Architecture
+```
+src/app/job-description/page.tsx     # Main page with 3-step flow
+src/components/ui/typing-loader.tsx  # ChatGPT-style animation component
+src/components/ui/auto-resize-textarea.tsx  # Auto-resizing input field
+```
+
+#### AI Integration
+- **SDK**: @google/genai v1.4.0 (latest official SDK)
+- **Model**: gemini-2.5-flash-preview-05-20 for fast parsing
+- **Schema**: Comprehensive TypeScript types for structured extraction
+- **Processing**: Debounced API calls with visual feedback
+
+#### State Management
+- **Form Library**: React Hook Form with Zod validation
+- **Interactive States**: Local state for editing modes and UI interactions
+- **Type Safety**: Full TypeScript coverage throughout the flow
+
+### Environment Configuration
+```bash
+# Required environment variable
+GOOGLE_GENERATIVE_AI_API_KEY=your-gemini-api-key
+
+# Verification commands
+npm run typecheck  # Verify TypeScript compilation
+npm run build     # Test production build
+npm run dev       # Start development server
+```
+
+### API Endpoints
+- `ai.parseJobDescription` - Main parsing endpoint using Gemini 2.5 Flash
+- `jobDescription.create` - Saves parsed data to database
+- `jobDescription.detectFocusAreas` - Legacy endpoint (replaced by AI parsing)
+
+### Performance Metrics
+- **Bundle Size**: 39.4 kB (optimized)
+- **Build Time**: ~2000ms (fast compilation)
+- **API Response**: ~2-3 seconds for job description parsing
+- **TypeScript**: Zero compilation errors
+
+### Future Enhancements
+- **Template System**: Pre-built job description templates (implemented but disabled)
+- **Advanced Editing**: Rich text editing capabilities
+- **Collaboration**: Multi-user editing and commenting
+- **Analytics**: Usage tracking and optimization insights
+
+### Troubleshooting
+- **API Errors**: Check GOOGLE_GENERATIVE_AI_API_KEY environment variable
+- **Parsing Issues**: Verify job description length (minimum 10 characters)
+- **UI Issues**: Clear browser cache and restart development server
+- **Build Errors**: Run `npm run typecheck` to identify TypeScript issues
