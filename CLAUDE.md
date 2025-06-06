@@ -61,18 +61,19 @@ NEXT_PUBLIC_GEMINI_API_KEY="" # For Gemini Live client-side
   - Examples: `feat(auth): add Clerk integration`, `fix(db): resolve connection pooling issue`
 - **NO Claude attribution** - Do not add "Generated with Claude Code" or "Co-Authored-By: Claude" to commits or PRs
 - **NO secrets in PRs** - Never include actual secrets, tokens, or API keys in pull request descriptions or commit messages
+- **NO secrets in documentation** - Never commit actual secrets to CLAUDE.md, README.md, or any tracked files
 
 ## Clerk Webhook Configuration
 **Status**: ✅ Configured for both development and production
 
 ### Development Webhook
 - **URL**: `https://[ngrok-url].ngrok-free.app/api/webhooks/clerk`
-- **Secret**: `whsec_chnDvDvykgZcHkHf9ZwXOIxdaSBtpGzh`
+- **Secret**: Set in local .env file (CLERK_WEBHOOK_SECRET)
 - **Events**: `user.created`, `user.updated`, `user.deleted`
 
 ### Production Webhook  
 - **URL**: `https://skillvee.vercel.app/api/webhooks/clerk`
-- **Secret**: `whsec_k4b36EKlZjLfVM/ivjnbtsPPQ3rtYWdM`
+- **Secret**: Set in Vercel environment variables (CLERK_WEBHOOK_SECRET)
 - **Events**: `user.created`, `user.updated`, `user.deleted`
 
 ## GitHub Issues - Development Roadmap
