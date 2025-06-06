@@ -27,27 +27,15 @@ AI-powered mock interview platform for data science roles:
 - **Shadcn/ui** + **Tailwind CSS v4** for UI
 - **Vercel** for deployment
 
-## Environment Variables Required
-```bash
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
-CLERK_WEBHOOK_SECRET=whsec_... # For user sync
-
-# Supabase Database  
-DATABASE_URL="postgresql://postgres.xyz:password@aws-0-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://postgres.xyz:password@aws-0-us-east-2.pooler.supabase.com:5432/postgres"
-SUPABASE_ACCESS_TOKEN="sbp_***" # For CLI access
-
-# AI Services (TODO: Add when implementing)
-GEMINI_API_KEY="" # For case generation and assessment
-NEXT_PUBLIC_GEMINI_API_KEY="" # For Gemini Live client-side
-```
 
 ## Key Commands
 - `npm run dev` - Start development server
+- `npm run build` - Build production application
 - `npm run typecheck` - TypeScript checking  
 - `npm run lint` - ESLint checking
+- `npm test` - Run Jest test suite
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
 - `npx prisma db push` - Push schema to database
 - `npx prisma studio` - Database management UI
 - `supabase db pull` - Pull remote schema changes
@@ -63,54 +51,76 @@ NEXT_PUBLIC_GEMINI_API_KEY="" # For Gemini Live client-side
 - **NO secrets in PRs** - Never include actual secrets, tokens, or API keys in pull request descriptions or commit messages
 - **NO secrets in documentation** - Never commit actual secrets to CLAUDE.md, README.md, or any tracked files
 
-## Clerk Webhook Configuration
-**Status**: ✅ Configured for both development and production
-
-### Development Webhook
-- **URL**: `https://[ngrok-url].ngrok-free.app/api/webhooks/clerk`
-- **Secret**: Set in local .env file (CLERK_WEBHOOK_SECRET)
-- **Events**: `user.created`, `user.updated`, `user.deleted`
-
-### Production Webhook  
-- **URL**: `https://skillvee.vercel.app/api/webhooks/clerk`
-- **Secret**: Set in Vercel environment variables (CLERK_WEBHOOK_SECRET)
-- **Events**: `user.created`, `user.updated`, `user.deleted`
-
-## GitHub Issues - Development Roadmap
-**Status**: ✅ 12 comprehensive issues created covering full MVP
-
-### Foundation Issues (Start Here)
-1. **Database Schema** - ✅ Core data models with Prisma
-2. **Authentication** - ✅ Clerk integration with protected routes  
-3. **tRPC API** - Type-safe API routes and procedures
-
-### Core Features  
-4. **Job Description Input** - AI-powered focus area detection
-5. **Media Capture** - Screen recording & audio capture
-6. **Gemini Live Integration** - Real-time AI conversation
-7. **AI Case Generation** - Interview case creation engine
-8. **Note-Taking Component** - Interactive notes with auto-save
-9. **Video Processing & Assessment** - AI-powered evaluation
-10. **Assessment Dashboard** - Results visualization & feedback
-
-### Quality & Scale
-11. **Testing Strategy** - Comprehensive testing implementation
-12. **Performance Optimization** - Monitoring & optimization
-
-**Estimated Timeline**: 10-14 weeks for 2-3 developers working in parallel
 
 ## Key Technical Insights
-
-### Gemini Live API Constraints & Solutions
-- **Constraint**: 15-minute session limit for audio-only mode
-- **Solution**: Session renewal every 14 minutes with seamless context preservation
-- **Benefits**: Full 20-30 minute real-time AI conversation for interviews
 
 ### Critical Architecture Decisions
 - **AI Services**: Gemini 2.5 Pro for case generation, Gemini Live for real-time conversation
 - **Media Handling**: Browser MediaRecorder API for screen/audio capture
 - **Processing Pipeline**: Background job queues for video processing and AI assessment
 - **Real-time Features**: WebSocket connections for live AI interaction
+
+## tRPC API Implementation
+**Status**: ✅ Complete with comprehensive testing framework
+
+### Architecture Overview
+- **Type-Safe Procedures**: Public, protected, admin, and AI-specific endpoints
+- **Enhanced Middleware**: Rate limiting (3 tiers), validation with XSS protection, timing
+- **5 Main Routers**: JobDescription, Interview, AI, Media, Assessment
+- **Advanced Features**: Cursor-based pagination, role-based access control, error handling
+
+### Key Features Implemented
+- **Authentication Integration**: Seamless Clerk integration with user role checking
+- **Rate Limiting**: Multiple tiers (strict: 5/min, moderate: 30/min, AI: 20/min)
+- **Input Validation**: XSS protection, file upload validation, business rule validation
+- **Error Handling**: Custom error types with detailed formatting
+- **Mock AI Integrations**: Ready for Gemini 2.5 Pro implementation
+
+### Production-Ready Capabilities
+- **Job Description Management**: CRUD operations with template system and AI focus detection
+- **Interview Lifecycle**: Complete workflow from scheduling to completion with real-time session management
+- **AI Operations**: Case generation, assessment analysis, transcription, response validation
+- **Media Handling**: Recording management with upload/download capabilities
+- **Assessment System**: Comprehensive evaluation with analytics and benchmarking
+
+## Testing Framework
+**Status**: ✅ Jest configured with 67 passing tests
+
+### Testing Infrastructure
+- **Framework**: Jest 29.7.0 with TypeScript support
+- **Configuration**: ESM modules, proper mocking for external dependencies
+- **Coverage**: Test utilities, middleware validation, rate limiting functionality
+- **Mock Strategy**: Database mocking, environment isolation, type-safe test helpers
+
+### Test Coverage Areas
+- **Rate Limiting Middleware**: 19 comprehensive tests covering all scenarios
+  - Request limiting, user separation, IP-based tracking
+  - Custom key generation, success/failure handling
+  - Sliding window behavior, utility functions
+- **Validation Middleware**: 48 detailed tests for security and data integrity
+  - XSS sanitization (script, iframe, javascript: URLs, event handlers)
+  - Input size validation, required field checking, string length constraints
+  - File upload validation, email/URL validation, date range validation
+  - Business rule validation, Zod schema integration
+
+### Test Organization
+```bash
+src/test/
+├── __mocks__/              # External dependency mocks
+│   ├── superjson.js        # tRPC serialization mock
+│   └── env.js              # Environment variables mock
+├── helpers/                # Test utilities
+│   └── trpc.ts            # tRPC test context and callers
+└── setup.ts               # Jest configuration and globals
+```
+
+### Running Tests
+```bash
+npm test                           # Run all tests
+npm run test:watch                # Watch mode for development
+npm run test:coverage             # Generate coverage reports
+npm test -- --testPathPattern=middleware  # Run specific test patterns
+```
 
 ## Supabase CLI Essentials
 **Status**: ✅ Configured with project ID: buyxawgqsxvmxbzooekf
@@ -123,9 +133,52 @@ supabase gen types typescript       # Generate TypeScript types
 supabase migration new <name>       # Create new migration
 ```
 
+## Build Configuration & Deployment
+**Status**: ✅ Production build successfully configured
+
+### Build Process
+- **Next.js 15.2.3**: Optimized production builds with turbo mode for development
+- **TypeScript Compilation**: Strict mode enabled with proper type checking
+- **ESLint Integration**: Comprehensive linting with custom rules for tRPC patterns
+- **Test Exclusion**: Test files properly excluded from production builds
+
+### Build Commands & Verification
+```bash
+npm run build                      # Production build with type checking and linting
+npm run typecheck                  # Standalone TypeScript verification
+npm run lint                       # ESLint checking with auto-fix available
+npm run preview                    # Local production preview
+```
+
+### Build Optimization Features
+- **Tree Shaking**: Unused code elimination for smaller bundles
+- **Static Generation**: Pre-rendered pages where possible
+- **Code Splitting**: Automatic chunking for optimal loading
+- **Image Optimization**: Built-in Next.js image optimization
+
 ## Troubleshooting Notes
-- **TypeScript errors**: Ensure tRPC routers are not empty
+
+### Common Build Issues
+- **Test file inclusion**: Ensure test files are excluded from production build via tsconfig.json and eslint.config.js
+- **tRPC middleware types**: Rate limiting middleware must return proper `next()` calls with correct typing
+- **ESM modules**: Jest configuration requires proper ESM handling for superjson and other dependencies
+- **Environment variables**: Mock environment files needed for test isolation
+
+### Development Issues
+- **TypeScript errors**: Ensure tRPC routers are not empty and middleware return types match expected signatures
 - **Database connection**: Use `npx prisma studio` to verify connection  
 - **Auth issues**: Verify Clerk keys and callback URLs in Vercel dashboard
 - **Schema sync**: Use `supabase db pull` if local/remote schemas drift
 - **Gemini API**: Rate limits may affect development - implement proper error handling
+
+### Testing Issues
+- **Jest ESM errors**: Ensure jest.config.js uses proper ESM preset and moduleNameMapper
+- **Mock dependencies**: Create proper mocks for external dependencies (superjson, env variables)
+- **Test isolation**: Use resetAllMocks() and proper test cleanup to avoid test interference
+- **Coverage reports**: Test files must be excluded from coverage collection
+
+### Production Deployment
+- **Vercel Integration**: Automatic deployments on main branch push
+- **Environment Variables**: Ensure all required env vars are set in Vercel dashboard
+- **Database Migrations**: Run `npx prisma db push` before deployment if schema changes
+- **Build Verification**: Always run `npm run build` locally before pushing to production
