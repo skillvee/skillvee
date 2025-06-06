@@ -68,7 +68,7 @@ export function createRateLimit(config: RateLimitConfig) {
     onLimitReached,
   } = config;
 
-  return async function rateLimitMiddleware(opts: { ctx: TRPCContext; next: () => Promise<unknown> }) {
+  return async function rateLimitMiddleware(opts: { ctx: TRPCContext; next: () => Promise<unknown> }): Promise<unknown> {
     const { ctx, next } = opts;
     const key = keyGenerator(ctx);
     const now = Date.now();

@@ -8,7 +8,6 @@
  */
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
-import { ZodError } from "zod";
 import { auth } from "@clerk/nextjs/server";
 
 import { db } from "~/server/db";
@@ -120,17 +119,29 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 /**
  * Rate limiting middleware for API calls
  */
-const rateLimitMiddleware = createRateLimit(RateLimits.moderate);
+const rateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
+  const rateLimiter = createRateLimit(RateLimits.moderate);
+  await rateLimiter({ ctx, next: async () => undefined });
+  return next();
+});
 
 /**
  * Strict rate limiting for sensitive operations
  */
-const strictRateLimitMiddleware = createRateLimit(RateLimits.strict);
+const strictRateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
+  const rateLimiter = createRateLimit(RateLimits.strict);
+  await rateLimiter({ ctx, next: async () => undefined });
+  return next();
+});
 
 /**
  * AI operations rate limiting
  */
-const aiRateLimitMiddleware = createRateLimit(RateLimits.ai);
+const aiRateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
+  const rateLimiter = createRateLimit(RateLimits.ai);
+  await rateLimiter({ ctx, next: async () => undefined });
+  return next();
+});
 
 /**
  * Public (unauthenticated) procedure

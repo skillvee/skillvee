@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { TRPCError } from "@trpc/server";
 
 import { 
   createTRPCRouter, 
@@ -38,7 +37,7 @@ export const aiRouter = createTRPCRouter({
         questionCount, 
         timeLimit,
         includeQuestionTypes,
-        customInstructions 
+        customInstructions: _customInstructions 
       } = input;
 
       // Verify job description exists
@@ -65,13 +64,13 @@ export const aiRouter = createTRPCRouter({
       const mockCase: GeneratedCaseOutput = {
         caseId: `case_${Date.now()}`,
         title: `${jobDescription.title} Interview Case`,
-        description: `Comprehensive interview case for ${jobDescription.title} position focusing on ${focusAreas?.join(", ") || jobDescription.focusAreas.join(", ")}`,
+        description: `Comprehensive interview case for ${jobDescription.title} position focusing on ${focusAreas?.join(", ") ?? jobDescription.focusAreas.join(", ")}`,
         timeLimit,
         difficulty,
         questions: Array.from({ length: questionCount }, (_, i) => ({
           id: `q_${i + 1}`,
           questionText: `Sample ${difficulty.toLowerCase()} question ${i + 1} about ${jobDescription.focusAreas[i % jobDescription.focusAreas.length]}`,
-          questionType: includeQuestionTypes?.[i % (includeQuestionTypes?.length || 1)] || "TECHNICAL",
+          questionType: includeQuestionTypes?.[i % (includeQuestionTypes?.length ?? 1)] ?? "TECHNICAL",
           difficulty,
           expectedAnswer: "Sample expected answer covering key concepts and implementation details.",
           evaluationCriteria: [
@@ -87,7 +86,7 @@ export const aiRouter = createTRPCRouter({
             "What are the trade-offs of your approach?"
           ],
         })),
-        focusAreas: focusAreas || jobDescription.focusAreas,
+        focusAreas: focusAreas ?? jobDescription.focusAreas,
         preparationTips: [
           "Review fundamental concepts",
           "Practice coding problems",
@@ -110,7 +109,7 @@ export const aiRouter = createTRPCRouter({
   generateAssessment: aiProcedure
     .input(generateAssessmentSchema)
     .mutation(async ({ ctx, input }) => {
-      const { interviewId, includeTranscription, assessmentCriteria, weightings } = input;
+      const { interviewId, includeTranscription, assessmentCriteria: _assessmentCriteria, weightings } = input;
 
       // Verify interview exists and is completed
       const interview = await ctx.db.interview.findFirst({
@@ -209,10 +208,10 @@ export const aiRouter = createTRPCRouter({
           "Edge case handling"
         ],
         detailedFeedback: assessment.detailedFeedback,
-        questionAnalysis: interview.questions.map((q, i) => ({
+        questionAnalysis: interview.questions.map((q, _i) => ({
           questionId: q.id,
           question: q.questionText,
-          candidateAnswer: q.userAnswer || "No answer provided",
+          candidateAnswer: q.userAnswer ?? "No answer provided",
           score: Math.max(1, Math.min(10, baseScore + (Math.random() - 0.5) * 2)),
           feedback: "Good understanding demonstrated with room for improvement in implementation details.",
           strengths: ["Clear explanation", "Correct approach"],
@@ -245,7 +244,7 @@ export const aiRouter = createTRPCRouter({
   startConversation: aiProcedure
     .input(startAIConversationSchema)
     .mutation(async ({ ctx, input }) => {
-      const { interviewId, sessionConfig, context } = input;
+      const { interviewId, sessionConfig, context: _context } = input;
 
       // Verify interview exists and is in progress
       const interview = await ctx.db.interview.findFirst({
@@ -277,7 +276,7 @@ export const aiRouter = createTRPCRouter({
       return {
         sessionId,
         status: "active",
-        config: sessionConfig || {
+        config: sessionConfig ?? {
           voice: "alloy",
           speed: 1.0,
           temperature: 0.7,
@@ -292,8 +291,8 @@ export const aiRouter = createTRPCRouter({
    */
   transcribeAudio: aiProcedure
     .input(transcribeAudioSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { audioFileUrl, language, speakerDiarization, timestampGranularity } = input;
+    .mutation(async ({ ctx: _ctx, input }) => {
+      const { audioFileUrl: _audioFileUrl, language, speakerDiarization: _speakerDiarization, timestampGranularity: _timestampGranularity } = input;
 
       // Simulate transcription processing
       await new Promise(resolve => setTimeout(resolve, 5000));
@@ -340,7 +339,7 @@ export const aiRouter = createTRPCRouter({
   analyzeResponse: aiProcedure
     .input(analyzeResponseSchema)
     .mutation(async ({ ctx, input }) => {
-      const { questionId, responseText, expectedAnswer, analysisType } = input;
+      const { questionId, responseText: _responseText, expectedAnswer: _expectedAnswer, analysisType: _analysisType } = input;
 
       // Verify question exists
       const question = await ctx.db.question.findFirst({
@@ -455,7 +454,7 @@ export const aiRouter = createTRPCRouter({
   validateAnswer: aiProcedure
     .input(validateAnswerSchema)
     .mutation(async ({ ctx, input }) => {
-      const { questionId, candidateAnswer, evaluationCriteria, provideFeedback } = input;
+      const { questionId, candidateAnswer, evaluationCriteria: _evaluationCriteria, provideFeedback } = input;
 
       // Verify question exists
       const question = await ctx.db.question.findFirst({

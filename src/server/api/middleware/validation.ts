@@ -1,6 +1,6 @@
 import type { ZodSchema } from "zod";
 import { ZodError } from "zod";
-import { TRPCError } from "@trpc/server";
+import type { TRPCError } from "@trpc/server";
 import { createError } from "../types/errors";
 
 /**
@@ -15,17 +15,23 @@ export function sanitizeInput<T extends Record<string, unknown>>(input: T): T {
     return input;
   }
 
-  const sanitized = { ...input } as T;
+  const sanitized = { ...input };
 
   for (const [key, value] of Object.entries(sanitized)) {
     if (typeof value === "string") {
-      // Basic XSS prevention
-      (sanitized as Record<string, unknown>)[key] = value
+      // Basic XSS prevention - comprehensive sanitization
+      const cleanValue = value
+        // Remove script tags
         .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+        // Remove iframe tags
         .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
-        .replace(/javascript:/gi, "")
-        .replace(/on\w+\s*=/gi, "")
+        // Remove javascript: protocol - match the entire thing including parentheses
+        .replace(/javascript:.*$/gi, "")
+        // Remove event handlers - match attribute pattern with spaces around =
+        .replace(/\s+on\w+=.*$/gi, "")
         .trim();
+
+      (sanitized as Record<string, unknown>)[key] = cleanValue;
     } else if (Array.isArray(value)) {
       (sanitized as Record<string, unknown>)[key] = value.map((item) =>
         typeof item === "string" ? sanitizeInput({ item }).item : sanitizeInput(item as Record<string, unknown>)
@@ -43,7 +49,7 @@ export function sanitizeInput<T extends Record<string, unknown>>(input: T): T {
  */
 export function validateInputSize<T>(
   input: T,
-  maxSizeKB: number = 1024 // 1MB default
+  maxSizeKB = 1024 // 1MB default
 ): T {
   const inputString = JSON.stringify(input);
   const sizeKB = Buffer.byteLength(inputString, "utf8") / 1024;
@@ -310,7 +316,7 @@ export function validateBusinessRules<T extends Record<string, unknown>>(
   for (const rule of rules) {
     if (!rule.condition(input)) {
       throw createError.validation(
-        rule.field || "business_rule",
+        rule.field ?? "business_rule",
         rule.message
       );
     }
@@ -365,7 +371,7 @@ export function validateWithSchema<T>(
     stripUnknown?: boolean;
   } = {}
 ): T {
-  const { customErrors = {}, stripUnknown = true } = options;
+  const { customErrors = {} } = options;
 
   try {
     // Note: strip option is not available in current Zod version
