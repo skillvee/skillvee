@@ -12,6 +12,8 @@ import { ZodError } from "zod";
 import { auth } from "@clerk/nextjs/server";
 
 import { db } from "~/server/db";
+import { formatError } from "./types/errors";
+import { createRateLimit, RateLimits } from "./middleware/rateLimit";
 
 /**
  * 1. CONTEXT
@@ -28,10 +30,33 @@ import { db } from "~/server/db";
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const { userId, sessionId } = await auth();
   
+  // Get user info if authenticated
+  let user = null;
+  if (userId) {
+    try {
+      user = await db.user.findUnique({
+        where: { 
+          clerkId: userId,
+          deletedAt: null,
+        },
+        select: {
+          id: true,
+          clerkId: true,
+          email: true,
+          role: true,
+        },
+      });
+    } catch (error) {
+      // Log error but don't fail context creation
+      console.error("Failed to fetch user in tRPC context:", error);
+    }
+  }
+  
   return {
     db,
     userId,
     sessionId,
+    user,
     ...opts,
   };
 };
@@ -45,16 +70,7 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
  */
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
-  errorFormatter({ shape, error }) {
-    return {
-      ...shape,
-      data: {
-        ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
-      },
-    };
-  },
+  errorFormatter: formatError,
 });
 
 /**
@@ -102,13 +118,30 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 });
 
 /**
+ * Rate limiting middleware for API calls
+ */
+const rateLimitMiddleware = createRateLimit(RateLimits.moderate);
+
+/**
+ * Strict rate limiting for sensitive operations
+ */
+const strictRateLimitMiddleware = createRateLimit(RateLimits.strict);
+
+/**
+ * AI operations rate limiting
+ */
+const aiRateLimitMiddleware = createRateLimit(RateLimits.ai);
+
+/**
  * Public (unauthenticated) procedure
  *
  * This is the base piece you use to build new queries and mutations on your tRPC API. It does not
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure.use(timingMiddleware);
+export const publicProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(rateLimitMiddleware);
 
 /**
  * Protected (authenticated) procedure
@@ -120,8 +153,9 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  */
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
+  .use(rateLimitMiddleware)
   .use(async ({ ctx, next }) => {
-    if (!ctx.userId) {
+    if (!ctx.userId || !ctx.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
     
@@ -129,6 +163,58 @@ export const protectedProcedure = t.procedure
       ctx: {
         ...ctx,
         userId: ctx.userId,
+        user: ctx.user,
+      },
+    });
+  });
+
+/**
+ * Admin-only procedure
+ *
+ * Only accessible to users with ADMIN role. Includes stricter rate limiting.
+ */
+export const adminProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(strictRateLimitMiddleware)
+  .use(async ({ ctx, next }) => {
+    if (!ctx.userId || !ctx.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    
+    if (ctx.user.role !== "ADMIN") {
+      throw new TRPCError({ 
+        code: "FORBIDDEN",
+        message: "Admin access required",
+      });
+    }
+    
+    return next({
+      ctx: {
+        ...ctx,
+        userId: ctx.userId,
+        user: ctx.user,
+      },
+    });
+  });
+
+/**
+ * AI procedure for AI-powered operations
+ *
+ * Includes special rate limiting for AI operations which are typically more expensive.
+ */
+export const aiProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(aiRateLimitMiddleware)
+  .use(async ({ ctx, next }) => {
+    if (!ctx.userId || !ctx.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    
+    return next({
+      ctx: {
+        ...ctx,
+        userId: ctx.userId,
+        user: ctx.user,
       },
     });
   });
