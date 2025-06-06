@@ -19,6 +19,7 @@ model User {
     firstName    String?
     lastName     String?
     profileImage String?
+    role         UserRole @default(INTERVIEWER)
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
     deletedAt    DateTime?
@@ -31,6 +32,7 @@ model User {
     @@map("users")
     @@index([clerkId])
     @@index([email])
+    @@index([role])
     @@index([deletedAt])
 }
 
@@ -221,4 +223,9 @@ enum TranscriptionStatus {
     IN_PROGRESS
     COMPLETED
     FAILED
+}
+
+enum UserRole {
+    ADMIN
+    INTERVIEWER
 }
