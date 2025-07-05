@@ -6,6 +6,7 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 
+import { env } from "~/env";
 import { createError } from "../types/errors";
 import {
   generateCaseSchema,
@@ -268,12 +269,12 @@ export const aiRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { interviewId, sessionConfig, context: _context } = input;
 
-      // Verify interview exists and is in progress
+      // Verify interview exists and is ready to start (SCHEDULED or IN_PROGRESS)
       const interview = await ctx.db.interview.findFirst({
         where: {
           id: interviewId,
           userId: ctx.user.id,
-          status: "IN_PROGRESS",
+          status: { in: ["SCHEDULED", "IN_PROGRESS"] },
           deletedAt: null,
         },
         include: {
@@ -289,20 +290,29 @@ export const aiRouter = createTRPCRouter({
       // Mock session ID (in real implementation, this would come from Gemini Live API)
       const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      // Update interview with session ID
+      // Update interview with session ID and set status to IN_PROGRESS if it was SCHEDULED
       await ctx.db.interview.update({
         where: { id: interviewId },
-        data: { geminiSessionId: sessionId },
+        data: { 
+          geminiSessionId: sessionId,
+          ...(interview.status === "SCHEDULED" ? { 
+            status: "IN_PROGRESS", 
+            startedAt: new Date() 
+          } : {})
+        },
       });
 
       return {
         sessionId,
         status: "active",
-        config: sessionConfig ?? {
-          voice: "alloy",
-          speed: 1.0,
-          temperature: 0.7,
-          maxTokens: 2048,
+        config: {
+          ...(sessionConfig ?? {
+            voice: "alloy",
+            speed: 1.0,
+            temperature: 0.7,
+            maxTokens: 2048,
+          }),
+          apiKey: env.GOOGLE_GENERATIVE_AI_API_KEY,
         },
         expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
       };
