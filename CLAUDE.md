@@ -286,3 +286,20 @@ npm run dev       # Start development server
 - **Parsing Issues**: Verify job description length (minimum 10 characters)
 - **UI Issues**: Clear browser cache and restart development server
 - **Build Errors**: Run `npm run typecheck` to identify TypeScript issues
+
+## Gemini Live Audio-to-Audio Implementation
+**Status**: ✅ Complete - Natural conversation flow with proper audio buffering
+
+### Critical Insights
+- **❌ Don't use**: Complex VAD, ScriptProcessorNode, setTimeout delays for audio finishing
+- **✅ Use**: Continuous streaming, AudioWorklet, callback-based completion
+
+### Key Files
+- **`src/lib/gemini-live.ts`** - Core implementation (AudioRecorder, AudioStreamer, WebSocket)
+- **`src/hooks/useGeminiLive.ts`** - React hook interface
+- **`public/audio-worklet.js`** - Modern audio processor
+
+### Audio Flow
+1. AudioWorklet → Base64 → WebSocket → Gemini Live API
+2. WebSocket → ArrayBuffer → AudioStreamer buffering → smooth playback
+3. Turn complete → `finishPlayback()` → callback when done → state change

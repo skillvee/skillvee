@@ -38,5 +38,5 @@
     "**/*.js",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "**/__tests__/**", "**/*.test.ts", "**/*.test.tsx", "src/test/**"]
+  "exclude": ["node_modules", "**/__tests__/**", "**/*.test.ts", "**/*.test.tsx", "src/test/**", "public/**/*.js", "**/*-backup.*"]
 }
