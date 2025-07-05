@@ -473,7 +473,7 @@ export const mediaRouter = createTRPCRouter({
   updateTranscription: protectedProcedure
     .input(updateTranscriptionSchema)
     .mutation(async ({ ctx, input }) => {
-      const { recordingId, transcriptionText, segments } = input;
+      const { recordingId, transcriptionText } = input;
 
       // Verify recording exists and user has permission
       const recording = await ctx.db.mediaRecording.findFirst({
@@ -616,8 +616,8 @@ export const mediaRouter = createTRPCRouter({
         recordingsByType,
         uploadStatusDist,
         transcriptionStatusDist,
-        dailyStats,
-        topInterviews,
+        // dailyStats,
+        // topInterviews,
       ] = await Promise.all([
         ctx.db.mediaRecording.count({ where: filters }),
         ctx.db.mediaRecording.aggregate({

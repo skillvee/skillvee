@@ -24,8 +24,8 @@ import type { GeminiLiveConfig } from "~/lib/gemini-live";
 export default function LiveInterviewPage() {
   const { user: clerkUser, isLoaded } = useUser();
   const [currentInterviewId, setCurrentInterviewId] = useState<string | null>(null);
-  const [interviewData, setInterviewData] = useState<any>(null);
-  const [questionsData, setQuestionsData] = useState<any[]>([]);
+  const [interviewData, setInterviewData] = useState<{ id: string } | null>(null);
+  const [questionsData, setQuestionsData] = useState<Array<{ id: string; questionText: string; questionType: string; difficulty: string; expectedAnswer: string; evaluationCriteria: string[]; timeAllocation: number; followUpQuestions: string[] }>>([]);
   const [pageState, setPageState] = useState<"setup" | "settings" | "active" | "completed">("setup");
   
   // Debug state changes
@@ -163,7 +163,7 @@ Guidelines:
     const compatibility = {
       webSocket: typeof WebSocket !== 'undefined',
       mediaDevices: !!(navigator.mediaDevices?.getUserMedia),
-      audioContext: !!(window.AudioContext || (window as any).webkitAudioContext),
+      audioContext: !!(window.AudioContext || (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext),
       overall: false
     };
     
@@ -339,14 +339,14 @@ Guidelines:
                 <div className="space-y-2">
                   <label className="text-sm font-medium">AI Model</label>
                   <Badge variant="outline" className="block w-fit">
-                    {geminiConfig.model || 'models/gemini-2.0-flash-exp'}
+                    {geminiConfig.model ?? 'models/gemini-2.0-flash-exp'}
                   </Badge>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Voice</label>
                   <Badge variant="outline" className="block w-fit">
-                    {geminiConfig.voice || 'Puck'}
+                    {geminiConfig.voice ?? 'Puck'}
                   </Badge>
                 </div>
 
@@ -493,7 +493,7 @@ Guidelines:
       <div className="min-h-screen bg-gray-50">
         <LiveInterviewSession
           interview={{
-            id: interviewData.id,
+            id: interviewData?.id ?? '',
             jobDescription: {
               title: "Senior Data Scientist",
               companyName: "TechCorp AI",

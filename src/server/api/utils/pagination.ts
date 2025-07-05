@@ -22,7 +22,7 @@ export interface PaginatedResult<T> {
 /**
  * Create cursor-based pagination arguments for Prisma
  */
-export function createPaginationArgs<T extends Record<string, any>>(
+export function createPaginationArgs<T extends Record<string, unknown>>(
   input: PaginationInput,
   orderBy: Prisma.Enumerable<T>,
   cursorField: keyof T = "id" as keyof T
@@ -36,23 +36,33 @@ export function createPaginationArgs<T extends Record<string, any>>(
   
   const take = direction === "forward" ? limit + 1 : -(limit + 1);
   
-  const args: any = {
+  const args: {
+    take: number;
+    orderBy: Prisma.Enumerable<T>;
+    cursor?: Record<string, unknown>;
+    skip?: number;
+  } = {
     take,
     orderBy,
   };
 
   if (cursor) {
-    args.cursor = { [cursorField]: cursor };
+    args.cursor = { [cursorField as string]: cursor };
     args.skip = 1; // Skip the cursor record itself
   }
 
-  return args;
+  return args as {
+    take: number;
+    skip?: number;
+    cursor?: { [K in keyof T]?: T[K] };
+    orderBy: Prisma.Enumerable<T>;
+  };
 }
 
 /**
  * Process pagination results and create response
  */
-export function processPaginationResults<T extends Record<string, any>>(
+export function processPaginationResults<T extends Record<string, unknown>>(
   items: T[],
   input: PaginationInput,
   cursorField: keyof T = "id" as keyof T
@@ -168,7 +178,7 @@ export function createSearchConditions(
         },
       }))
     ),
-  } as any;
+  } as Prisma.StringFilter;
 }
 
 /**
@@ -177,11 +187,11 @@ export function createSearchConditions(
 export function createDateRangeFilter(
   from?: Date,
   to?: Date,
-  field: string = "createdAt"
-): Record<string, any> | undefined {
+  field = "createdAt"
+): Record<string, unknown> | undefined {
   if (!from && !to) return undefined;
   
-  const filter: Record<string, any> = {};
+  const filter: Record<string, unknown> = {};
   
   if (from && to) {
     filter[field] = {
@@ -219,7 +229,7 @@ export function createSortCondition<T>(
 /**
  * Combine multiple filters
  */
-export function combineFilters(...filters: (Record<string, any> | undefined)[]): Record<string, any> {
+export function combineFilters(...filters: (Record<string, unknown> | undefined)[]): Record<string, unknown> {
   const validFilters = filters.filter(Boolean);
   
   if (validFilters.length === 0) return {};
@@ -234,9 +244,9 @@ export function combineFilters(...filters: (Record<string, any> | undefined)[]):
  * Create inclusion filter (e.g., for soft deletes)
  */
 export function createInclusionFilter(
-  includeDeleted: boolean = false,
-  deletedField: string = "deletedAt"
-): Record<string, any> {
+  includeDeleted = false,
+  deletedField = "deletedAt"
+): Record<string, unknown> {
   if (includeDeleted) return {};
   
   return {
@@ -250,8 +260,8 @@ export function createInclusionFilter(
 export function createPermissionFilter(
   userId: string,
   userRole: "ADMIN" | "INTERVIEWER",
-  ownerField: string = "userId"
-): Record<string, any> {
+  ownerField = "userId"
+): Record<string, unknown> {
   // Admins can see everything
   if (userRole === "ADMIN") {
     return {};
@@ -266,9 +276,9 @@ export function createPermissionFilter(
 /**
  * Utility for counting total items (useful for offset pagination)
  */
-export async function countWithFilters<T>(
-  model: any,
-  filters: Record<string, any>
+export async function countWithFilters<T extends { count: (args: { where: unknown }) => Promise<number> }>(
+  model: T,
+  filters: Record<string, unknown>
 ): Promise<number> {
   return model.count({
     where: filters,

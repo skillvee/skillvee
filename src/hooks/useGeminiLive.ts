@@ -372,7 +372,7 @@ export function useGeminiLivePermissions() {
   }, []);
 
   useEffect(() => {
-    checkPermissions();
+    void checkPermissions();
   }, [checkPermissions]);
 
   return {

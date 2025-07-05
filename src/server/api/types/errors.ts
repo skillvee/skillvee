@@ -146,7 +146,7 @@ export const createError = {
  * Enhanced error formatter for tRPC
  */
 export function formatError(opts: {
-  shape: any;
+  shape: { data: { zodError?: unknown; code: string } };
   error: TRPCError;
 }) {
   const { shape, error } = opts;

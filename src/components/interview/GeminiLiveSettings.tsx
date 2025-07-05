@@ -41,7 +41,7 @@ export function GeminiLiveSettings({
   className
 }: GeminiLiveSettingsProps) {
   const [customSystemInstruction, setCustomSystemInstruction] = useState(
-    config.systemInstruction || ''
+    config.systemInstruction ?? ''
   );
 
   // Voice options with descriptions
@@ -117,7 +117,7 @@ Guidelines:
 - Provide constructive feedback when appropriate`,
     };
 
-    setCustomSystemInstruction(defaultConfig.systemInstruction || '');
+    setCustomSystemInstruction(defaultConfig.systemInstruction ?? '');
     onConfigChange(defaultConfig);
     onReset?.();
   };
@@ -147,7 +147,7 @@ Guidelines:
             <span>AI Model</span>
           </Label>
           <Select
-            value={config.model || 'gemini-2.0-flash-live-001'}
+            value={config.model ?? 'gemini-2.0-flash-live-001'}
             onValueChange={(value) => handleConfigUpdate({ 
               model: value as GeminiLiveConfig['model'] 
             })}
@@ -193,7 +193,7 @@ Guidelines:
             <span>Voice</span>
           </Label>
           <Select
-            value={config.voice || 'Puck'}
+            value={config.voice ?? 'Puck'}
             onValueChange={(value) => handleConfigUpdate({ 
               voice: value as GeminiLiveConfig['voice'] 
             })}
@@ -242,7 +242,7 @@ Guidelines:
               <Switch
                 checked={config.responseModalities?.includes('AUDIO') ?? true}
                 onCheckedChange={(checked) => {
-                  const modalities = config.responseModalities || ['AUDIO'];
+                  const modalities = config.responseModalities ?? ['AUDIO'];
                   if (checked && !modalities.includes('AUDIO')) {
                     handleConfigUpdate({ 
                       responseModalities: [...modalities, 'AUDIO'] 
@@ -266,7 +266,7 @@ Guidelines:
               <Switch
                 checked={config.responseModalities?.includes('TEXT') ?? false}
                 onCheckedChange={(checked) => {
-                  const modalities = config.responseModalities || ['AUDIO'];
+                  const modalities = config.responseModalities ?? ['AUDIO'];
                   if (checked && !modalities.includes('TEXT')) {
                     handleConfigUpdate({ 
                       responseModalities: [...modalities, 'TEXT'] 
@@ -357,9 +357,9 @@ Guidelines:
           <div className="p-3 bg-muted/50 rounded-lg">
             <pre className="text-xs font-mono text-muted-foreground overflow-x-auto">
               {JSON.stringify({
-                model: config.model || 'gemini-2.0-flash-live-001',
-                voice: config.voice || 'Puck',
-                responseModalities: config.responseModalities || ['AUDIO'],
+                model: config.model ?? 'gemini-2.0-flash-live-001',
+                voice: config.voice ?? 'Puck',
+                responseModalities: config.responseModalities ?? ['AUDIO'],
                 systemInstructionLength: customSystemInstruction.length
               }, null, 2)}
             </pre>
@@ -456,7 +456,7 @@ Guidelines:
                 <Badge variant="outline" className="text-xs">
                   {preset.config.voice}
                 </Badge>
-                {preset.config.responseModalities?.includes('TEXT' as any) && (
+                {(preset.config.responseModalities as Array<'AUDIO' | 'TEXT'>)?.includes('TEXT') && (
                   <Badge variant="outline" className="text-xs">
                     Text
                   </Badge>

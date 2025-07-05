@@ -2,7 +2,6 @@ import { z } from "zod";
 import {
   idSchema,
   paginationSchema,
-  fileUploadSchema,
   durationSchema,
   recordingTypeSchema,
   uploadStatusSchema,

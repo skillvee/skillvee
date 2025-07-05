@@ -120,11 +120,11 @@ Please parse this job description and return the structured data.`;
     if (!responseText) {
       throw new Error("Empty response from Gemini API");
     }
-    const parsedData = JSON.parse(responseText);
+    const parsedData: unknown = JSON.parse(responseText);
     
     return {
       success: true,
-      data: parsedData,
+      data: parsedData as { title?: string; company?: string; difficulty?: string; requirements?: string[]; focusAreas?: string[] },
     };
   } catch (error) {
     console.error("Gemini API error:", error);
@@ -190,8 +190,8 @@ Return 5-8 most relevant focus areas.`;
     if (!responseText) {
       throw new Error("Empty response from Gemini API");
     }
-    const parsedData = JSON.parse(responseText);
-    return parsedData.focusAreas || [];
+    const parsedData: unknown = JSON.parse(responseText);
+    return (parsedData as { focusAreas?: string[] }).focusAreas ?? [];
   } catch (error) {
     console.error("Focus area generation error:", error);
     return [];

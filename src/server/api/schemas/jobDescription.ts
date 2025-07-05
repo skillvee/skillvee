@@ -3,7 +3,6 @@ import {
   idSchema,
   paginationSchema,
   searchSchema,
-  textContentSchema,
   richTextSchema,
   companyNameSchema,
   jobTitleSchema,

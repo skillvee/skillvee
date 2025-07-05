@@ -65,7 +65,7 @@ const AI_PROCESSING_MESSAGES = [
 export default function JobDescriptionPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = React.useState<"input" | "processing" | "results">("input");
-  const [parsedData, setParsedData] = React.useState<any>(null);
+  const [parsedData, setParsedData] = React.useState<{ extractedInfo?: { location?: string; employmentType?: string } } | null>(null);
   
   // Interactive state for results step
   const [showFullDescription, setShowFullDescription] = React.useState(false);
@@ -105,11 +105,11 @@ export default function JobDescriptionPage() {
     onSuccess: (data) => {
       setParsedData(data);
       // Auto-populate form fields
-      setValue("title", data.title || "");
-      setValue("company", data.company || "");
-      setValue("difficulty", data.difficulty || "MEDIUM");
-      setValue("requirements", data.requirements || []);
-      setValue("focusAreas", data.focusAreas || []);
+      setValue("title", data.title ?? "");
+      setValue("company", data.company ?? "");
+      setValue("difficulty", data.difficulty ?? "MEDIUM");
+      setValue("requirements", data.requirements ?? []);
+      setValue("focusAreas", data.focusAreas ?? []);
       
       setCurrentStep("results");
     },
@@ -553,21 +553,21 @@ Requirements:
               </Card>
 
               {/* Additional Info */}
-              {parsedData?.extractedInfo?.location || parsedData?.extractedInfo?.employmentType ? (
+              {(parsedData?.extractedInfo?.location ?? parsedData?.extractedInfo?.employmentType) ? (
                 <Card className="border-0 shadow-lg">
                   <CardContent className="p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Details</h3>
                     <div className="space-y-3 text-sm">
-                      {parsedData.extractedInfo.location && (
+                      {parsedData?.extractedInfo?.location && (
                         <div className="flex items-center space-x-2">
                           <MapPin className="h-4 w-4 text-gray-500" />
-                          <span className="text-gray-700">{parsedData.extractedInfo.location}</span>
+                          <span className="text-gray-700">{parsedData?.extractedInfo?.location}</span>
                         </div>
                       )}
-                      {parsedData.extractedInfo.employmentType && (
+                      {parsedData?.extractedInfo?.employmentType && (
                         <div className="flex items-center space-x-2">
                           <Clock className="h-4 w-4 text-gray-500" />
-                          <span className="text-gray-700">{parsedData.extractedInfo.employmentType}</span>
+                          <span className="text-gray-700">{parsedData?.extractedInfo?.employmentType}</span>
                         </div>
                       )}
                     </div>

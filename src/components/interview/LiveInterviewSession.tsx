@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
@@ -12,7 +12,6 @@ import {
   Phone, 
   PhoneOff, 
   Volume2, 
-  VolumeX, 
   RefreshCw,
   CheckCircle,
   AlertCircle,
@@ -21,7 +20,6 @@ import {
   Pause,
   Play,
   SkipForward,
-  Settings
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useGeminiLiveInterview, useGeminiLivePermissions } from "~/hooks/useGeminiLive";
@@ -252,7 +250,7 @@ export function LiveInterviewSession({
       addToConversationLog('system', `Moving to question ${newIndex + 1} of ${questions.length}`);
     } else {
       // Interview complete
-      endSession();
+      void endSession();
     }
   }, [currentQuestionIndex, questions, geminiLive, onQuestionComplete, endSession]);
 
@@ -396,7 +394,7 @@ export function LiveInterviewSession({
             <div className="space-y-4">
               <h2 className="text-2xl font-semibold">Ready to start your AI interview?</h2>
               <p className="text-muted-foreground max-w-lg mx-auto">
-                You'll be speaking with an AI interviewer who will ask questions about {interview.jobDescription.focusAreas.join(', ')}. 
+                You&apos;ll be speaking with an AI interviewer who will ask questions about {interview.jobDescription.focusAreas.join(', ')}. 
                 The session will be recorded and you can interrupt the AI at any time.
               </p>
               
@@ -437,7 +435,7 @@ export function LiveInterviewSession({
                 <CardTitle className="flex items-center justify-between">
                   <span>Question {currentQuestionIndex + 1}</span>
                   <Badge variant="outline">
-                    {currentQuestion?.difficulty || interview.jobDescription.difficulty}
+                    {currentQuestion?.difficulty ?? interview.jobDescription.difficulty}
                   </Badge>
                 </CardTitle>
               </CardHeader>
