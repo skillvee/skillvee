@@ -124,7 +124,7 @@ Please parse this job description and return the structured data.`;
     
     return {
       success: true,
-      data: parsedData as { title?: string; company?: string; difficulty?: string; requirements?: string[]; focusAreas?: string[] },
+      data: parsedData as { title?: string; company?: string; difficulty?: "JUNIOR" | "MEDIUM" | "SENIOR"; requirements?: string[]; focusAreas?: string[]; extractedInfo?: { summary?: string; location?: string; employmentType?: string; salary?: string; benefits?: string[] } },
     };
   } catch (error) {
     console.error("Gemini API error:", error);
@@ -134,12 +134,12 @@ Please parse this job description and return the structured data.`;
       success: false,
       error: error instanceof Error ? error.message : "Failed to parse job description",
       data: {
-        title: null,
-        company: null,
-        difficulty: null,
+        title: undefined,
+        company: undefined,
+        difficulty: undefined,
         requirements: [],
         focusAreas: [],
-        extractedInfo: null,
+        extractedInfo: undefined,
       },
     };
   }
