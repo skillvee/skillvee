@@ -122,6 +122,7 @@ export class GeminiLiveClient {
     };
   }
 
+
   /**
    * Start a new Gemini Live session
    */
@@ -185,6 +186,9 @@ export class GeminiLiveClient {
       this.reconnectAttempts = 0;
       
       console.log('GeminiLiveClient: Session started successfully, waiting for setup...');
+      
+      // Wait for setup completion before resolving
+      await this.waitForSetupCompletion();
 
     } catch (error) {
       console.error('GeminiLiveClient: Failed to start session:', error);
@@ -296,6 +300,33 @@ export class GeminiLiveClient {
       };
 
       checkConnection();
+    });
+  }
+
+  /**
+   * Wait for setup completion
+   */
+  private async waitForSetupCompletion(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (this.setupCompleted) {
+        resolve();
+        return;
+      }
+
+      const timeout = setTimeout(() => {
+        reject(new Error('Setup completion timeout'));
+      }, 10000);
+
+      const checkSetup = () => {
+        if (this.setupCompleted) {
+          clearTimeout(timeout);
+          resolve();
+        } else {
+          setTimeout(checkSetup, 100);
+        }
+      };
+
+      checkSetup();
     });
   }
 

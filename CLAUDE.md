@@ -187,6 +187,7 @@ npm run preview                    # Local production preview
 - **Auth issues**: Verify Clerk keys and callback URLs in Vercel dashboard
 - **Schema sync**: Use `supabase db pull` if local/remote schemas drift
 - **Gemini API**: Rate limits may affect development - implement proper error handling
+- **React State vs Client State**: When working with WebSocket connections, avoid checking React state (`state.isConnected`) for immediate operations. Use direct client state checks (`client.isConnected`) since React state updates are asynchronous and may cause race conditions in connection flows
 
 ### Testing Issues
 - **Jest ESM errors**: Ensure jest.config.js uses proper ESM preset and moduleNameMapper

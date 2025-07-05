@@ -97,20 +97,15 @@ export function useGeminiLive(options: UseGeminiLiveOptions = {}): UseGeminiLive
 
     // Connection events
     client.on('connected', ({ sessionId }) => {
-      console.log('useGeminiLive: Connected event received, updating state to connected');
-      setState(prev => {
-        const newState = {
-          ...prev,
-          isConnected: true,
-          sessionId,
-          connectionState: 'connected' as const,
-          isSetupComplete: true,
-          error: null,
-          lastInteraction: new Date(),
-        };
-        console.log('useGeminiLive: State updated, isConnected:', newState.isConnected);
-        return newState;
-      });
+      setState(prev => ({
+        ...prev,
+        isConnected: true,
+        sessionId,
+        connectionState: 'connected' as const,
+        isSetupComplete: true,
+        error: null,
+        lastInteraction: new Date(),
+      }));
       reconnectAttemptsRef.current = 0;
       onConnected?.();
     });
@@ -296,7 +291,14 @@ export function useGeminiLive(options: UseGeminiLiveOptions = {}): UseGeminiLive
   }, []);
 
   const startListening = useCallback(async () => {
-    if (!clientRef.current || !state.isConnected) {
+    if (!clientRef.current) {
+      throw new Error('Gemini Live client not initialized');
+    }
+
+    // IMPORTANT: Use client.isConnected instead of state.isConnected
+    // React state updates are asynchronous and may not reflect the actual
+    // WebSocket connection state immediately after connection completes
+    if (!clientRef.current.isConnected) {
       throw new Error('Not connected to Gemini Live');
     }
 
@@ -307,7 +309,7 @@ export function useGeminiLive(options: UseGeminiLiveOptions = {}): UseGeminiLive
       setState(prev => ({ ...prev, error: errorMessage }));
       throw error;
     }
-  }, [state.isConnected]);
+  }, []);
 
   const stopListening = useCallback(() => {
     if (!clientRef.current) return;

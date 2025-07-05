@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
@@ -71,7 +71,6 @@ export function LiveInterviewSession({
     type: 'user' | 'ai' | 'system';
     content: string;
   }>>([]);
-
   // Gemini Live integration
   const geminiLive = useGeminiLiveInterview({
     onError: (error) => {
@@ -159,25 +158,10 @@ export function LiveInterviewSession({
         currentQuestionIndex,
       };
 
-      // Connect with the API key from the server
+      // Connect with the API key from the server (this now waits for setup completion)
       console.log('🔌 Connecting to Gemini Live with context:', context);
       await geminiLive.connect(context, conversationResult.config.apiKey);
-      console.log('🎯 Gemini Live connect() completed, isConnected:', geminiLive.isConnected);
-      
-      // Wait for setup completion by checking actual connection
-      console.log('⏳ Waiting for setup completion...');
-      let attempts = 0;
-      while (!geminiLive.isConnected && attempts < 30) { // 3 second timeout
-        await new Promise(resolve => setTimeout(resolve, 100));
-        attempts++;
-        console.log(`🔍 Setup check ${attempts}/30, isConnected:`, geminiLive.isConnected);
-      }
-      
-      if (!geminiLive.isConnected) {
-        throw new Error('Failed to establish connection after setup');
-      }
-      
-      console.log('✅ Connection established!');
+      console.log('✅ Connection and setup completed!');
       
       console.log('🎤 Starting to listen for audio...');
       await geminiLive.startListening();
