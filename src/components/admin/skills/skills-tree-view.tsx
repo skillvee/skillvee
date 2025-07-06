@@ -67,6 +67,7 @@ interface SkillsTreeViewProps {
   };
   isLoading: boolean;
   searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 interface TreeItemProps {
@@ -197,7 +198,7 @@ function TreeItem({ node, level, searchQuery, onSelect }: TreeItemProps) {
   );
 }
 
-export function SkillsTreeView({ data, isLoading, searchQuery }: SkillsTreeViewProps) {
+export function SkillsTreeView({ data, isLoading, searchQuery, onSearchChange }: SkillsTreeViewProps) {
   const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
 
   // Transform API data to tree structure
@@ -280,6 +281,16 @@ export function SkillsTreeView({ data, isLoading, searchQuery }: SkillsTreeViewP
             <CardDescription>
               Navigate through domains, categories, skills, and competencies
             </CardDescription>
+            {/* Search Input */}
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search skills and competencies..."
+                value={searchQuery || ""}
+                onChange={(e) => onSearchChange?.(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-input rounded-md bg-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+              />
+            </div>
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[600px] w-full">
