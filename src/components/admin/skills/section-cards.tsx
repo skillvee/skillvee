@@ -10,32 +10,33 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
 import { 
-  TrendingUpIcon, 
-  TrendingDownIcon,
   Building2,
   FolderOpen,
   Target,
   Award,
 } from "lucide-react";
-import type { SkillsStats } from "~/server/api/schemas/skills";
 
 interface SectionCardsProps {
-  stats?: SkillsStats;
   isLoading: boolean;
 }
 
-export function SectionCards({ stats, isLoading }: SectionCardsProps) {
+export function SectionCards({ isLoading }: SectionCardsProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 gap-4 px-4 lg:px-6">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i} className="@container/card">
-            <CardHeader className="pb-3">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-8 w-16" />
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <Skeleton className="size-12 rounded-lg" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-32" />
             </CardContent>
           </Card>
         ))}
@@ -43,46 +44,30 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
     );
   }
 
-  if (!stats) {
-    return null;
-  }
-
   const cardData = [
     {
-      title: "Total Domains",
-      description: "Knowledge domains",
-      value: stats.totalDomains,
-      change: "+12%",
-      trend: "up" as const,
+      title: "Domains",
+      description: "Knowledge frameworks",
       icon: Building2,
-      detail: "Active frameworks",
+      detail: "Organize by subject area",
     },
     {
       title: "Categories",
-      description: "Skill categories",
-      value: stats.totalCategories,
-      change: "+8%", 
-      trend: "up" as const,
+      description: "Skill groupings",
       icon: FolderOpen,
-      detail: "Organized groups",
+      detail: "Structured classifications",
     },
     {
       title: "Skills",
-      description: "Individual skills",
-      value: stats.totalSkills,
-      change: "+25%",
-      trend: "up" as const,
+      description: "Core abilities",
       icon: Target,
-      detail: "Tracked abilities",
+      detail: "Measurable competencies",
     },
     {
-      title: "Competencies",
-      description: "Detailed competencies",
-      value: stats.totalCompetencies,
-      change: "+18%",
-      trend: "up" as const,
+      title: "Assessment",
+      description: "5-level proficiency",
       icon: Award,
-      detail: `${stats.primaryCompetencies} primary`,
+      detail: "Detailed evaluation",
     },
   ];
 
@@ -90,37 +75,28 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
     <div className="grid grid-cols-1 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 gap-4 px-4 lg:px-6">
       {cardData.map((card) => {
         const Icon = card.icon;
-        const TrendIcon = card.trend === "up" ? TrendingUpIcon : TrendingDownIcon;
         
         return (
           <Card key={card.title} className="@container/card">
-            <CardHeader className="relative pb-3">
-              <CardDescription>{card.description}</CardDescription>
-              <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-                {card.value.toLocaleString()}
-              </CardTitle>
-              <div className="absolute right-4 top-4">
-                <Badge 
-                  variant="outline" 
-                  className={`flex gap-1 rounded-lg text-xs ${
-                    card.trend === "up" 
-                      ? "text-green-700 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950 dark:border-green-800"
-                      : "text-red-700 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950 dark:border-red-800"
-                  }`}
-                >
-                  <TrendIcon className="size-3" />
-                  {card.change}
-                </Badge>
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex size-12 items-center justify-center rounded-lg bg-muted">
+                  <Icon className="size-6 text-muted-foreground" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle className="text-lg font-semibold">
+                    {card.title}
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    {card.description}
+                  </CardDescription>
+                </div>
               </div>
             </CardHeader>
-            <CardContent className="flex-col items-start gap-1 text-sm">
-              <div className="line-clamp-1 flex gap-2 font-medium">
-                <Icon className="size-4 text-muted-foreground" />
+            <CardContent className="pt-0">
+              <p className="text-sm text-muted-foreground">
                 {card.detail}
-              </div>
-              <div className="text-muted-foreground">
-                {card.title.toLowerCase()} available
-              </div>
+              </p>
             </CardContent>
           </Card>
         );

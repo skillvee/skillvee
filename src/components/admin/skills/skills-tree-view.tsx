@@ -37,7 +37,6 @@ interface TreeNode {
   type: "domain" | "category" | "skill" | "competency";
   priority?: "PRIMARY" | "SECONDARY" | "NONE";
   children?: TreeNode[];
-  count?: number;
 }
 
 interface SkillsTreeViewProps {
@@ -158,11 +157,6 @@ function TreeItem({ node, level, searchQuery, onSelect }: TreeItemProps) {
               {node.name}
             </span>
             {getPriorityBadge()}
-            {node.count !== undefined && (
-              <Badge variant="outline" className="ml-auto text-xs">
-                {node.count}
-              </Badge>
-            )}
           </div>
           
           <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
@@ -209,23 +203,19 @@ export function SkillsTreeView({ data, isLoading, searchQuery, onSearchChange }:
       id: domain.id,
       name: domain.name,
       type: "domain" as const,
-      count: domain.categories?.length || 0,
       children: domain.categories?.map(category => ({
         id: category.id,
         name: category.name,
         type: "category" as const,
-        count: category.skills?.length || 0,
         children: category.skills?.map(skill => ({
           id: skill.id,
           name: skill.name,
           type: "skill" as const,
-          count: skill.competencies?.length || 0,
           children: skill.competencies?.map(competency => ({
             id: competency.id,
             name: competency.name,
             type: "competency" as const,
             priority: competency.priority,
-            count: competency.levels?.length || 0,
           })),
         })),
       })),
@@ -367,12 +357,6 @@ export function SkillsTreeView({ data, isLoading, searchQuery, onSearchChange }:
                   </div>
                 )}
 
-                {selectedNode.count !== undefined && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">Children:</span>
-                    <Badge variant="outline">{selectedNode.count}</Badge>
-                  </div>
-                )}
 
                 <div className="space-y-2">
                   <Button size="sm" className="w-full gap-2">
