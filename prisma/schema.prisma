@@ -1,231 +1,313 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-// User model - synced with Clerk
 model User {
-    id           String   @id @default(cuid())
-    clerkId      String   @unique
-    email        String   @unique
-    firstName    String?
-    lastName     String?
-    profileImage String?
-    role         UserRole @default(INTERVIEWER)
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
-    deletedAt    DateTime?
+  id              String           @id @default(cuid())
+  clerkId         String           @unique
+  email           String           @unique
+  firstName       String?
+  lastName        String?
+  profileImage    String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?
+  role            UserRole         @default(INTERVIEWER)
+  interviewNotes  InterviewNote[]
+  interviews      Interview[]
+  jobDescriptions JobDescription[]
 
-    // Relationships
-    jobDescriptions JobDescription[]
-    interviews      Interview[]
-    interviewNotes  InterviewNote[]
-
-    @@map("users")
-    @@index([clerkId])
-    @@index([email])
-    @@index([role])
-    @@index([deletedAt])
+  @@index([clerkId])
+  @@index([email])
+  @@index([role])
+  @@index([deletedAt])
+  @@map("users")
 }
 
-// Job descriptions and templates
 model JobDescription {
-    id          String   @id @default(cuid())
-    title       String
-    company     String?
-    description String
-    requirements String[]
-    focusAreas  String[] // AI-derived focus areas
-    isTemplate  Boolean  @default(false)
-    userId      String?  // Nullable for system templates
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
-    deletedAt   DateTime?
+  id           String      @id @default(cuid())
+  title        String
+  company      String?
+  description  String
+  requirements String[]
+  focusAreas   String[]
+  isTemplate   Boolean     @default(false)
+  userId       String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  deletedAt    DateTime?
+  companyName  String?
+  difficulty   Difficulty  @default(MEDIUM)
+  interviews   Interview[]
+  user         User?       @relation(fields: [userId], references: [id])
 
-    // Relationships
-    user       User?       @relation(fields: [userId], references: [id])
-    interviews Interview[]
-
-    @@map("job_descriptions")
-    @@index([userId])
-    @@index([isTemplate])
-    @@index([deletedAt])
+  @@index([userId])
+  @@index([isTemplate])
+  @@index([deletedAt])
+  @@map("job_descriptions")
 }
 
-// Interview sessions
 model Interview {
-    id              String           @id @default(cuid())
-    userId          String
-    jobDescriptionId String
-    status          InterviewStatus  @default(SCHEDULED)
-    scheduledAt     DateTime?
-    startedAt       DateTime?
-    completedAt     DateTime?
-    duration        Int?             // Duration in minutes
-    geminiSessionId String?          // For Gemini Live session tracking
-    notes           String?          // General user notes
-    createdAt       DateTime         @default(now())
-    updatedAt       DateTime         @updatedAt
-    deletedAt       DateTime?
+  id               String           @id @default(cuid())
+  userId           String
+  jobDescriptionId String
+  status           InterviewStatus  @default(SCHEDULED)
+  scheduledAt      DateTime?
+  startedAt        DateTime?
+  completedAt      DateTime?
+  duration         Int?
+  geminiSessionId  String?
+  notes            String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  deletedAt        DateTime?
+  endedAt          DateTime?
+  geminiConfig     String?
+  assessment       Assessment?
+  interviewNotes   InterviewNote[]
+  jobDescription   JobDescription   @relation(fields: [jobDescriptionId], references: [id])
+  user             User             @relation(fields: [userId], references: [id])
+  mediaRecordings  MediaRecording[]
+  questions        Question[]
 
-    // Relationships
-    user           User              @relation(fields: [userId], references: [id])
-    jobDescription JobDescription    @relation(fields: [jobDescriptionId], references: [id])
-    questions      Question[]
-    assessment     Assessment?
-    mediaRecordings MediaRecording[]
-    interviewNotes InterviewNote[]
-
-    @@map("interviews")
-    @@index([userId])
-    @@index([jobDescriptionId])
-    @@index([status])
-    @@index([scheduledAt])
-    @@index([deletedAt])
+  @@index([userId])
+  @@index([jobDescriptionId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([deletedAt])
+  @@map("interviews")
 }
 
-// AI-generated interview questions
 model Question {
-    id             String       @id @default(cuid())
-    interviewId    String
-    questionText   String
-    questionType   QuestionType @default(TECHNICAL)
-    difficulty     Difficulty   @default(MEDIUM)
-    expectedAnswer String?      // AI-generated ideal answer
-    userAnswer     String?      // Transcribed user response
-    orderIndex     Int          // For sequencing questions
-    timeAsked      DateTime?
-    timeAnswered   DateTime?
-    createdAt      DateTime     @default(now())
-    updatedAt      DateTime     @updatedAt
+  id                 String       @id @default(cuid())
+  interviewId        String
+  questionText       String
+  questionType       QuestionType @default(TECHNICAL)
+  difficulty         Difficulty   @default(MEDIUM)
+  expectedAnswer     String?
+  userAnswer         String?
+  orderIndex         Int
+  timeAsked          DateTime?
+  timeAnswered       DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  evaluationCriteria String?
+  followUpQuestions  String?
+  timeAllocation     Int?
+  interview          Interview    @relation(fields: [interviewId], references: [id], onDelete: Cascade)
 
-    // Relationships
-    interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
-
-    @@map("questions")
-    @@index([interviewId])
-    @@index([questionType])
-    @@index([orderIndex])
+  @@index([interviewId])
+  @@index([questionType])
+  @@index([orderIndex])
+  @@map("questions")
 }
 
-// AI-generated performance assessments
 model Assessment {
-    id                    String   @id @default(cuid())
-    interviewId           String   @unique
-    overallScore          Int      // 1-10 scale
-    technicalScore        Int      // 1-10 scale
-    communicationScore    Int      // 1-10 scale
-    problemSolvingScore   Int      // 1-10 scale
-    strengthsAnalysis     String
-    improvementAreas      String
-    detailedFeedback      String
-    recommendedNextSteps  String
-    createdAt             DateTime @default(now())
-    updatedAt             DateTime @updatedAt
+  id                   String    @id @default(cuid())
+  interviewId          String    @unique
+  overallScore         Int
+  technicalScore       Int
+  communicationScore   Int
+  problemSolvingScore  Int
+  strengthsAnalysis    String
+  improvementAreas     String
+  detailedFeedback     String
+  recommendedNextSteps String
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  interview            Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
 
-    // Relationships
-    interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
-
-    @@map("assessments")
-    @@index([interviewId])
-    @@index([overallScore])
+  @@index([interviewId])
+  @@index([overallScore])
+  @@map("assessments")
 }
 
-// Media recordings (screen + audio)
 model MediaRecording {
-    id                   String              @id @default(cuid())
-    interviewId          String
-    recordingType        RecordingType       @default(SCREEN_AND_AUDIO)
-    filePath             String
-    fileSize             BigInt              // File size in bytes
-    duration             Int?                // Duration in seconds
-    uploadStatus         UploadStatus        @default(UPLOADING)
-    transcriptionStatus  TranscriptionStatus @default(PENDING)
-    transcriptionText    String?
-    createdAt            DateTime            @default(now())
-    updatedAt            DateTime            @updatedAt
+  id                  String              @id @default(cuid())
+  interviewId         String
+  recordingType       RecordingType       @default(SCREEN_AND_AUDIO)
+  filePath            String
+  fileSize            BigInt
+  duration            Int?
+  uploadStatus        UploadStatus        @default(UPLOADING)
+  transcriptionStatus TranscriptionStatus @default(PENDING)
+  transcriptionText   String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  interview           Interview           @relation(fields: [interviewId], references: [id], onDelete: Cascade)
 
-    // Relationships
-    interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
-
-    @@map("media_recordings")
-    @@index([interviewId])
-    @@index([uploadStatus])
-    @@index([transcriptionStatus])
+  @@index([interviewId])
+  @@index([uploadStatus])
+  @@index([transcriptionStatus])
+  @@map("media_recordings")
 }
 
-// User notes during interviews
 model InterviewNote {
-    id          String   @id @default(cuid())
-    interviewId String
-    userId      String
-    content     String
-    timestamp   DateTime // When note was taken during interview
-    positionX   Float?   // X coordinate for positioned notes
-    positionY   Float?   // Y coordinate for positioned notes
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  id          String    @id @default(cuid())
+  interviewId String
+  userId      String
+  content     String
+  timestamp   DateTime
+  positionX   Float?
+  positionY   Float?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  interview   Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id])
 
-    // Relationships
-    interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
-    user      User      @relation(fields: [userId], references: [id])
-
-    @@map("interview_notes")
-    @@index([interviewId])
-    @@index([userId])
-    @@index([timestamp])
+  @@index([interviewId])
+  @@index([userId])
+  @@index([timestamp])
+  @@map("interview_notes")
 }
 
-// Enums
 enum InterviewStatus {
-    SCHEDULED
-    IN_PROGRESS
-    COMPLETED
-    CANCELLED
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }
 
 enum QuestionType {
-    TECHNICAL
-    BEHAVIORAL
-    CASE_STUDY
-    PROBLEM_SOLVING
-    SYSTEM_DESIGN
+  TECHNICAL
+  BEHAVIORAL
+  CASE_STUDY
+  PROBLEM_SOLVING
+  SYSTEM_DESIGN
 }
 
 enum Difficulty {
-    EASY
-    MEDIUM
-    HARD
+  EASY
+  MEDIUM
+  HARD
+  JUNIOR
+  SENIOR
 }
 
 enum RecordingType {
-    SCREEN
-    AUDIO
-    SCREEN_AND_AUDIO
+  SCREEN
+  AUDIO
+  SCREEN_AND_AUDIO
 }
 
 enum UploadStatus {
-    UPLOADING
-    COMPLETED
-    FAILED
+  UPLOADING
+  COMPLETED
+  FAILED
 }
 
 enum TranscriptionStatus {
-    PENDING
-    IN_PROGRESS
-    COMPLETED
-    FAILED
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
 }
 
 enum UserRole {
-    ADMIN
-    INTERVIEWER
+  ADMIN
+  INTERVIEWER
+}
+
+// Skills Management System - Hierarchical Structure
+// Domain → Category → Skill → Competency → CompetencyLevel
+
+model Domain {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+
+  // Relationships
+  categories Category[]
+
+  @@map("domains")
+  @@index([name])
+  @@index([deletedAt])
+}
+
+model Category {
+  id       String   @id @default(cuid())
+  name     String
+  domainId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  // Relationships
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  skills Skill[]
+
+  @@unique([domainId, name])
+  @@map("categories")
+  @@index([domainId])
+  @@index([deletedAt])
+}
+
+model Skill {
+  id          String   @id @default(cuid())
+  name        String
+  categoryId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  // Relationships
+  category     Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  competencies Competency[]
+
+  @@unique([categoryId, name])
+  @@map("skills")
+  @@index([categoryId])
+  @@index([deletedAt])
+}
+
+model Competency {
+  id        String             @id @default(cuid())
+  name      String
+  priority  CompetencyPriority @default(NONE)
+  skillId   String
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  deletedAt DateTime?
+
+  // Relationships
+  skill  Skill             @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  levels CompetencyLevel[]
+
+  @@unique([skillId, name])
+  @@map("competencies")
+  @@index([skillId])
+  @@index([priority])
+  @@index([deletedAt])
+}
+
+model CompetencyLevel {
+  id           String   @id @default(cuid())
+  level        Int      @db.SmallInt // 1-5
+  name         String   // e.g., "Beginning/Novice"
+  description  String   @db.Text
+  competencyId String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  competency Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+
+  @@unique([competencyId, level])
+  @@map("competency_levels")
+  @@index([competencyId])
+  @@index([level])
+}
+
+enum CompetencyPriority {
+  PRIMARY
+  SECONDARY
+  NONE
 }
