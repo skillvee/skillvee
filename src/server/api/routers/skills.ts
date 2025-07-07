@@ -19,6 +19,13 @@ import {
 } from "../utils/pagination";
 
 import {
+  parseAndValidateCSV,
+  transformCSVToHierarchy,
+  exportSkillsToCSV,
+  generateCSVTemplate,
+} from "../utils/csv-parser";
+
+import {
   // Domain schemas
   createDomainSchema,
   updateDomainSchema,
@@ -1123,8 +1130,6 @@ export const skillsRouter = createTRPCRouter({
       csvContent: z.string().min(1, "CSV content is required"),
     }))
     .mutation(async ({ input }) => {
-      const { parseAndValidateCSV } = await import("../utils/csv-parser");
-      
       const validationResult = parseAndValidateCSV(input.csvContent);
       
       return {
@@ -1150,7 +1155,6 @@ export const skillsRouter = createTRPCRouter({
       skipErrors: z.boolean().default(true),
     }))
     .mutation(async ({ ctx, input }) => {
-      const { parseAndValidateCSV, transformCSVToHierarchy } = await import("../utils/csv-parser");
       
       // Validate CSV first
       const validationResult = parseAndValidateCSV(input.csvContent);
@@ -1282,7 +1286,6 @@ export const skillsRouter = createTRPCRouter({
   exportCSV: protectedProcedure
     .input(csvExportSchema)
     .query(async ({ ctx, input }) => {
-      const { exportSkillsToCSV } = await import("../utils/csv-parser");
       
       // Get hierarchy data based on filters
       const inclusionFilter = createInclusionFilter(input.includeDeleted || false);
@@ -1336,8 +1339,6 @@ export const skillsRouter = createTRPCRouter({
    */
   getCSVTemplate: publicProcedure
     .query(async () => {
-      const { generateCSVTemplate } = await import("../utils/csv-parser");
-      
       const csvContent = generateCSVTemplate();
       
       return {
