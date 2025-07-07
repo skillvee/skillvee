@@ -25,6 +25,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { api } from "~/trpc/react";
 
 interface CSVImportDialogProps {
   onClose: () => void;
@@ -52,60 +53,46 @@ interface ImportPreview {
 export function CSVImportDialog({ onClose }: CSVImportDialogProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [activeTab, setActiveTab] = useState("upload");
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  // tRPC hooks
+  const validateCSV = api.skills.validateCSV.useMutation();
+  const importCSV = api.skills.importCSV.useMutation();
+  const { data: csvTemplate } = api.skills.getCSVTemplate.useQuery();
+
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file && file.type === "text/csv") {
       setFile(file);
+      setIsValidating(true);
       
-      // Simulate file validation
-      setTimeout(() => {
+      try {
+        // Read file content
+        const csvContent = await file.text();
+        
+        // Validate CSV using tRPC endpoint
+        const result = await validateCSV.mutateAsync({ csvContent });
+        
         setPreview({
-          totalRows: 150,
-          validRows: 142,
-          errors: [
-            { row: 5, field: "priority", message: "Invalid priority value 'HIGH'. Must be PRIMARY, SECONDARY, or NONE." },
-            { row: 12, field: "domain", message: "Domain name exceeds 100 character limit." },
-            { row: 23, field: "competency", message: "Competency name cannot be empty." },
-            { row: 34, field: "rubric_level_1", message: "Rubric level 1 description is required." },
-            { row: 45, field: "category", message: "Category name contains invalid characters." },
-            { row: 67, field: "skill", message: "Duplicate skill name within category." },
-            { row: 89, field: "rubric_level_3", message: "Rubric level 3 description cannot be empty." },
-            { row: 101, field: "priority", message: "Priority cannot be PRIMARY for skill without competencies." },
-          ],
-          sample: [
-            {
-              domain: "Technical Skills",
-              category: "Programming",
-              skill: "JavaScript",
-              competency: "Async Programming",
-              priority: "PRIMARY"
-            },
-            {
-              domain: "Technical Skills",
-              category: "Programming",
-              skill: "JavaScript", 
-              competency: "DOM Manipulation",
-              priority: "SECONDARY"
-            },
-            {
-              domain: "Cognitive",
-              category: "Problem Solving",
-              skill: "Analytical Thinking",
-              competency: "Pattern Recognition",
-              priority: "PRIMARY"
-            }
-          ]
+          totalRows: result.stats.totalRows,
+          validRows: result.stats.validRows,
+          errors: result.errors,
+          sample: result.preview
         });
         setActiveTab("preview");
-      }, 1000);
+      } catch (error) {
+        console.error("CSV validation error:", error);
+        toast.error("Failed to validate CSV file");
+      } finally {
+        setIsValidating(false);
+      }
     } else {
       toast.error("Please upload a valid CSV file");
     }
-  }, []);
+  }, [validateCSV]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -116,41 +103,58 @@ export function CSVImportDialog({ onClose }: CSVImportDialogProps) {
   });
 
   const handleImport = async () => {
-    if (!file) return;
+    if (!file || !preview) return;
     
     setIsUploading(true);
+    setUploadProgress(0);
     
-    // Simulate upload progress
-    for (let i = 0; i <= 100; i += 10) {
-      setUploadProgress(i);
-      await new Promise(resolve => setTimeout(resolve, 200));
+    try {
+      // Read file content
+      const csvContent = await file.text();
+      
+      // Show progress while importing
+      setUploadProgress(30);
+      
+      // Import CSV using tRPC endpoint
+      const result = await importCSV.mutateAsync({ 
+        csvContent,
+        skipErrors: true 
+      });
+      
+      setUploadProgress(100);
+      
+      toast.success(`Successfully imported ${result.stats.competenciesCreated} competencies across ${result.stats.domainsCreated} domains!`);
+      
+      // Refresh the page data (you might want to invalidate queries here)
+      setTimeout(() => {
+        onClose();
+        window.location.reload(); // Simple refresh - you could use tRPC invalidation instead
+      }, 1000);
+      
+    } catch (error) {
+      console.error("CSV import error:", error);
+      toast.error("Failed to import CSV file");
+    } finally {
+      setIsUploading(false);
     }
-    
-    // Simulate final processing
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast.success(`Successfully imported ${preview?.validRows} competencies!`);
-    setIsUploading(false);
-    onClose();
   };
 
   const downloadTemplate = () => {
-    // Create sample CSV content
-    const csvContent = `Domain,Category,Skill,Competency,Priority,Rubric_Level_1,Rubric_Level_2,Rubric_Level_3,Rubric_Level_4,Rubric_Level_5
-Technical Skills,Programming,JavaScript,Async Programming,PRIMARY,Struggles with basic async concepts and callback functions,Understands promises but makes syntax errors frequently,Uses async/await correctly in most scenarios,Handles complex async patterns with error handling,Masters all async programming concepts including advanced patterns
-Technical Skills,Programming,JavaScript,DOM Manipulation,SECONDARY,Basic element selection and modification,Can modify element properties and handle simple events,Creates dynamic interfaces with event delegation,Optimizes DOM operations and understands performance,Masters virtual DOM concepts and advanced manipulation patterns`;
-    
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "skills-template.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-    
-    toast.success("Template downloaded successfully!");
+    if (csvTemplate) {
+      const blob = new Blob([csvTemplate.content], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = csvTemplate.filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("Template downloaded successfully!");
+    } else {
+      toast.error("Template not available");
+    }
   };
 
   return (
@@ -202,6 +206,11 @@ Technical Skills,Programming,JavaScript,DOM Manipulation,SECONDARY,Basic element
                     <span className="text-sm font-medium text-green-700 dark:text-green-300">
                       {file.name}
                     </span>
+                    {isValidating && (
+                      <div className="ml-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                      </div>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
@@ -210,10 +219,17 @@ Technical Skills,Programming,JavaScript,DOM Manipulation,SECONDARY,Basic element
                         e.stopPropagation();
                         setFile(null);
                         setPreview(null);
+                        setActiveTab("upload");
                       }}
                     >
                       <X className="h-4 w-4" />
                     </Button>
+                  </div>
+                )}
+                
+                {isValidating && (
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Validating CSV file...
                   </div>
                 )}
               </div>
@@ -396,15 +412,15 @@ Technical Skills,Programming,JavaScript,DOM Manipulation,SECONDARY,Basic element
         {activeTab === "upload" && (
           <Button 
             onClick={() => setActiveTab("preview")} 
-            disabled={!file}
+            disabled={!file || isValidating || !preview}
           >
-            Continue
+            {isValidating ? "Validating..." : "Continue"}
           </Button>
         )}
         {activeTab === "preview" && (
           <Button 
             onClick={() => setActiveTab("import")}
-            disabled={preview?.errors.length === preview?.totalRows}
+            disabled={!preview || preview.validRows === 0}
           >
             Continue to Import
           </Button>
