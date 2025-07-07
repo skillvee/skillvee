@@ -54,11 +54,6 @@ interface SkillsTreeViewProps {
             id: string;
             name: string;
             priority: "PRIMARY" | "SECONDARY" | "NONE";
-            levels?: Array<{
-              id: string;
-              level: number;
-              name: string;
-            }>;
           }>;
         }>;
       }>;

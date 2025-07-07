@@ -269,17 +269,21 @@ model Skill {
 }
 
 model Competency {
-  id        String             @id @default(cuid())
-  name      String
-  priority  CompetencyPriority @default(NONE)
-  skillId   String
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-  deletedAt DateTime?
+  id            String             @id @default(cuid())
+  name          String
+  priority      CompetencyPriority @default(NONE)
+  skillId       String
+  rubricLevel1  String             @db.Text // Level 1 description
+  rubricLevel2  String             @db.Text // Level 2 description
+  rubricLevel3  String             @db.Text // Level 3 description
+  rubricLevel4  String             @db.Text // Level 4 description
+  rubricLevel5  String             @db.Text // Level 5 description
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  deletedAt     DateTime?
 
   // Relationships
-  skill  Skill             @relation(fields: [skillId], references: [id], onDelete: Cascade)
-  levels CompetencyLevel[]
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
 
   @@unique([skillId, name])
   @@map("competencies")
@@ -288,23 +292,6 @@ model Competency {
   @@index([deletedAt])
 }
 
-model CompetencyLevel {
-  id           String   @id @default(cuid())
-  level        Int      @db.SmallInt // 1-5
-  name         String   // e.g., "Beginning/Novice"
-  description  String   @db.Text
-  competencyId String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // Relationships
-  competency Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
-
-  @@unique([competencyId, level])
-  @@map("competency_levels")
-  @@index([competencyId])
-  @@index([level])
-}
 
 enum CompetencyPriority {
   PRIMARY

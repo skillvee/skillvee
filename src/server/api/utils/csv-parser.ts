@@ -22,7 +22,6 @@ export interface CSVImportStats {
   categoriesCreated: number;
   skillsCreated: number;
   competenciesCreated: number;
-  levelsCreated: number;
   duplicatesSkipped: number;
   errorsEncountered: number;
 }
@@ -54,16 +53,11 @@ export function parseAndValidateCSV(csvContent: string): CSVValidationResult {
           skill: record.Skill,
           competency: record.Competency,
           priority: record.Priority,
-          level_1_name: record.Level_1_Name,
-          level_1_description: record.Level_1_Description,
-          level_2_name: record.Level_2_Name,
-          level_2_description: record.Level_2_Description,
-          level_3_name: record.Level_3_Name,
-          level_3_description: record.Level_3_Description,
-          level_4_name: record.Level_4_Name,
-          level_4_description: record.Level_4_Description,
-          level_5_name: record.Level_5_Name,
-          level_5_description: record.Level_5_Description,
+          rubric_level_1: record.Rubric_Level_1,
+          rubric_level_2: record.Rubric_Level_2,
+          rubric_level_3: record.Rubric_Level_3,
+          rubric_level_4: record.Rubric_Level_4,
+          rubric_level_5: record.Rubric_Level_5,
         });
 
         validRows.push(validatedRow);
@@ -129,11 +123,11 @@ export function transformCSVToHierarchy(rows: CSVRow[]) {
         competencies: Array<{
           name: string;
           priority: "PRIMARY" | "SECONDARY" | "NONE";
-          levels: Array<{
-            level: number;
-            name: string;
-            description: string;
-          }>;
+          rubricLevel1: string;
+          rubricLevel2: string;
+          rubricLevel3: string;
+          rubricLevel4: string;
+          rubricLevel5: string;
         }>;
       }>;
     }>;
@@ -167,17 +161,15 @@ export function transformCSVToHierarchy(rows: CSVRow[]) {
     }
     const skill = category.skills.get(row.skill)!;
 
-    // Add competency with levels
+    // Add competency with rubric levels
     skill.competencies.push({
       name: row.competency,
       priority: row.priority,
-      levels: [
-        { level: 1, name: row.level_1_name, description: row.level_1_description },
-        { level: 2, name: row.level_2_name, description: row.level_2_description },
-        { level: 3, name: row.level_3_name, description: row.level_3_description },
-        { level: 4, name: row.level_4_name, description: row.level_4_description },
-        { level: 5, name: row.level_5_name, description: row.level_5_description },
-      ],
+      rubricLevel1: row.rubric_level_1,
+      rubricLevel2: row.rubric_level_2,
+      rubricLevel3: row.rubric_level_3,
+      rubricLevel4: row.rubric_level_4,
+      rubricLevel5: row.rubric_level_5,
     });
   });
 
@@ -194,16 +186,11 @@ export function generateCSVTemplate(): string {
     "Skill",
     "Competency",
     "Priority",
-    "Level_1_Name",
-    "Level_1_Description",
-    "Level_2_Name", 
-    "Level_2_Description",
-    "Level_3_Name",
-    "Level_3_Description",
-    "Level_4_Name",
-    "Level_4_Description",
-    "Level_5_Name",
-    "Level_5_Description"
+    "Rubric_Level_1",
+    "Rubric_Level_2",
+    "Rubric_Level_3",
+    "Rubric_Level_4",
+    "Rubric_Level_5"
   ];
 
   const sampleRows = [
@@ -213,15 +200,10 @@ export function generateCSVTemplate(): string {
       "JavaScript",
       "Async Programming",
       "PRIMARY",
-      "Beginning/Novice",
       "Struggles with basic async concepts and often writes blocking code. Needs guidance on promises and callbacks.",
-      "Developing/Basic", 
       "Understands promises but makes errors with chaining and error handling. Can use async/await with guidance.",
-      "Competent/Proficient",
       "Uses async/await correctly and handles basic error cases. Understands event loop concepts.",
-      "Accomplished/Advanced",
       "Handles complex async patterns including concurrency control and advanced error handling.",
-      "Exemplary/Expert",
       "Masters all async programming concepts including custom promises, generators, and performance optimization."
     ],
     [
@@ -230,15 +212,10 @@ export function generateCSVTemplate(): string {
       "JavaScript",
       "DOM Manipulation",
       "SECONDARY",
-      "Beginning/Novice",
       "Basic element selection and property modification. Often relies on jQuery or frameworks.",
-      "Developing/Basic",
       "Can modify element properties and handle basic events. Understanding of DOM structure is developing.",
-      "Competent/Proficient", 
       "Creates dynamic interfaces with proper event handling. Understands DOM APIs and browser compatibility.",
-      "Accomplished/Advanced",
       "Optimizes DOM operations and uses modern APIs like MutationObserver. Handles complex interactions.",
-      "Exemplary/Expert",
       "Masters virtual DOM concepts, performance optimization, and accessibility considerations."
     ],
     [
@@ -247,15 +224,10 @@ export function generateCSVTemplate(): string {
       "Analytical Thinking", 
       "Pattern Recognition",
       "PRIMARY",
-      "Beginning/Novice",
       "Struggles to identify patterns in data or problems. Needs explicit guidance to see connections.",
-      "Developing/Basic",
       "Can identify obvious patterns but misses subtle relationships. Requires assistance for complex analysis.",
-      "Competent/Proficient",
       "Recognizes patterns in familiar domains and can apply known frameworks for analysis.",
-      "Accomplished/Advanced", 
       "Quickly identifies complex patterns and can transfer pattern recognition across different domains.",
-      "Exemplary/Expert",
       "Naturally sees abstract patterns and can create new frameworks for pattern analysis."
     ]
   ];
@@ -280,16 +252,11 @@ export function exportSkillsToCSV(hierarchyData: any): string {
     "Skill", 
     "Competency",
     "Priority",
-    "Level_1_Name",
-    "Level_1_Description",
-    "Level_2_Name",
-    "Level_2_Description", 
-    "Level_3_Name",
-    "Level_3_Description",
-    "Level_4_Name",
-    "Level_4_Description",
-    "Level_5_Name", 
-    "Level_5_Description"
+    "Rubric_Level_1",
+    "Rubric_Level_2",
+    "Rubric_Level_3",
+    "Rubric_Level_4",
+    "Rubric_Level_5"
   ];
   rows.push(headers);
 
@@ -299,23 +266,17 @@ export function exportSkillsToCSV(hierarchyData: any): string {
       domain.categories?.forEach((category: any) => {
         category.skills?.forEach((skill: any) => {
           skill.competencies?.forEach((competency: any) => {
-            // Sort levels by level number
-            const sortedLevels = [...(competency.levels || [])]
-              .sort((a, b) => a.level - b.level);
-            
-            // Pad levels array to ensure we have 5 levels
-            const levels = Array.from({ length: 5 }, (_, i) => {
-              const level = sortedLevels.find(l => l.level === i + 1);
-              return level || { name: "", description: "" };
-            });
-
             const row = [
               domain.name,
               category.name,
               skill.name,
               competency.name,
               competency.priority || "NONE",
-              ...levels.flatMap(level => [level.name, level.description])
+              competency.rubricLevel1 || "",
+              competency.rubricLevel2 || "",
+              competency.rubricLevel3 || "",
+              competency.rubricLevel4 || "",
+              competency.rubricLevel5 || ""
             ];
             
             rows.push(row);

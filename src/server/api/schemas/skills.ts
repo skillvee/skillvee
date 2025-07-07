@@ -112,34 +112,6 @@ export const listSkillsSchema = paginationSchema.extend({
   includeDeleted: z.boolean().default(false),
 });
 
-// Competency Level schemas
-export const competencyLevelSchema = z.object({
-  id: idSchema,
-  level: z.number().int().min(1).max(5),
-  name: z.string().min(1).max(100).transform((str) => str.trim()),
-  description: richTextSchema,
-  competencyId: idSchema,
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
-
-export const createCompetencyLevelSchema = z.object({
-  level: z.number().int().min(1).max(5),
-  name: z.string().min(1).max(100).transform((str) => str.trim()),
-  description: richTextSchema,
-  competencyId: idSchema,
-});
-
-export const updateCompetencyLevelSchema = z.object({
-  id: idSchema,
-  level: z.number().int().min(1).max(5).optional(),
-  name: z.string().min(1).max(100).transform((str) => str.trim()).optional(),
-  description: richTextSchema.optional(),
-});
-
-export const deleteCompetencyLevelSchema = z.object({
-  id: idSchema,
-});
 
 // Competency schemas
 export const competencySchema = z.object({
@@ -147,6 +119,11 @@ export const competencySchema = z.object({
   name: z.string().min(1).max(100).transform((str) => str.trim()),
   priority: competencyPrioritySchema,
   skillId: idSchema,
+  rubricLevel1: richTextSchema,
+  rubricLevel2: richTextSchema,
+  rubricLevel3: richTextSchema,
+  rubricLevel4: richTextSchema,
+  rubricLevel5: richTextSchema,
   createdAt: z.date(),
   updatedAt: z.date(),
   deletedAt: z.date().nullable().optional(),
@@ -156,17 +133,22 @@ export const createCompetencySchema = z.object({
   name: z.string().min(1).max(100).transform((str) => str.trim()),
   priority: competencyPrioritySchema.default("NONE"),
   skillId: idSchema,
-  levels: z.array(z.object({
-    level: z.number().int().min(1).max(5),
-    name: z.string().min(1).max(100).transform((str) => str.trim()),
-    description: richTextSchema,
-  })).min(1).max(5),
+  rubricLevel1: richTextSchema,
+  rubricLevel2: richTextSchema,
+  rubricLevel3: richTextSchema,
+  rubricLevel4: richTextSchema,
+  rubricLevel5: richTextSchema,
 });
 
 export const updateCompetencySchema = z.object({
   id: idSchema,
   name: z.string().min(1).max(100).transform((str) => str.trim()).optional(),
   priority: competencyPrioritySchema.optional(),
+  rubricLevel1: richTextSchema.optional(),
+  rubricLevel2: richTextSchema.optional(),
+  rubricLevel3: richTextSchema.optional(),
+  rubricLevel4: richTextSchema.optional(),
+  rubricLevel5: richTextSchema.optional(),
 });
 
 export const deleteCompetencySchema = z.object({
@@ -216,16 +198,11 @@ export const csvRowSchema = z.object({
   skill: z.string().min(1).max(100),
   competency: z.string().min(1).max(100),
   priority: competencyPrioritySchema,
-  level_1_name: z.string().min(1).max(100),
-  level_1_description: richTextSchema,
-  level_2_name: z.string().min(1).max(100),
-  level_2_description: richTextSchema,
-  level_3_name: z.string().min(1).max(100),
-  level_3_description: richTextSchema,
-  level_4_name: z.string().min(1).max(100),
-  level_4_description: richTextSchema,
-  level_5_name: z.string().min(1).max(100),
-  level_5_description: richTextSchema,
+  rubric_level_1: richTextSchema,
+  rubric_level_2: richTextSchema,
+  rubric_level_3: richTextSchema,
+  rubric_level_4: richTextSchema,
+  rubric_level_5: richTextSchema,
 });
 
 // Hierarchical data structures
@@ -261,15 +238,7 @@ export const skillOutputSchema = skillSchema.extend({
 });
 
 export const competencyOutputSchema = competencySchema.extend({
-  _count: z.object({
-    levels: z.number(),
-  }).optional(),
   skill: skillOutputSchema.optional(),
-  levels: z.array(competencyLevelSchema).optional(),
-});
-
-export const competencyLevelOutputSchema = competencyLevelSchema.extend({
-  competency: competencyOutputSchema.optional(),
 });
 
 // Stats and analytics
@@ -278,7 +247,6 @@ export const skillsStatsSchema = z.object({
   totalCategories: z.number(),
   totalSkills: z.number(),
   totalCompetencies: z.number(),
-  totalLevels: z.number(),
   primaryCompetencies: z.number(),
   secondaryCompetencies: z.number(),
   recentlyAdded: z.array(z.object({
@@ -299,14 +267,12 @@ export type Domain = z.infer<typeof domainSchema>;
 export type Category = z.infer<typeof categorySchema>;
 export type Skill = z.infer<typeof skillSchema>;
 export type Competency = z.infer<typeof competencySchema>;
-export type CompetencyLevel = z.infer<typeof competencyLevelSchema>;
 export type CompetencyPriority = z.infer<typeof competencyPrioritySchema>;
 
 export type DomainOutput = z.infer<typeof domainOutputSchema>;
 export type CategoryOutput = z.infer<typeof categoryOutputSchema>;
 export type SkillOutput = z.infer<typeof skillOutputSchema>;
 export type CompetencyOutput = z.infer<typeof competencyOutputSchema>;
-export type CompetencyLevelOutput = z.infer<typeof competencyLevelOutputSchema>;
 
 export type SkillsStats = z.infer<typeof skillsStatsSchema>;
 export type CSVRow = z.infer<typeof csvRowSchema>;

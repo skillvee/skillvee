@@ -43,10 +43,6 @@ import {
   deleteCompetencySchema,
   listCompetenciesSchema,
   
-  // Competency Level schemas
-  createCompetencyLevelSchema,
-  updateCompetencyLevelSchema,
-  deleteCompetencyLevelSchema,
   
   // Bulk operations
   bulkDeleteSchema,
@@ -65,7 +61,6 @@ import {
   type CategoryOutput,
   type SkillOutput,
   type CompetencyOutput,
-  type CompetencyLevelOutput,
   type SkillsStats,
 } from "../schemas/skills";
 
@@ -609,11 +604,11 @@ export const skillsRouter = createTRPCRouter({
    * COMPETENCY ENDPOINTS
    */
   
-  // Create competency with levels (admin only)
+  // Create competency with rubric levels (admin only)
   createCompetency: adminProcedure
     .input(createCompetencySchema)
     .mutation(async ({ ctx, input }) => {
-      const { name, priority, skillId, levels } = input;
+      const { name, priority, skillId, rubricLevel1, rubricLevel2, rubricLevel3, rubricLevel4, rubricLevel5 } = input;
 
       // Check if skill exists
       const skill = await ctx.db.skill.findFirst({
@@ -640,51 +635,29 @@ export const skillsRouter = createTRPCRouter({
         );
       }
 
-      // Validate levels array (must be 1-5 and unique)
-      const levelNumbers = levels.map(l => l.level);
-      const uniqueLevels = new Set(levelNumbers);
-      
-      if (uniqueLevels.size !== levelNumbers.length) {
-        throw createError.conflict("Duplicate levels are not allowed");
-      }
-
-      // Create competency with levels in a transaction
-      const competency = await ctx.db.$transaction(async (tx) => {
-        const newCompetency = await tx.competency.create({
-          data: { name, priority, skillId },
-        });
-
-        // Create all levels
-        await tx.competencyLevel.createMany({
-          data: levels.map(level => ({
-            ...level,
-            competencyId: newCompetency.id,
-          })),
-        });
-
-        // Return competency with levels
-        return await tx.competency.findUnique({
-          where: { id: newCompetency.id },
-          include: {
-            skill: {
-              include: {
-                category: {
-                  include: {
-                    domain: true,
-                  },
+      // Create competency with rubric levels
+      const competency = await ctx.db.competency.create({
+        data: { 
+          name, 
+          priority, 
+          skillId,
+          rubricLevel1,
+          rubricLevel2,
+          rubricLevel3,
+          rubricLevel4,
+          rubricLevel5,
+        },
+        include: {
+          skill: {
+            include: {
+              category: {
+                include: {
+                  domain: true,
                 },
               },
             },
-            levels: {
-              orderBy: { level: "asc" },
-            },
-            _count: {
-              select: {
-                levels: true,
-              },
-            },
           },
-        });
+        },
       });
 
       return competency;
@@ -759,14 +732,6 @@ export const skillsRouter = createTRPCRouter({
               },
             },
           },
-          levels: {
-            orderBy: { level: "asc" },
-          },
-          _count: {
-            select: {
-              levels: true,
-            },
-          },
         },
         orderBy: orderBy as any,
         take: limit,
@@ -786,7 +751,7 @@ export const skillsRouter = createTRPCRouter({
   updateCompetency: adminProcedure
     .input(updateCompetencySchema)
     .mutation(async ({ ctx, input }) => {
-      const { id, name, priority } = input;
+      const { id, name, priority, rubricLevel1, rubricLevel2, rubricLevel3, rubricLevel4, rubricLevel5 } = input;
 
       // Check if competency exists
       const existing = await ctx.db.competency.findFirst({
@@ -821,6 +786,11 @@ export const skillsRouter = createTRPCRouter({
         data: { 
           ...(name && { name }),
           ...(priority && { priority }),
+          ...(rubricLevel1 && { rubricLevel1 }),
+          ...(rubricLevel2 && { rubricLevel2 }),
+          ...(rubricLevel3 && { rubricLevel3 }),
+          ...(rubricLevel4 && { rubricLevel4 }),
+          ...(rubricLevel5 && { rubricLevel5 }),
           updatedAt: new Date(),
         },
         include: {
@@ -831,14 +801,6 @@ export const skillsRouter = createTRPCRouter({
                   domain: true,
                 },
               },
-            },
-          },
-          levels: {
-            orderBy: { level: "asc" },
-          },
-          _count: {
-            select: {
-              levels: true,
             },
           },
         },
@@ -870,144 +832,6 @@ export const skillsRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  /**
-   * COMPETENCY LEVEL ENDPOINTS
-   */
-
-  // Create competency level (admin only)
-  createCompetencyLevel: adminProcedure
-    .input(createCompetencyLevelSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { level, name, description, competencyId } = input;
-
-      // Check if competency exists
-      const competency = await ctx.db.competency.findFirst({
-        where: { id: competencyId, deletedAt: null },
-      });
-
-      if (!competency) {
-        throw createError.notFound("Competency", competencyId);
-      }
-
-      // Check for duplicate level within competency
-      const existing = await ctx.db.competencyLevel.findFirst({
-        where: { 
-          level,
-          competencyId,
-        },
-      });
-
-      if (existing) {
-        throw createError.conflict(
-          "Level already exists for this competency",
-          { level, competencyId }
-        );
-      }
-
-      const competencyLevel = await ctx.db.competencyLevel.create({
-        data: { level, name, description, competencyId },
-        include: {
-          competency: {
-            include: {
-              skill: {
-                include: {
-                  category: {
-                    include: {
-                      domain: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      return competencyLevel;
-    }),
-
-  // Update competency level (admin only)
-  updateCompetencyLevel: adminProcedure
-    .input(updateCompetencyLevelSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { id, level, name, description } = input;
-
-      // Check if competency level exists
-      const existing = await ctx.db.competencyLevel.findUnique({
-        where: { id },
-      });
-
-      if (!existing) {
-        throw createError.notFound("Competency Level", id);
-      }
-
-      // Check for duplicate level within competency if level is being updated
-      if (level && level !== existing.level) {
-        const duplicate = await ctx.db.competencyLevel.findFirst({
-          where: { 
-            level,
-            competencyId: existing.competencyId,
-            id: { not: id },
-          },
-        });
-
-        if (duplicate) {
-          throw createError.conflict(
-            "Level already exists for this competency",
-            { level, competencyId: existing.competencyId }
-          );
-        }
-      }
-
-      const competencyLevel = await ctx.db.competencyLevel.update({
-        where: { id },
-        data: { 
-          ...(level && { level }),
-          ...(name && { name }),
-          ...(description && { description }),
-          updatedAt: new Date(),
-        },
-        include: {
-          competency: {
-            include: {
-              skill: {
-                include: {
-                  category: {
-                    include: {
-                      domain: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      return competencyLevel;
-    }),
-
-  // Delete competency level (admin only)
-  deleteCompetencyLevel: adminProcedure
-    .input(deleteCompetencyLevelSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { id } = input;
-
-      // Check if competency level exists
-      const existing = await ctx.db.competencyLevel.findUnique({
-        where: { id },
-      });
-
-      if (!existing) {
-        throw createError.notFound("Competency Level", id);
-      }
-
-      await ctx.db.competencyLevel.delete({
-        where: { id },
-      });
-
-      return { success: true };
-    }),
 
   /**
    * HIERARCHICAL DATA ENDPOINTS
@@ -1033,11 +857,6 @@ export const skillsRouter = createTRPCRouter({
             },
             competencies: {
               where: inclusionFilter,
-              include: {
-                levels: {
-                  orderBy: { level: "asc" },
-                },
-              },
               orderBy: { name: "asc" },
             },
           },
@@ -1061,11 +880,6 @@ export const skillsRouter = createTRPCRouter({
               include: {
                 competencies: {
                   where: inclusionFilter,
-                  include: {
-                    levels: {
-                      orderBy: { level: "asc" },
-                    },
-                  },
                   orderBy: { name: "asc" },
                 },
               },
@@ -1094,11 +908,6 @@ export const skillsRouter = createTRPCRouter({
                   include: {
                     competencies: {
                       where: inclusionFilter,
-                      include: {
-                        levels: {
-                          orderBy: { level: "asc" },
-                        },
-                      },
                       orderBy: { name: "asc" },
                     },
                   },
@@ -1129,11 +938,6 @@ export const skillsRouter = createTRPCRouter({
                 include: {
                   competencies: {
                     where: inclusionFilter,
-                    include: {
-                      levels: {
-                        orderBy: { level: "asc" },
-                      },
-                    },
                     orderBy: { name: "asc" },
                   },
                 },
@@ -1161,7 +965,6 @@ export const skillsRouter = createTRPCRouter({
         totalCategories,
         totalSkills,
         totalCompetencies,
-        totalLevels,
         primaryCompetencies,
         secondaryCompetencies,
         recentlyAdded,
@@ -1170,7 +973,6 @@ export const skillsRouter = createTRPCRouter({
         ctx.db.category.count({ where: { deletedAt: null } }),
         ctx.db.skill.count({ where: { deletedAt: null } }),
         ctx.db.competency.count({ where: { deletedAt: null } }),
-        ctx.db.competencyLevel.count(),
         ctx.db.competency.count({ 
           where: { 
             priority: "PRIMARY",
@@ -1228,7 +1030,6 @@ export const skillsRouter = createTRPCRouter({
         totalCategories,
         totalSkills,
         totalCompetencies,
-        totalLevels,
         primaryCompetencies,
         secondaryCompetencies,
         recentlyAdded,
@@ -1366,7 +1167,6 @@ export const skillsRouter = createTRPCRouter({
         categoriesCreated: 0,
         skillsCreated: 0,
         competenciesCreated: 0,
-        levelsCreated: 0,
         duplicatesSkipped: 0,
         errorsEncountered: validationResult.errors.length,
       };
@@ -1442,26 +1242,20 @@ export const skillsRouter = createTRPCRouter({
                     continue;
                   }
 
-                  // Create competency
+                  // Create competency with rubric levels
                   const competency = await tx.competency.create({
                     data: { 
                       name: competencyData.name, 
                       priority: competencyData.priority,
                       skillId: skill.id,
+                      rubricLevel1: competencyData.rubricLevel1 || "Basic understanding",
+                      rubricLevel2: competencyData.rubricLevel2 || "Developing skills",
+                      rubricLevel3: competencyData.rubricLevel3 || "Proficient application",
+                      rubricLevel4: competencyData.rubricLevel4 || "Advanced expertise",
+                      rubricLevel5: competencyData.rubricLevel5 || "Expert mastery",
                     },
                   });
                   stats.competenciesCreated++;
-
-                  // Create levels
-                  await tx.competencyLevel.createMany({
-                    data: competencyData.levels.map(level => ({
-                      level: level.level,
-                      name: level.name,
-                      description: level.description,
-                      competencyId: competency.id,
-                    })),
-                  });
-                  stats.levelsCreated += competencyData.levels.length;
                 }
               }
             }
@@ -1516,11 +1310,6 @@ export const skillsRouter = createTRPCRouter({
                 include: {
                   competencies: {
                     where: inclusionFilter,
-                    include: {
-                      levels: {
-                        orderBy: { level: "asc" },
-                      },
-                    },
                     orderBy: { name: "asc" },
                   },
                 },

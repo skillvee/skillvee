@@ -70,10 +70,10 @@ export function CSVImportDialog({ onClose }: CSVImportDialogProps) {
             { row: 5, field: "priority", message: "Invalid priority value 'HIGH'. Must be PRIMARY, SECONDARY, or NONE." },
             { row: 12, field: "domain", message: "Domain name exceeds 100 character limit." },
             { row: 23, field: "competency", message: "Competency name cannot be empty." },
-            { row: 34, field: "level_1_description", message: "Description is required for level 1." },
+            { row: 34, field: "rubric_level_1", message: "Rubric level 1 description is required." },
             { row: 45, field: "category", message: "Category name contains invalid characters." },
             { row: 67, field: "skill", message: "Duplicate skill name within category." },
-            { row: 89, field: "level_3_name", message: "Level 3 name is required when description is provided." },
+            { row: 89, field: "rubric_level_3", message: "Rubric level 3 description cannot be empty." },
             { row: 101, field: "priority", message: "Priority cannot be PRIMARY for skill without competencies." },
           ],
           sample: [
@@ -136,9 +136,9 @@ export function CSVImportDialog({ onClose }: CSVImportDialogProps) {
 
   const downloadTemplate = () => {
     // Create sample CSV content
-    const csvContent = `Domain,Category,Skill,Competency,Priority,Level_1_Name,Level_1_Description,Level_2_Name,Level_2_Description,Level_3_Name,Level_3_Description,Level_4_Name,Level_4_Description,Level_5_Name,Level_5_Description
-Technical Skills,Programming,JavaScript,Async Programming,PRIMARY,Beginning/Novice,Struggles with basic async concepts...,Developing/Basic,Understands promises but makes errors...,Competent/Proficient,Uses async/await correctly...,Accomplished/Advanced,Handles complex async patterns...,Exemplary/Expert,Masters all async programming concepts...
-Technical Skills,Programming,JavaScript,DOM Manipulation,SECONDARY,Beginning/Novice,Basic element selection...,Developing/Basic,Can modify element properties...,Competent/Proficient,Creates dynamic interfaces...,Accomplished/Advanced,Optimizes DOM operations...,Exemplary/Expert,Masters virtual DOM concepts...`;
+    const csvContent = `Domain,Category,Skill,Competency,Priority,Rubric_Level_1,Rubric_Level_2,Rubric_Level_3,Rubric_Level_4,Rubric_Level_5
+Technical Skills,Programming,JavaScript,Async Programming,PRIMARY,Struggles with basic async concepts and callback functions,Understands promises but makes syntax errors frequently,Uses async/await correctly in most scenarios,Handles complex async patterns with error handling,Masters all async programming concepts including advanced patterns
+Technical Skills,Programming,JavaScript,DOM Manipulation,SECONDARY,Basic element selection and modification,Can modify element properties and handle simple events,Creates dynamic interfaces with event delegation,Optimizes DOM operations and understands performance,Masters virtual DOM concepts and advanced manipulation patterns`;
     
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
@@ -241,9 +241,9 @@ Technical Skills,Programming,JavaScript,DOM Manipulation,SECONDARY,Beginning/Nov
                 CSV Format Requirements
               </h4>
               <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                <li>• Headers: Domain, Category, Skill, Competency, Priority, Level_1_Name, Level_1_Description, etc.</li>
+                <li>• Headers: Domain, Category, Skill, Competency, Priority, Rubric_Level_1, Rubric_Level_2, etc.</li>
                 <li>• Priority values: PRIMARY, SECONDARY, or NONE</li>
-                <li>• All 5 competency levels must be provided (Level_1 through Level_5)</li>
+                <li>• All 5 rubric levels must be provided (Rubric_Level_1 through Rubric_Level_5)</li>
                 <li>• Domain and category names will be created if they don't exist</li>
                 <li>• Maximum file size: 10MB</li>
               </ul>
