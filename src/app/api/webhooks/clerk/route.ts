@@ -23,6 +23,8 @@ type ClerkWebhookEvent = {
 };
 
 export async function POST(req: NextRequest) {
+  console.log("Webhook received:", new Date().toISOString());
+  
   // Get the headers
   const headerPayload = await headers();
   const svix_id = headerPayload.get("svix-id");
@@ -31,6 +33,7 @@ export async function POST(req: NextRequest) {
 
   // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
+    console.error("Missing svix headers:", { svix_id, svix_timestamp, svix_signature });
     return new Response("Error occurred -- no svix headers", {
       status: 400,
     });
@@ -38,14 +41,7 @@ export async function POST(req: NextRequest) {
 
   // Get the body
   const payload = await req.text();
-
-  // If there are no headers, error out
-  if (!env.CLERK_WEBHOOK_SECRET) {
-    console.error("CLERK_WEBHOOK_SECRET not found");
-    return new Response("Error occurred -- webhook secret not configured", {
-      status: 500,
-    });
-  }
+  console.log("Webhook payload length:", payload.length);
 
   // Create a new Svix instance with your secret.
   const wh = new Webhook(env.CLERK_WEBHOOK_SECRET);
@@ -59,6 +55,7 @@ export async function POST(req: NextRequest) {
       "svix-timestamp": svix_timestamp,
       "svix-signature": svix_signature,
     }) as ClerkWebhookEvent;
+    console.log("Webhook verified successfully, event type:", evt.type);
   } catch (err) {
     console.error("Error verifying webhook:", err);
     return new Response("Error occurred", {
@@ -71,21 +68,26 @@ export async function POST(req: NextRequest) {
   try {
     switch (type) {
       case "user.created":
+        console.log("Processing user.created event for:", data.id);
         await handleUserCreated(data);
         break;
       case "user.updated":
+        console.log("Processing user.updated event for:", data.id);
         await handleUserUpdated(data);
         break;
       case "user.deleted":
+        console.log("Processing user.deleted event for:", data.id);
         await handleUserDeleted(data);
         break;
       default:
         console.log(`Unhandled webhook type: ${type}`);
     }
 
+    console.log("Webhook processed successfully");
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error processing webhook:", error);
+    console.error("Stack trace:", error instanceof Error ? error.stack : 'No stack trace');
     return new Response("Error occurred", { status: 500 });
   }
 }
@@ -94,25 +96,60 @@ async function handleUserCreated(data: ClerkWebhookEvent["data"]) {
   const email = data.email_addresses[0]?.email_address;
   
   if (!email) {
-    console.error("No email found in user.created webhook");
-    return;
+    console.error("No email found in user.created webhook", { data });
+    throw new Error("No email found in webhook data");
   }
 
   // Default to INTERVIEWER role, can be changed to ADMIN via Clerk metadata
   const role = data.public_metadata?.role === "admin" ? "ADMIN" : "INTERVIEWER";
 
-  await db.user.create({
-    data: {
+  console.log("Attempting to create user in database:", {
+    clerkId: data.id,
+    email,
+    firstName: data.first_name,
+    lastName: data.last_name,
+    role,
+  });
+
+  try {
+    // Check if user already exists
+    const existingUser = await db.user.findUnique({
+      where: { clerkId: data.id },
+    });
+
+    if (existingUser) {
+      console.log("User already exists in database:", data.id);
+      return;
+    }
+
+    const newUser = await db.user.create({
+      data: {
+        clerkId: data.id,
+        email,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        profileImage: data.profile_image_url,
+        role: role,
+      },
+    });
+
+    console.log(`User created successfully in database:`, {
+      id: newUser.id,
+      clerkId: newUser.clerkId,
+      email: newUser.email,
+      role: newUser.role,
+    });
+  } catch (error) {
+    console.error("Database error creating user:", error);
+    console.error("User data:", {
       clerkId: data.id,
       email,
       firstName: data.first_name,
       lastName: data.last_name,
-      profileImage: data.profile_image_url,
-      role: role,
-    },
-  });
-
-  console.log(`User created: ${email} with role: ${role}`);
+      role,
+    });
+    throw error;
+  }
 }
 
 async function handleUserUpdated(data: ClerkWebhookEvent["data"]) {
