@@ -36,24 +36,25 @@ export default async function CandidatesPage() {
         <nav className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">SV</span>
-                </div>
-                <span className="text-xl font-semibold text-gray-900">SkillVee</span>
-              </div>
+              <Link href="/" className="flex items-center space-x-2">
+                <Image 
+                  src="/skillvee-logo.png?v=2" 
+                  alt="SkillVee" 
+                  width={120} 
+                  height={32}
+                  className="object-contain"
+                  priority
+                />
+              </Link>
               <div className="hidden md:flex items-center space-x-6">
-                <Link href="/candidates" className="text-primary font-medium">
-                  Candidates
-                </Link>
                 <Link href="/companies" className="text-gray-600 hover:text-gray-900">
                   Companies
                 </Link>
-                <Link href="/interview" className="text-gray-600 hover:text-gray-900">
-                  AI Interview
-                </Link>
                 <Link href="/pricing" className="text-gray-600 hover:text-gray-900">
                   Pricing
+                </Link>
+                <Link href="/faq" className="text-gray-600 hover:text-gray-900">
+                  FAQ
                 </Link>
               </div>
             </div>
