@@ -1,10 +1,10 @@
 import { currentUser } from "@clerk/nextjs/server";
-import { SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { ChevronLeft, Search, BookOpen, Users, Target, Settings, CreditCard } from "lucide-react";
+import Navigation from "~/components/navigation";
 
 export default async function FAQPage() {
   const user = await currentUser();
@@ -12,67 +12,22 @@ export default async function FAQPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <Link href="/" className="flex items-center space-x-2">
-              <Image 
-                src="/skillvee-logo.png?v=2" 
-                alt="SkillVee" 
-                width={120} 
-                height={32}
-                className="object-contain"
-                priority
-              />
-            </Link>
-            <div className="hidden md:flex items-center space-x-6">
-              <Link href="/companies" className="text-gray-600 hover:text-gray-900">
-                Companies
-              </Link>
-              <Link href="/pricing" className="text-gray-600 hover:text-gray-900">
-                Pricing
-              </Link>
-              <Link href="/faq" className="text-blue-600 font-medium">
-                FAQ
-              </Link>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <Link href="/dashboard">
-                  <Button variant="outline">Dashboard</Button>
-                </Link>
-                <UserButton />
-              </div>
-            ) : (
-              <>
-                <SignInButton mode="modal">
-                  <Button variant="outline">Log in</Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button className="bg-blue-600 hover:bg-blue-700">Sign up</Button>
-                </SignUpButton>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+      <Navigation currentPage="faq" />
 
       {/* Header */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-4xl mx-auto px-6">
-          <div className="flex items-center mb-6">
+          <div className="flex items-center mb-6 animate-fade-in">
             <Link href="/" className="flex items-center text-blue-600 hover:text-blue-700">
               <ChevronLeft className="w-4 h-4 mr-1" />
               Back to Home
             </Link>
           </div>
-          <div className="text-center">
+          <div className="text-center animate-slide-up">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
               Frequently Asked Questions
             </h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-600 animate-fade-in-delay">
               Find answers to all your questions about SkillVee
             </p>
           </div>
@@ -84,15 +39,15 @@ export default async function FAQPage() {
         <div className="max-w-4xl mx-auto px-6">
           
           {/* Getting Started */}
-          <div className="mb-12">
+          <div className="mb-12 animate-on-scroll">
             <div className="flex items-center mb-6">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3 animate-bounce-subtle">
                 <BookOpen className="w-5 h-5 text-blue-600" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900">Getting Started</h2>
             </div>
-            <div className="space-y-4">
-              <Card>
+            <div className="space-y-4 stagger-animation">
+              <Card className="card-hover">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     How do I sign up for SkillVee?
@@ -103,7 +58,7 @@ export default async function FAQPage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="card-hover">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Do I need any experience to start?
@@ -114,7 +69,7 @@ export default async function FAQPage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="card-hover">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     What should I expect in my first interview session?
@@ -128,15 +83,15 @@ export default async function FAQPage() {
           </div>
 
           {/* AI Interview Practice */}
-          <div className="mb-12">
+          <div className="mb-12 animate-on-scroll">
             <div className="flex items-center mb-6">
-              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3 animate-bounce-subtle">
                 <Search className="w-5 h-5 text-purple-600" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900">AI Interview Practice</h2>
             </div>
-            <div className="space-y-4">
-              <Card>
+            <div className="space-y-4 stagger-animation">
+              <Card className="card-hover">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     How realistic are the AI interviews?
@@ -213,16 +168,6 @@ export default async function FAQPage() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Will companies actually contact me?
-                  </h3>
-                  <p className="text-gray-600">
-                    Yes! We have partnerships with 500+ companies ranging from startups to Fortune 500 companies. When your skills match their needs, recruiters and hiring managers can reach out directly through our platform.
-                  </p>
-                </CardContent>
-              </Card>
 
               <Card>
                 <CardContent className="p-6">
@@ -230,21 +175,11 @@ export default async function FAQPage() {
                     How long does it take to get matched with opportunities?
                   </h3>
                   <p className="text-gray-600">
-                    It varies based on your skill level and market demand. Typically, users who practice consistently see their first opportunities within 2-4 weeks. Our average match time is 48 hours once your profile reaches the threshold for matching.
+                    It varies based on your skill level and market demand. Typically, users who practice consistently see their first opportunities within 2-4 weeks.
                   </p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Can I control what types of jobs I'm matched with?
-                  </h3>
-                  <p className="text-gray-600">
-                    Absolutely! You can set preferences for company size, industry, location (remote/hybrid/onsite), salary range, and specific roles. You can also pause matching at any time if you're not currently looking.
-                  </p>
-                </CardContent>
-              </Card>
 
               <Card>
                 <CardContent className="p-6">
@@ -260,15 +195,15 @@ export default async function FAQPage() {
           </div>
 
           {/* Pricing & Features */}
-          <div className="mb-12">
+          <div className="mb-12 animate-on-scroll">
             <div className="flex items-center mb-6">
-              <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+              <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3 animate-bounce-subtle">
                 <CreditCard className="w-5 h-5 text-orange-600" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900">Pricing & Features</h2>
             </div>
-            <div className="space-y-4">
-              <Card>
+            <div className="space-y-4 stagger-animation">
+              <Card className="card-hover">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Is SkillVee really completely free?
@@ -315,15 +250,15 @@ export default async function FAQPage() {
           </div>
 
           {/* Technical & Privacy */}
-          <div className="mb-12">
+          <div className="mb-12 animate-on-scroll">
             <div className="flex items-center mb-6">
-              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
+              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3 animate-bounce-subtle">
                 <Settings className="w-5 h-5 text-gray-600" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900">Technical & Privacy</h2>
             </div>
-            <div className="space-y-4">
-              <Card>
+            <div className="space-y-4 stagger-animation">
+              <Card className="card-hover">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     What information do you collect about me?
@@ -370,20 +305,20 @@ export default async function FAQPage() {
           </div>
 
           {/* Contact & Support */}
-          <div className="text-center py-12 border-t border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+          <div className="text-center py-8 sm:py-12 border-t border-gray-200 animate-on-scroll">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
               Still have questions?
             </h3>
             <p className="text-gray-600 mb-6">
               We're here to help! Reach out to our support team anytime.
             </p>
-            <div className="flex justify-center space-x-4">
-              <Button variant="outline" asChild>
+            <div className="flex flex-col sm:flex-row justify-center gap-4 sm:space-x-4">
+              <Button variant="outline" asChild className="btn-hover-lift">
                 <Link href="mailto:support@skillvee.com">
                   Email Support
                 </Link>
               </Button>
-              <Button asChild>
+              <Button asChild className="btn-hover-lift">
                 <Link href="/">
                   Start Practicing
                 </Link>

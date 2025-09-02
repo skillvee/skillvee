@@ -1,5 +1,4 @@
 import { currentUser } from "@clerk/nextjs/server";
-import { SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
 import { HydrateClient } from "~/trpc/server";
@@ -18,6 +17,7 @@ import {
   Star,
   ArrowRight
 } from "lucide-react";
+import Navigation from "~/components/navigation";
 
 export default async function CompaniesPage() {
   const user = await currentUser();
@@ -26,202 +26,132 @@ export default async function CompaniesPage() {
     <HydrateClient>
       <div className="min-h-screen bg-white">
         {/* Navigation */}
-        <nav className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <Link href="/" className="flex items-center space-x-2">
-                <Image 
-                  src="/skillvee-logo.png?v=2" 
-                  alt="SkillVee" 
-                  width={120} 
-                  height={32}
-                  className="object-contain"
-                  priority
-                />
-              </Link>
-              <div className="hidden md:flex items-center space-x-6">
-                <Link href="/companies" className="text-blue-600 font-medium">
-                  Companies
-                </Link>
-                <Link href="/pricing" className="text-gray-600 hover:text-gray-900">
-                  Pricing
-                </Link>
-                <Link href="/faq" className="text-gray-600 hover:text-gray-900">
-                  FAQ
-                </Link>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              {user ? (
-                <div className="flex items-center space-x-4">
-                  <Link href="/dashboard">
-                    <Button variant="outline">Dashboard</Button>
-                  </Link>
-                  <UserButton />
-                </div>
-              ) : (
-                <>
-                  <SignUpButton>
-                    <Button>Schedule Demo</Button>
-                  </SignUpButton>
-                </>
-              )}
-            </div>
-          </div>
-        </nav>
+        <Navigation currentPage="companies" />
 
         <main className="flex-1">
           {/* Hero Section */}
           <div className="bg-white py-16 md:py-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="md:flex md:items-center md:justify-between">
-                <div className="md:w-1/2 mb-10 md:mb-0">
-                  <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                <div className="md:w-1/2 mb-10 md:mb-0 animate-fade-in">
+                  <h1 className="text-4xl md:text-5xl font-bold mb-4 animate-slide-up">
                     Hire <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">pre-vetted</span> data scientists
                   </h1>
-                  <p className="text-xl text-gray-800 font-medium mb-6">
+                  <p className="text-xl text-gray-800 font-medium mb-6 animate-fade-in-delay">
                     Stop losing $240K on failed hires
                   </p>
-                  <p className="text-lg text-gray-700 mb-6">
+                  <p className="text-lg text-gray-700 mb-6 animate-fade-in-delay-2">
                     Skip resume screening and technical interviews. Every candidate has already proven their skills through real projects.
                   </p>
-                  <div className="bg-blue-100/50 rounded-lg p-4 mb-6 border-l-4 border-primary">
+                  <div className="bg-blue-100/50 rounded-lg p-4 mb-6 border-l-4 border-primary animate-fade-in-delay-3">
                     <p className="font-semibold text-gray-800">From hire to shipping code in 48 hours ⚡</p>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    {user ? (
-                      <Button size="lg" className="font-medium px-8 rounded-xl">
+                  <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-delay-4">
+                    <Link href="/demo">
+                      <Button size="lg" className="font-medium px-8 rounded-xl btn-hover-lift">
                         Schedule a demo
                       </Button>
-                    ) : (
-                      <SignUpButton>
-                        <Button size="lg" className="font-medium px-8 rounded-xl">
-                          Schedule a demo
-                        </Button>
-                      </SignUpButton>
-                    )}
+                    </Link>
                     <Link href="/pricing">
-                      <Button size="lg" variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors rounded-xl">
+                      <Button size="lg" variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors rounded-xl btn-hover-lift">
                         View pricing
                       </Button>
                     </Link>
                   </div>
                 </div>
-                <div className="md:w-1/2 flex justify-center">
+                <div className="md:w-1/2 flex justify-center animate-slide-left">
                   <div className="relative w-full max-w-md">
-                    <Card className="bg-white shadow-xl hover:shadow-2xl transition-shadow">
+                    <Card className="bg-white shadow-xl hover:shadow-2xl transition-shadow card-hover">
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-6">
                           <h3 className="font-semibold">Matched Candidates</h3>
                           <div className="text-sm text-gray-500">12 matches</div>
                         </div>
                         
-                        <div className="space-y-6">
-                          <div className="bg-primary/5 rounded-lg p-4 mb-4">
-                            <div className="flex items-center gap-3 mb-3">
+                        <div className="space-y-4 stagger-animation">
+                          <div className="bg-green-50 rounded-lg p-3 border border-green-200 card-hover">
+                            <div className="flex items-center gap-2 mb-2">
                               <div className="flex-shrink-0">
                                 <Image 
                                   src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80" 
                                   alt="Anna K." 
-                                  width={40}
-                                  height={40}
+                                  width={32}
+                                  height={32}
                                   className="rounded-full object-cover"
                                 />
                               </div>
                               <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800">Anna K.</h3>
-                                <p className="text-sm text-gray-500">Ex-Netflix • $140K</p>
+                                <h3 className="font-semibold text-gray-800 text-sm">Anna K.</h3>
+                                <p className="text-xs text-gray-500">Ex-Netflix • $140K</p>
                                 <div className="flex gap-1 mt-1">
-                                  <span className="bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 rounded">Validated</span>
-                                  <span className="bg-purple-100 text-purple-800 text-xs px-1.5 py-0.5 rounded">Portfolio</span>
+                                  <span className="bg-green-100 text-green-700 text-xs px-1.5 py-0.5 rounded">✓ Skills Verified</span>
+                                  <span className="bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 rounded">5 Projects</span>
                                 </div>
                               </div>
                               <div className="ml-auto">
-                                <span className="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded-full">98% Match</span>
+                                <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">98% Match</span>
                               </div>
                             </div>
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600">Machine Learning</span>
-                                <div className="flex">
-                                  {[1,2,3,4,5].map(i => (
-                                    <Star key={i} className={`w-4 h-4 ${i <= 5 ? 'fill-primary text-primary' : 'fill-gray-200 text-gray-200'}`} />
-                                  ))}
-                                </div>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600">SQL</span>
-                                <div className="flex">
-                                  {[1,2,3,4,5].map(i => (
-                                    <Star key={i} className={`w-4 h-4 ${i <= 4 ? 'fill-primary text-primary' : 'fill-gray-200 text-gray-200'}`} />
-                                  ))}
-                                </div>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600">Python</span>
-                                <div className="flex">
-                                  {[1,2,3,4,5].map(i => (
-                                    <Star key={i} className={`w-4 h-4 ${i <= 5 ? 'fill-primary text-primary' : 'fill-gray-200 text-gray-200'}`} />
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
+                            <p className="text-xs text-green-700 ml-8">⭐ Top performer - Proven ML expertise</p>
                           </div>
                           
-                          <div className="bg-gray-50 rounded-lg p-4">
-                            <div className="flex items-center gap-3 mb-3">
+                          <div className="bg-blue-50 rounded-lg p-3 border border-blue-200 card-hover">
+                            <div className="flex items-center gap-2 mb-2">
                               <div className="flex-shrink-0">
                                 <Image 
                                   src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80" 
                                   alt="Michael R." 
-                                  width={40}
-                                  height={40}
+                                  width={32}
+                                  height={32}
                                   className="rounded-full object-cover"
                                 />
                               </div>
                               <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800">Michael R.</h3>
-                                <p className="text-sm text-gray-500">Ex-Google • $165K</p>
+                                <h3 className="font-semibold text-gray-800 text-sm">Michael R.</h3>
+                                <p className="text-xs text-gray-500">Ex-Google • $165K</p>
                                 <div className="flex gap-1 mt-1">
-                                  <span className="bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 rounded">Validated</span>
-                                  <span className="bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded">Available</span>
+                                  <span className="bg-green-100 text-green-700 text-xs px-1.5 py-0.5 rounded">✓ Skills Verified</span>
+                                  <span className="bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 rounded">Available</span>
                                 </div>
                               </div>
                               <div className="ml-auto">
-                                <span className="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded-full">95% Match</span>
+                                <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">95% Match</span>
                               </div>
                             </div>
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600">Deep Learning</span>
-                                <div className="flex">
-                                  {[1,2,3,4,5].map(i => (
-                                    <Star key={i} className={`w-4 h-4 ${i <= 5 ? 'fill-primary text-primary' : 'fill-gray-200 text-gray-200'}`} />
-                                  ))}
+                            <p className="text-xs text-blue-700 ml-8">🚀 Strong candidate - Deep learning expert</p>
+                          </div>
+
+                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 card-hover">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="flex-shrink-0">
+                                <Image 
+                                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80" 
+                                  alt="Sarah J." 
+                                  width={32}
+                                  height={32}
+                                  className="rounded-full object-cover"
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-gray-800 text-sm">Sarah J.</h3>
+                                <p className="text-xs text-gray-500">Ex-Apple • $125K</p>
+                                <div className="flex gap-1 mt-1">
+                                  <span className="bg-yellow-100 text-yellow-700 text-xs px-1.5 py-0.5 rounded">⚡ Skills Tested</span>
+                                  <span className="bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded">Junior</span>
                                 </div>
                               </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600">Data Viz</span>
-                                <div className="flex">
-                                  {[1,2,3,4,5].map(i => (
-                                    <Star key={i} className={`w-4 h-4 ${i <= 4 ? 'fill-primary text-primary' : 'fill-gray-200 text-gray-200'}`} />
-                                  ))}
-                                </div>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600">Cloud</span>
-                                <div className="flex">
-                                  {[1,2,3,4,5].map(i => (
-                                    <Star key={i} className={`w-4 h-4 ${i <= 4 ? 'fill-primary text-primary' : 'fill-gray-200 text-gray-200'}`} />
-                                  ))}
-                                </div>
+                              <div className="ml-auto">
+                                <span className="bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full">88% Match</span>
                               </div>
                             </div>
+                            <p className="text-xs text-gray-600 ml-8">📈 Good potential - Developing skills</p>
                           </div>
                         </div>
                         
                         <div className="flex justify-center mt-6">
-                          <Button size="sm" variant="outline" className="text-gray-600 rounded-xl">View all candidates</Button>
+                          <Link href="/demo">
+                            <Button size="sm" variant="outline" className="text-gray-600 rounded-xl">View all candidates</Button>
+                          </Link>
                         </div>
                       </CardContent>
                     </Card>
@@ -234,7 +164,7 @@ export default async function CompaniesPage() {
           {/* How It Works Section */}
           <section className="py-16 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-16">
+              <div className="text-center mb-16 animate-on-scroll">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">From job req to team member in 48 hours ⚡</h2>
                 <p className="text-lg text-gray-500 max-w-2xl mx-auto">
                   No resume screening. No technical interviews. No hiring mistakes.
@@ -242,11 +172,11 @@ export default async function CompaniesPage() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <Card className="bg-white hover:shadow-xl transition-all duration-300 border-0 shadow-md h-full">
+                <Card className="bg-white hover:shadow-xl transition-all duration-300 border-0 shadow-md h-full animate-on-scroll-zoom card-hover">
                   <CardContent className="p-8 h-full flex flex-col">
                     <div className="flex items-start gap-4 mb-6">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg flex-shrink-0">1</div>
-                      <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg flex-shrink-0 animate-bounce-subtle">1</div>
+                      <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center animate-float">
                         <Search className="w-8 h-8 text-primary" />
                       </div>
                     </div>
@@ -295,17 +225,11 @@ export default async function CompaniesPage() {
               </div>
               
               <div className="mt-16 text-center">
-                {user ? (
+                <Link href="/demo">
                   <Button size="lg" className="font-medium px-8 py-4 text-lg rounded-xl bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-primary transition-all duration-300">
                     See available candidates →
                   </Button>
-                ) : (
-                  <SignUpButton>
-                    <Button size="lg" className="font-medium px-8 py-4 text-lg rounded-xl bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-primary transition-all duration-300">
-                      See available candidates →
-                    </Button>
-                  </SignUpButton>
-                )}
+                </Link>
               </div>
             </div>
           </section>
@@ -643,58 +567,60 @@ export default async function CompaniesPage() {
         </main>
         
         {/* Footer */}
-        <footer className="bg-gray-50 text-gray-900 py-12">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid md:grid-cols-4 gap-8 mb-8">
+        <footer className="bg-gray-100 text-gray-800 py-8 sm:py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
               <div>
-                <div className="flex items-center space-x-2 mb-4">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">SV</span>
-                  </div>
-                  <span className="text-xl font-semibold">SkillVee</span>
+                <div className="mb-4">
+                  <Image 
+                    src="/skillvee-logo.png?v=2" 
+                    alt="SkillVee" 
+                    width={120} 
+                    height={32}
+                    className="object-contain"
+                  />
                 </div>
-                <p className="text-gray-600">
+                <p className="text-gray-600 mb-4">
                   Connecting data scientists with their dream careers.
+                </p>
+                <p className="text-gray-600">
+                  <a href="mailto:hi@skillvee.com" className="hover:text-gray-800">
+                    hi@skillvee.com
+                  </a>
                 </p>
               </div>
               
               <div>
-                <h3 className="font-semibold mb-4">For Candidates</h3>
+                <h3 className="font-semibold mb-4 text-gray-800">For Candidates</h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li><Link href="/candidates" className="hover:text-gray-900">Apply Now</Link></li>
-                  <li><Link href="/interview" className="hover:text-gray-900">Practice Interviews</Link></li>
-                  <li><Link href="/resources" className="hover:text-gray-900">Resources</Link></li>
+                  <li><Link href="/candidates" className="hover:text-gray-800">Get Started</Link></li>
+                  <li><Link href="/interview" className="hover:text-gray-800">Practice Interviews</Link></li>
+                  <li><Link href="/faq" className="hover:text-gray-800">FAQ</Link></li>
                 </ul>
               </div>
               
               <div>
-                <h3 className="font-semibold mb-4">For Companies</h3>
+                <h3 className="font-semibold mb-4 text-gray-800">For Companies</h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li><Link href="/companies" className="hover:text-gray-900">Post Jobs</Link></li>
-                  <li><Link href="/pricing" className="hover:text-gray-900">Pricing</Link></li>
-                  <li><Link href="/enterprise" className="hover:text-gray-900">Enterprise</Link></li>
+                  <li><Link href="/companies" className="hover:text-gray-800">Get in Touch</Link></li>
+                  <li><Link href="/pricing" className="hover:text-gray-800">Pricing</Link></li>
+                  <li><Link href="/demo" className="hover:text-gray-800">Demo</Link></li>
                 </ul>
               </div>
               
               <div>
-                <h3 className="font-semibold mb-4">Company</h3>
+                <h3 className="font-semibold mb-4 text-gray-800">Legal</h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li><Link href="/about" className="hover:text-gray-900">About Us</Link></li>
-                  <li><Link href="/blog" className="hover:text-gray-900">Blog</Link></li>
-                  <li><Link href="/careers" className="hover:text-gray-900">Careers</Link></li>
-                  <li><Link href="/contact" className="hover:text-gray-900">Contact</Link></li>
+                  <li><Link href="/privacy" className="hover:text-gray-800">Privacy Policy</Link></li>
+                  <li><Link href="/terms" className="hover:text-gray-800">Terms of Service</Link></li>
                 </ul>
               </div>
             </div>
             
-            <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center">
-              <p className="text-gray-500 mb-4 md:mb-0">
+            <div className="border-t border-gray-300 pt-8 text-center">
+              <p className="text-gray-600">
                 © 2025 SkillVee. All rights reserved.
               </p>
-              <div className="flex space-x-6 text-gray-500">
-                <Link href="/privacy" className="hover:text-gray-900">Privacy Policy</Link>
-                <Link href="/terms" className="hover:text-gray-900">Terms of Service</Link>
-              </div>
             </div>
           </div>
         </footer>

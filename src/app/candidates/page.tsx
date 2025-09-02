@@ -33,7 +33,7 @@ export default async function CandidatesPage() {
     <HydrateClient>
       <div className="min-h-screen bg-white">
         {/* Navigation */}
-        <nav className="bg-white border-b border-gray-200 px-6 py-4">
+        <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-4 backdrop-blur-sm bg-white/95">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-8">
               <Link href="/" className="flex items-center space-x-2">
@@ -82,48 +82,48 @@ export default async function CandidatesPage() {
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 py-16 md:py-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="md:flex md:items-center md:justify-between">
-                <div className="md:w-1/2 mb-10 md:mb-0">
-                  <h1 className="text-4xl md:text-5xl font-bold mb-6">
+                <div className="md:w-1/2 mb-10 md:mb-0 animate-fade-in">
+                  <h1 className="text-4xl md:text-5xl font-bold mb-6 animate-slide-up">
                     <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">One application.</span><br />
                     Many data science opportunities.
                   </h1>
-                  <p className="text-lg text-gray-700 mb-4">
+                  <p className="text-lg text-gray-700 mb-4 animate-fade-in-delay">
                     Stop sending countless job applications. Apply once with SkillVee, validate your data science skills, and get matched with leading companies looking for talent like you.
                   </p>
-                  <div className="bg-blue-100/50 rounded-lg p-4 mb-6 border-l-4 border-primary">
+                  <div className="bg-blue-100/50 rounded-lg p-4 mb-6 border-l-4 border-primary animate-fade-in-delay-2">
                     <p className="font-semibold text-gray-800">Get hired 5x faster 🚀</p>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-delay-3">
                     {user ? (
                       <Link href="/job-description">
-                        <Button size="lg" className="font-medium px-8 rounded-xl">
+                        <Button size="lg" className="font-medium px-8 rounded-xl btn-hover-lift">
                           Apply now
                         </Button>
                       </Link>
                     ) : (
                       <SignUpButton>
-                        <Button size="lg" className="font-medium px-8 rounded-xl">
+                        <Button size="lg" className="font-medium px-8 rounded-xl btn-hover-lift">
                           Apply now
                         </Button>
                       </SignUpButton>
                     )}
                     <Link href="/interview">
-                      <Button size="lg" variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors rounded-xl">
+                      <Button size="lg" variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors rounded-xl btn-hover-lift">
                         Practice with AI
                       </Button>
                     </Link>
                   </div>
                 </div>
-                <div className="md:w-1/2 flex justify-center">
-                  <div className="bg-white shadow-xl rounded-xl p-6 border border-blue-100 max-w-md w-full hover:shadow-2xl transition-shadow">
+                <div className="md:w-1/2 flex justify-center animate-slide-left">
+                  <div className="bg-white shadow-xl rounded-xl p-6 border border-blue-100 max-w-md w-full hover:shadow-2xl transition-shadow card-hover">
                     <div className="flex items-center gap-2 mb-6">
                       <div className="w-3 h-3 rounded-full bg-red-400"></div>
                       <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
                       <div className="w-3 h-3 rounded-full bg-green-400"></div>
                     </div>
-                    <div className="space-y-6">
+                    <div className="space-y-6 stagger-animation">
                       <div className="flex gap-3 items-center">
-                        <div className="w-10 h-10 rounded bg-primary/10 flex items-center justify-center text-primary">
+                        <div className="w-10 h-10 rounded bg-primary/10 flex items-center justify-center text-primary animate-float">
                           <Briefcase size={20} />
                         </div>
                         <div>
@@ -168,7 +168,7 @@ export default async function CandidatesPage() {
           {/* Key Benefits Section */}
           <section className="py-16 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-16">
+              <div className="text-center mb-16 animate-on-scroll">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Why data scientists choose us 🚀</h2>
                 <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                   We help talented data scientists like you stand out and connect with the best opportunities.
@@ -176,9 +176,9 @@ export default async function CandidatesPage() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <Card className="bg-white hover:shadow-lg transition-all duration-300">
+                <Card className="bg-white hover:shadow-lg transition-all duration-300 animate-on-scroll-zoom card-hover">
                   <CardContent className="p-6">
-                    <div className="p-3 rounded-lg bg-primary/10 text-primary mb-4 w-fit">
+                    <div className="p-3 rounded-lg bg-primary/10 text-primary mb-4 w-fit animate-bounce-subtle">
                       <CheckCircle size={24} />
                     </div>
                     <h3 className="text-xl font-semibold mb-2">Apply just once</h3>
@@ -186,9 +186,9 @@ export default async function CandidatesPage() {
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-white hover:shadow-lg transition-all duration-300">
+                <Card className="bg-white hover:shadow-lg transition-all duration-300 animate-on-scroll-zoom card-hover">
                   <CardContent className="p-6">
-                    <div className="p-3 rounded-lg bg-primary/10 text-primary mb-4 w-fit">
+                    <div className="p-3 rounded-lg bg-primary/10 text-primary mb-4 w-fit animate-bounce-subtle">
                       <Clock size={24} />
                     </div>
                     <h3 className="text-xl font-semibold mb-2">Save precious time</h3>
@@ -196,9 +196,9 @@ export default async function CandidatesPage() {
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-white hover:shadow-lg transition-all duration-300">
+                <Card className="bg-white hover:shadow-lg transition-all duration-300 animate-on-scroll-zoom card-hover">
                   <CardContent className="p-6">
-                    <div className="p-3 rounded-lg bg-primary/10 text-primary mb-4 w-fit">
+                    <div className="p-3 rounded-lg bg-primary/10 text-primary mb-4 w-fit animate-bounce-subtle">
                       <Zap size={24} />
                     </div>
                     <h3 className="text-xl font-semibold mb-2">Skill validation</h3>
@@ -212,7 +212,7 @@ export default async function CandidatesPage() {
           {/* How It Works Section */}
           <section className="py-16 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-16">
+              <div className="text-center mb-16 animate-on-scroll">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">How it works ✨</h2>
                 <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                   Three simple steps to find your ideal data science role.
@@ -474,58 +474,60 @@ export default async function CandidatesPage() {
         </main>
         
         {/* Footer */}
-        <footer className="bg-gray-50 text-gray-900 py-12">
+        <footer className="bg-gray-100 text-gray-800 py-12">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid md:grid-cols-4 gap-8 mb-8">
               <div>
-                <div className="flex items-center space-x-2 mb-4">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">SV</span>
-                  </div>
-                  <span className="text-xl font-semibold">SkillVee</span>
+                <div className="mb-4">
+                  <Image 
+                    src="/skillvee-logo.png?v=2" 
+                    alt="SkillVee" 
+                    width={120} 
+                    height={32}
+                    className="object-contain"
+                  />
                 </div>
-                <p className="text-gray-600">
+                <p className="text-gray-600 mb-4">
                   Connecting data scientists with their dream careers.
+                </p>
+                <p className="text-gray-600">
+                  <a href="mailto:hi@skillvee.com" className="hover:text-gray-800">
+                    hi@skillvee.com
+                  </a>
                 </p>
               </div>
               
               <div>
-                <h3 className="font-semibold mb-4">For Candidates</h3>
+                <h3 className="font-semibold mb-4 text-gray-800">For Candidates</h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li><Link href="/job-description" className="hover:text-gray-900">Apply Now</Link></li>
-                  <li><Link href="/interview" className="hover:text-gray-900">Practice Interviews</Link></li>
-                  <li><Link href="/resources" className="hover:text-gray-900">Resources</Link></li>
+                  <li><Link href="/candidates" className="hover:text-gray-800">Get Started</Link></li>
+                  <li><Link href="/interview" className="hover:text-gray-800">Practice Interviews</Link></li>
+                  <li><Link href="/faq" className="hover:text-gray-800">FAQ</Link></li>
                 </ul>
               </div>
               
               <div>
-                <h3 className="font-semibold mb-4">For Companies</h3>
+                <h3 className="font-semibold mb-4 text-gray-800">For Companies</h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li><Link href="/companies" className="hover:text-gray-900">Post Jobs</Link></li>
-                  <li><Link href="/pricing" className="hover:text-gray-900">Pricing</Link></li>
-                  <li><Link href="/enterprise" className="hover:text-gray-900">Enterprise</Link></li>
+                  <li><Link href="/companies" className="hover:text-gray-800">Get in Touch</Link></li>
+                  <li><Link href="/pricing" className="hover:text-gray-800">Pricing</Link></li>
+                  <li><Link href="/demo" className="hover:text-gray-800">Demo</Link></li>
                 </ul>
               </div>
               
               <div>
-                <h3 className="font-semibold mb-4">Company</h3>
+                <h3 className="font-semibold mb-4 text-gray-800">Legal</h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li><Link href="/about" className="hover:text-gray-900">About Us</Link></li>
-                  <li><Link href="/blog" className="hover:text-gray-900">Blog</Link></li>
-                  <li><Link href="/careers" className="hover:text-gray-900">Careers</Link></li>
-                  <li><Link href="/contact" className="hover:text-gray-900">Contact</Link></li>
+                  <li><Link href="/privacy" className="hover:text-gray-800">Privacy Policy</Link></li>
+                  <li><Link href="/terms" className="hover:text-gray-800">Terms of Service</Link></li>
                 </ul>
               </div>
             </div>
             
-            <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center">
-              <p className="text-gray-500 mb-4 md:mb-0">
+            <div className="border-t border-gray-300 pt-8 text-center">
+              <p className="text-gray-600">
                 © 2025 SkillVee. All rights reserved.
               </p>
-              <div className="flex space-x-6 text-gray-500">
-                <Link href="/privacy" className="hover:text-gray-900">Privacy Policy</Link>
-                <Link href="/terms" className="hover:text-gray-900">Terms of Service</Link>
-              </div>
             </div>
           </div>
         </footer>

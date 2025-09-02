@@ -1,5 +1,4 @@
 import { currentUser } from "@clerk/nextjs/server";
-import { SignInButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
 import { HydrateClient } from "~/trpc/server";
@@ -15,6 +14,7 @@ import {
   CheckCircle,
   ArrowRight
 } from "lucide-react";
+import Navigation from "~/components/navigation";
 
 export default async function DemoPage() {
   const user = await currentUser();
@@ -23,84 +23,44 @@ export default async function DemoPage() {
     <HydrateClient>
       <div className="min-h-screen bg-gray-50">
         {/* Navigation */}
-        <nav className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <Link href="/" className="flex items-center space-x-2">
-                <Image 
-                  src="/skillvee-logo.png?v=2" 
-                  alt="SkillVee" 
-                  width={120} 
-                  height={32}
-                  className="object-contain"
-                  priority
-                />
-              </Link>
-              <div className="hidden md:flex items-center space-x-6">
-                <Link href="/companies" className="text-gray-600 hover:text-gray-900">
-                  Companies
-                </Link>
-                <Link href="/pricing" className="text-gray-600 hover:text-gray-900">
-                  Pricing
-                </Link>
-                <Link href="/faq" className="text-gray-600 hover:text-gray-900">
-                  FAQ
-                </Link>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              {user ? (
-                <div className="flex items-center space-x-4">
-                  <Link href="/dashboard">
-                    <Button variant="outline">Dashboard</Button>
-                  </Link>
-                  <UserButton />
-                </div>
-              ) : (
-                <SignInButton>
-                  <Button>Sign In</Button>
-                </SignInButton>
-              )}
-            </div>
-          </div>
-        </nav>
+        <Navigation />
 
         <main className="flex-1">
           {/* Hero Section */}
           <div className="bg-white py-8">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-8">
-                <h1 className="text-3xl md:text-4xl font-bold mb-3">
-                  See SkillVee in action
+              <div className="text-center mb-8 animate-fade-in">
+                <h1 className="text-3xl md:text-4xl font-bold mb-3 animate-slide-up">
+                  Let's talk about your hiring needs
                 </h1>
-                <p className="text-lg text-gray-600">
-                  Get a personalized demo of pre-vetted data science talent
+                <p className="text-lg text-gray-600 animate-fade-in-delay">
+                  Get a personalized walkthrough of how SkillVee can help you find top data science talent
                 </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-8 items-start">
                 {/* Left side - Benefits */}
-                <div>
-                  <h2 className="text-xl font-bold mb-4 text-gray-900">What you'll see:</h2>
-                  <div className="space-y-3 mb-6">
+                <div className="animate-slide-right">
+                  <h2 className="text-xl font-bold mb-4 text-gray-900">What we'll discuss:</h2>
+                  <div className="space-y-3 mb-6 stagger-animation">
                     <div className="flex items-center gap-3">
-                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      <span className="text-gray-700">Browse pre-vetted candidates with proven portfolios</span>
+                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 animate-pulse-subtle" />
+                      <span className="text-gray-700">Your current hiring challenges and requirements</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      <span className="text-gray-700">Skip technical interviews - they've already proven they can code</span>
+                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 animate-pulse-subtle" />
+                      <span className="text-gray-700">How our pre-vetted talent pool can help you</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      <span className="text-gray-700">48-hour placement with 90-day performance guarantee</span>
+                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 animate-pulse-subtle" />
+                      <span className="text-gray-700">Our 48-hour placement process and guarantees</span>
                     </div>
                   </div>
 
-                  <div className="bg-primary/5 rounded-lg p-4">
+                  <div className="bg-blue-50 rounded-lg p-4 animate-bounce-in">
                     <div className="flex items-center gap-2 mb-2">
-                      <Clock className="w-5 h-5 text-primary" />
-                      <h3 className="font-semibold text-gray-900">15-minute demo</h3>
+                      <Clock className="w-5 h-5 text-blue-600 animate-float" />
+                      <h3 className="font-semibold text-gray-900">15-minute conversation</h3>
                     </div>
                     <p className="text-sm text-gray-600">
                       We'll respond within 24 hours to schedule a time that works for you.
@@ -109,10 +69,10 @@ export default async function DemoPage() {
                 </div>
 
                 {/* Right side - Form */}
-                <Card className="bg-white shadow-lg">
+                <Card className="bg-white shadow-lg animate-slide-left card-hover">
                   <CardContent className="p-6">
                     <div className="mb-4">
-                      <h3 className="text-xl font-bold mb-1">Schedule your demo</h3>
+                      <h3 className="text-xl font-bold mb-1">Get in touch</h3>
                       <p className="text-sm text-gray-600">Just need a few details to get started</p>
                     </div>
 
@@ -156,10 +116,10 @@ export default async function DemoPage() {
                       <Button 
                         type="submit" 
                         size="lg" 
-                        className="w-full font-medium rounded-xl"
+                        className="w-full font-medium bg-blue-600 hover:bg-blue-700 btn-hover-lift"
                       >
-                        <Calendar className="w-4 h-4 mr-2" />
-                        Request Demo
+                        <Calendar className="w-4 h-4 mr-2 animate-bounce-subtle" />
+                        Let's Talk
                       </Button>
 
                       <p className="text-xs text-gray-500 text-center">
@@ -174,58 +134,60 @@ export default async function DemoPage() {
         </main>
         
         {/* Footer */}
-        <footer className="bg-gray-50 text-gray-900 py-12">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid md:grid-cols-4 gap-8 mb-8">
+        <footer className="bg-gray-100 text-gray-800 py-8 sm:py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
               <div>
-                <div className="flex items-center space-x-2 mb-4">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">SV</span>
-                  </div>
-                  <span className="text-xl font-semibold">SkillVee</span>
+                <div className="mb-4">
+                  <Image 
+                    src="/skillvee-logo.png?v=2" 
+                    alt="SkillVee" 
+                    width={120} 
+                    height={32}
+                    className="object-contain"
+                  />
                 </div>
-                <p className="text-gray-600">
+                <p className="text-gray-600 mb-4">
                   Connecting data scientists with their dream careers.
+                </p>
+                <p className="text-gray-600">
+                  <a href="mailto:hi@skillvee.com" className="hover:text-gray-800">
+                    hi@skillvee.com
+                  </a>
                 </p>
               </div>
               
               <div>
-                <h3 className="font-semibold mb-4">For Candidates</h3>
+                <h3 className="font-semibold mb-4 text-gray-800">For Candidates</h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li><Link href="/candidates" className="hover:text-gray-900">Apply Now</Link></li>
-                  <li><Link href="/interview" className="hover:text-gray-900">Practice Interviews</Link></li>
-                  <li><Link href="/resources" className="hover:text-gray-900">Resources</Link></li>
+                  <li><Link href="/candidates" className="hover:text-gray-800">Get Started</Link></li>
+                  <li><Link href="/interview" className="hover:text-gray-800">Practice Interviews</Link></li>
+                  <li><Link href="/faq" className="hover:text-gray-800">FAQ</Link></li>
                 </ul>
               </div>
               
               <div>
-                <h3 className="font-semibold mb-4">For Companies</h3>
+                <h3 className="font-semibold mb-4 text-gray-800">For Companies</h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li><Link href="/companies" className="hover:text-gray-900">Post Jobs</Link></li>
-                  <li><Link href="/pricing" className="hover:text-gray-900">Pricing</Link></li>
-                  <li><Link href="/enterprise" className="hover:text-gray-900">Enterprise</Link></li>
+                  <li><Link href="/companies" className="hover:text-gray-800">Get in Touch</Link></li>
+                  <li><Link href="/pricing" className="hover:text-gray-800">Pricing</Link></li>
+                  <li><Link href="/demo" className="hover:text-gray-800">Demo</Link></li>
                 </ul>
               </div>
               
               <div>
-                <h3 className="font-semibold mb-4">Company</h3>
+                <h3 className="font-semibold mb-4 text-gray-800">Legal</h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li><Link href="/about" className="hover:text-gray-900">About Us</Link></li>
-                  <li><Link href="/blog" className="hover:text-gray-900">Blog</Link></li>
-                  <li><Link href="/careers" className="hover:text-gray-900">Careers</Link></li>
-                  <li><Link href="/contact" className="hover:text-gray-900">Contact</Link></li>
+                  <li><Link href="/privacy" className="hover:text-gray-800">Privacy Policy</Link></li>
+                  <li><Link href="/terms" className="hover:text-gray-800">Terms of Service</Link></li>
                 </ul>
               </div>
             </div>
             
-            <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center">
-              <p className="text-gray-500 mb-4 md:mb-0">
+            <div className="border-t border-gray-300 pt-8 text-center">
+              <p className="text-gray-600">
                 © 2025 SkillVee. All rights reserved.
               </p>
-              <div className="flex space-x-6 text-gray-500">
-                <Link href="/privacy" className="hover:text-gray-900">Privacy Policy</Link>
-                <Link href="/terms" className="hover:text-gray-900">Terms of Service</Link>
-              </div>
             </div>
           </div>
         </footer>

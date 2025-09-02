@@ -15,8 +15,9 @@ export default function HeroLottie({ animationUrl }: HeroLottieProps) {
         loop
         autoplay
         style={{ 
-          width: '800px',
-          transform: 'translateX(-10px) translateY(-50px) scale(1.4)' 
+          width: '600px',
+          height: '600px',
+          transform: 'translateX(-10px) translateY(-50px)'
         }}
       />
     </div>

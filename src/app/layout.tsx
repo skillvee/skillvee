@@ -5,6 +5,7 @@ import { Geist } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 
 import { TRPCReactProvider } from "~/trpc/react";
+import AnimationProvider from "~/components/animation-provider";
 
 export const metadata: Metadata = {
   title: "SkillVee - AI-Powered Data Science Interview Practice",
@@ -27,7 +28,11 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={`${geist.variable}`}>
         <body>
-          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <TRPCReactProvider>
+            <AnimationProvider>
+              {children}
+            </AnimationProvider>
+          </TRPCReactProvider>
         </body>
       </html>
     </ClerkProvider>
