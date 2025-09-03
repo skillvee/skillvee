@@ -927,9 +927,8 @@ export default async function Home() {
               <div>
                 <h3 className="font-semibold mb-4 text-gray-800">For Companies</h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li><Link href="/companies" className="hover:text-gray-800">Get in Touch</Link></li>
+                  <li><Link href="/demo" className="hover:text-gray-800">Get in Touch</Link></li>
                   <li><Link href="/pricing" className="hover:text-gray-800">Pricing</Link></li>
-                  <li><Link href="/demo" className="hover:text-gray-800">Demo</Link></li>
                 </ul>
               </div>
               
