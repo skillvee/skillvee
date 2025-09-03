@@ -195,7 +195,7 @@ export function MediaRecorder({
           </div>
           <div className="flex items-center space-x-2">
             {mediaCapture.state === "stopped" && mediaCapture.recordedBlob && (
-              <Badge variant="outline" className="text-green-600">
+              <Badge variant="outline" className="text-teal-600">
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Recording Complete
               </Badge>
@@ -319,7 +319,7 @@ export function MediaRecorder({
                 <Button
                   onClick={mediaCapture.resumeRecording}
                   size="lg"
-                  className="bg-green-600 hover:bg-green-700 text-white"
+                  className="bg-teal-600 hover:bg-teal-700 text-white"
                 >
                   <Play className="h-5 w-5 mr-2" />
                   Resume

@@ -30,7 +30,7 @@ export default async function PricingPage() {
           {/* Hero Section */}
           <section className="bg-white py-20">
             <div className="max-w-7xl mx-auto px-6 text-center">
-              <Badge className="bg-green-50 text-green-700 border-green-200 w-fit mx-auto mb-6 animate-bounce-in">
+              <Badge className="bg-teal-50 text-teal-700 border-teal-200 w-fit mx-auto mb-6 animate-bounce-in">
                 ✨ Free Forever for Data Scientists
               </Badge>
               <h1 className="text-5xl font-bold mb-6 leading-tight animate-fade-in">
@@ -50,7 +50,7 @@ export default async function PricingPage() {
                 <Card className="bg-white hover:shadow-lg transition-shadow border-2 border-transparent hover:border-blue-100 relative animate-on-scroll-left card-hover">
                   <CardContent className="p-8">
                     <div className="text-center mb-8">
-                      <Badge className="bg-green-50 text-green-700 border-green-200 mb-4">
+                      <Badge className="bg-teal-50 text-teal-700 border-teal-200 mb-4">
                         ✨ Always Free
                       </Badge>
                       <h3 className="text-3xl font-bold mb-4 text-gray-900">For <span className="text-blue-600">Data Scientists</span></h3>
@@ -63,23 +63,23 @@ export default async function PricingPage() {
                     
                     <div className="space-y-4 mb-8 stagger-animation">
                       <div className="flex items-center space-x-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 animate-pulse-subtle" />
+                        <CheckCircle className="w-5 h-5 text-teal-600 animate-pulse-subtle" />
                         <span className="text-gray-700">AI-powered interview practice</span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 animate-pulse-subtle" />
+                        <CheckCircle className="w-5 h-5 text-teal-600 animate-pulse-subtle" />
                         <span className="text-gray-700">Instant feedback & coaching</span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 animate-pulse-subtle" />
+                        <CheckCircle className="w-5 h-5 text-teal-600 animate-pulse-subtle" />
                         <span className="text-gray-700">Real company case studies</span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 animate-pulse-subtle" />
+                        <CheckCircle className="w-5 h-5 text-teal-600 animate-pulse-subtle" />
                         <span className="text-gray-700">Job opportunity matching</span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 animate-pulse-subtle" />
+                        <CheckCircle className="w-5 h-5 text-teal-600 animate-pulse-subtle" />
                         <span className="text-gray-700">Career resources & guides</span>
                       </div>
                     </div>
@@ -117,23 +117,23 @@ export default async function PricingPage() {
                     
                     <div className="space-y-4 mb-8 stagger-animation">
                       <div className="flex items-center space-x-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 animate-pulse-subtle" />
+                        <CheckCircle className="w-5 h-5 text-teal-600 animate-pulse-subtle" />
                         <span className="text-gray-700">Pre-vetted talent pool</span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 animate-pulse-subtle" />
+                        <CheckCircle className="w-5 h-5 text-teal-600 animate-pulse-subtle" />
                         <span className="text-gray-700">48-hour placement</span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 animate-pulse-subtle" />
+                        <CheckCircle className="w-5 h-5 text-teal-600 animate-pulse-subtle" />
                         <span className="text-gray-700">90-day guarantee</span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 animate-pulse-subtle" />
+                        <CheckCircle className="w-5 h-5 text-teal-600 animate-pulse-subtle" />
                         <span className="text-gray-700">AI-powered matching</span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 animate-pulse-subtle" />
+                        <CheckCircle className="w-5 h-5 text-teal-600 animate-pulse-subtle" />
                         <span className="text-gray-700">No upfront costs</span>
                       </div>
                     </div>
@@ -187,7 +187,7 @@ export default async function PricingPage() {
                   />
                 </div>
                 <p className="text-gray-600 mb-4">
-                  Connecting data scientists with their dream careers.
+                  Revolutionizing how talent meets opportunity in the age of AI.
                 </p>
                 <p className="text-gray-600">
                   <a href="mailto:hi@skillvee.com" className="hover:text-gray-800">

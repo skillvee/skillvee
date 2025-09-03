@@ -27,55 +27,51 @@ export default function Navigation({ currentPage }: NavigationProps) {
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-4 backdrop-blur-sm bg-white/95">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center space-x-8">
-          <Link href="/" className="flex items-center space-x-2">
-            <Image 
-              src="/skillvee-logo.png?v=2" 
-              alt="SkillVee" 
-              width={120} 
-              height={32}
-              className="object-contain"
-              priority
-            />
-          </Link>
-          
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.href}
-                href={link.href} 
-                className={`${
-                  currentPage === link.label.toLowerCase() 
-                    ? "text-blue-600 font-medium" 
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </div>
+        {/* Logo */}
+        <Link href="/" className="flex items-center space-x-2">
+          <Image 
+            src="/skillvee-logo.png?v=2" 
+            alt="SkillVee" 
+            width={120} 
+            height={32}
+            className="object-contain"
+            priority
+          />
+        </Link>
 
-        {/* Desktop Auth Buttons */}
-        <div className="hidden md:flex items-center space-x-4">
-          {user ? (
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard">
-                <Button variant="outline">Dashboard</Button>
-              </Link>
-              <UserButton />
-            </div>
-          ) : (
-            <>
-              <SignInButton mode="modal">
-                <Button variant="outline">Log in</Button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <Button className="bg-blue-600 hover:bg-blue-700">Sign up</Button>
-              </SignUpButton>
-            </>
-          )}
+        {/* Desktop Navigation & Auth - Right Aligned */}
+        <div className="hidden md:flex items-center space-x-6">
+          {navLinks.map((link) => (
+            <Link 
+              key={link.href}
+              href={link.href} 
+              className={`${
+                currentPage === link.label.toLowerCase() 
+                  ? "text-blue-600 font-medium" 
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+          
+            {user ? (
+              <>
+                <Link href="/dashboard">
+                  <Button variant="outline">Dashboard</Button>
+                </Link>
+                <UserButton />
+              </>
+            ) : (
+              <>
+                <SignInButton mode="modal">
+                  <Button variant="outline">Log in</Button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button className="bg-blue-600 hover:bg-blue-700">Sign up</Button>
+                </SignUpButton>
+              </>
+            )}
         </div>
 
         {/* Mobile menu button */}

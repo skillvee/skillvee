@@ -119,7 +119,7 @@ export default async function CandidatesPage() {
                     <div className="flex items-center gap-2 mb-6">
                       <div className="w-3 h-3 rounded-full bg-red-400"></div>
                       <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                      <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                      <div className="w-3 h-3 rounded-full bg-teal-400"></div>
                     </div>
                     <div className="space-y-6 stagger-animation">
                       <div className="flex gap-3 items-center">
@@ -131,7 +131,7 @@ export default async function CandidatesPage() {
                           <p className="text-sm text-gray-500">Tech Innovators Inc.</p>
                         </div>
                         <div className="ml-auto">
-                          <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">Matched</span>
+                          <span className="bg-teal-100 text-teal-800 text-xs px-2 py-0.5 rounded-full">Matched</span>
                         </div>
                       </div>
                       <div className="flex gap-3 items-center">
@@ -143,7 +143,7 @@ export default async function CandidatesPage() {
                           <p className="text-sm text-gray-500">Data Analytics Corp.</p>
                         </div>
                         <div className="ml-auto">
-                          <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">Matched</span>
+                          <span className="bg-teal-100 text-teal-800 text-xs px-2 py-0.5 rounded-full">Matched</span>
                         </div>
                       </div>
                       <div className="flex gap-3 items-center">
@@ -488,7 +488,7 @@ export default async function CandidatesPage() {
                   />
                 </div>
                 <p className="text-gray-600 mb-4">
-                  Connecting data scientists with their dream careers.
+                  Revolutionizing how talent meets opportunity in the age of AI.
                 </p>
                 <p className="text-gray-600">
                   <a href="mailto:hi@skillvee.com" className="hover:text-gray-800">

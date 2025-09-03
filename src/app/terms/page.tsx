@@ -68,15 +68,15 @@ export default function TermsPage() {
           </Card>
 
           {/* Company Terms */}
-          <Card className="border-2 border-purple-200 hover:border-purple-300 transition-colors">
+          <Card className="border-2 border-orange-200 hover:border-orange-300 transition-colors">
             <CardHeader className="text-center pb-4">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Building2 className="w-8 h-8 text-purple-600" />
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Building2 className="w-8 h-8 text-orange-600" />
               </div>
               <CardTitle className="text-xl text-gray-900">
                 For Companies
               </CardTitle>
-              <Badge className="bg-purple-50 text-purple-700 border-purple-200 w-fit mx-auto">
+              <Badge className="bg-orange-50 text-orange-700 border-orange-200 w-fit mx-auto">
                 Employers & Recruiters
               </Badge>
             </CardHeader>
@@ -99,7 +99,7 @@ export default function TermsPage() {
                 </div>
               </div>
               <Link href="/company-terms" target="_blank">
-                <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                <Button className="w-full bg-orange-600 hover:bg-orange-700">
                   View Company Terms
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>

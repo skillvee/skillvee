@@ -44,15 +44,15 @@ export default async function DemoPage() {
                   <h2 className="text-xl font-bold mb-4 text-gray-900">What we'll discuss:</h2>
                   <div className="space-y-3 mb-6 stagger-animation">
                     <div className="flex items-center gap-3">
-                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 animate-pulse-subtle" />
+                      <CheckCircle className="w-4 h-4 text-teal-500 flex-shrink-0 animate-pulse-subtle" />
                       <span className="text-gray-700">Your current hiring challenges and requirements</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 animate-pulse-subtle" />
+                      <CheckCircle className="w-4 h-4 text-teal-500 flex-shrink-0 animate-pulse-subtle" />
                       <span className="text-gray-700">How our pre-vetted talent pool can help you</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 animate-pulse-subtle" />
+                      <CheckCircle className="w-4 h-4 text-teal-500 flex-shrink-0 animate-pulse-subtle" />
                       <span className="text-gray-700">Our 48-hour placement process and guarantees</span>
                     </div>
                   </div>
@@ -148,7 +148,7 @@ export default async function DemoPage() {
                   />
                 </div>
                 <p className="text-gray-600 mb-4">
-                  Connecting data scientists with their dream careers.
+                  Revolutionizing how talent meets opportunity in the age of AI.
                 </p>
                 <p className="text-gray-600">
                   <a href="mailto:hi@skillvee.com" className="hover:text-gray-800">

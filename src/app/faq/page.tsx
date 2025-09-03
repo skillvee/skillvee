@@ -85,8 +85,8 @@ export default async function FAQPage() {
           {/* AI Interview Practice */}
           <div className="mb-12 animate-on-scroll">
             <div className="flex items-center mb-6">
-              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3 animate-bounce-subtle">
-                <Search className="w-5 h-5 text-purple-600" />
+              <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3 animate-bounce-subtle">
+                <Search className="w-5 h-5 text-orange-600" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900">AI Interview Practice</h2>
             </div>
@@ -151,8 +151,8 @@ export default async function FAQPage() {
           {/* Job Matching & Opportunities */}
           <div className="mb-12">
             <div className="flex items-center mb-6">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                <Users className="w-5 h-5 text-green-600" />
+              <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center mr-3">
+                <Users className="w-5 h-5 text-teal-600" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900">Job Matching & Opportunities</h2>
             </div>

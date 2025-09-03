@@ -272,7 +272,7 @@ export function InterviewRecorder({
                 overallStatus === "recording" ? "fill-red-500 text-red-500 animate-pulse" : 
                 overallStatus === "paused" ? "fill-yellow-500 text-yellow-500" :
                 overallStatus === "uploading" ? "fill-blue-500 text-blue-500 animate-pulse" :
-                overallStatus === "completed" ? "fill-green-500 text-green-500" :
+                overallStatus === "completed" ? "fill-teal-500 text-teal-500" :
                 "fill-gray-300 text-gray-300"
               )} 
             />
@@ -280,7 +280,7 @@ export function InterviewRecorder({
           </div>
           <div className="flex items-center space-x-2">
             {overallStatus === "completed" && (
-              <Badge variant="outline" className="text-green-600">
+              <Badge variant="outline" className="text-teal-600">
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Upload Complete
               </Badge>
@@ -470,7 +470,7 @@ export function InterviewRecorder({
               <Button
                 onClick={mediaCapture.resumeRecording}
                 size="lg"
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="bg-teal-600 hover:bg-teal-700 text-white"
               >
                 <Play className="h-5 w-5 mr-2" />
                 Resume

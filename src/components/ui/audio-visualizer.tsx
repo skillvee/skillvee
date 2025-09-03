@@ -8,7 +8,7 @@ export interface AudioVisualizerProps {
   isActive: boolean;
   variant?: 'bars' | 'waveform' | 'circle' | 'simple';
   size?: 'sm' | 'md' | 'lg';
-  color?: 'blue' | 'green' | 'red' | 'purple';
+  color?: 'blue' | 'teal' | 'red' | 'orange';
   className?: string;
 }
 
@@ -37,9 +37,9 @@ export function AudioVisualizer({
   // Colors for different variants
   const colors = {
     blue: { primary: '#3b82f6', secondary: '#93c5fd' },
-    green: { primary: '#10b981', secondary: '#86efac' },
+    teal: { primary: '#14b8a6', secondary: '#7dd3fc' },
     red: { primary: '#ef4444', secondary: '#fca5a5' },
-    purple: { primary: '#8b5cf6', secondary: '#c4b5fd' }
+    orange: { primary: '#f97316', secondary: '#fed7aa' }
   };
 
   const colorScheme = colors[color];
@@ -206,7 +206,7 @@ export function AudioLevelIndicator({ level, isActive, className }: AudioLevelIn
             key={i}
             className={cn(
               "w-1 h-4 rounded-full transition-colors duration-150",
-              isLit ? "bg-green-500" : "bg-gray-300"
+              isLit ? "bg-teal-500" : "bg-gray-300"
             )}
           />
         );
@@ -233,7 +233,7 @@ export function MicrophoneStatus({
     <div className={cn("flex items-center space-x-2", className)}>
       <div className={cn(
         "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
-        isListening && !isMuted ? "bg-green-500" : 
+        isListening && !isMuted ? "bg-teal-500" : 
         isMuted ? "bg-red-500" : "bg-gray-400"
       )}>
         <div className={cn(
