@@ -14,6 +14,16 @@ const config = {
     // Allow production builds to complete even if there are type errors
     ignoreBuildErrors: false,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
   webpack: (config, { isServer }) => {
     // Exclude test files from build
     config.module.rules.push({

@@ -558,7 +558,7 @@ interface ConnectionStatusProps {
 function ConnectionStatus({ connectionState, isListening, isAISpeaking, audioLevel }: ConnectionStatusProps) {
   const getStatusColor = () => {
     switch (connectionState) {
-      case 'connected': return 'bg-green-500';
+      case 'connected': return 'bg-teal-500';
       case 'connecting': return 'bg-yellow-500';
       case 'reconnecting': return 'bg-orange-500';
       case 'error': return 'bg-red-500';
@@ -634,7 +634,7 @@ function LiveConversationIndicator({ isAISpeaking, isListening, audioLevel, isPa
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             {isListening && !isPaused ? (
-              <Mic className="w-4 h-4 text-green-500" />
+              <Mic className="w-4 h-4 text-teal-500" />
             ) : (
               <MicOff className="w-4 h-4 text-gray-400" />
             )}
@@ -643,7 +643,7 @@ function LiveConversationIndicator({ isAISpeaking, isListening, audioLevel, isPa
           {isListening && !isPaused && (
             <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-green-500 transition-all duration-100"
+                className="h-full bg-teal-500 transition-all duration-100"
                 style={{ width: `${audioLevel * 100}%` }}
               />
             </div>

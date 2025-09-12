@@ -39,7 +39,7 @@ export default async function DashboardPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Completed
             </h3>
-            <p className="text-3xl font-bold text-green-600">
+            <p className="text-3xl font-bold text-teal-600">
               {stats.completedInterviews}
             </p>
           </div>
@@ -48,7 +48,7 @@ export default async function DashboardPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Average Score
             </h3>
-            <p className="text-3xl font-bold text-purple-600">
+            <p className="text-3xl font-bold text-orange-600">
               {stats.averageScore ? `${stats.averageScore.toFixed(1)}/10` : "N/A"}
             </p>
           </div>
@@ -80,7 +80,7 @@ export default async function DashboardPage() {
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                           interview.status === "COMPLETED"
-                            ? "bg-green-100 text-green-800"
+                            ? "bg-teal-100 text-teal-800"
                             : interview.status === "IN_PROGRESS"
                             ? "bg-blue-100 text-blue-800"
                             : "bg-gray-100 text-gray-800"

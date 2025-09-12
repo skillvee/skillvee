@@ -267,13 +267,13 @@ Guidelines:
           {/* Browser Compatibility Check */}
           <Card className={cn(
             browserCompatibility.overall 
-              ? "border-green-200 bg-green-50" 
+              ? "border-teal-200 bg-teal-50" 
               : "border-yellow-200 bg-yellow-50"
           )}>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 {browserCompatibility.overall ? (
-                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <CheckCircle className="w-5 h-5 text-teal-600" />
                 ) : (
                   <AlertTriangle className="w-5 h-5 text-yellow-600" />
                 )}
@@ -290,7 +290,7 @@ Guidelines:
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex items-center space-x-2">
                   {browserCompatibility.webSocket ? (
-                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <CheckCircle className="w-4 h-4 text-teal-600" />
                   ) : (
                     <AlertTriangle className="w-4 h-4 text-red-600" />
                   )}
@@ -298,7 +298,7 @@ Guidelines:
                 </div>
                 <div className="flex items-center space-x-2">
                   {browserCompatibility.mediaDevices ? (
-                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <CheckCircle className="w-4 h-4 text-teal-600" />
                   ) : (
                     <AlertTriangle className="w-4 h-4 text-red-600" />
                   )}
@@ -306,7 +306,7 @@ Guidelines:
                 </div>
                 <div className="flex items-center space-x-2">
                   {browserCompatibility.audioContext ? (
-                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <CheckCircle className="w-4 h-4 text-teal-600" />
                   ) : (
                     <AlertTriangle className="w-4 h-4 text-red-600" />
                   )}

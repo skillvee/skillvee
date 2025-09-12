@@ -1,0 +1,51 @@
+/* Hide LinkedIn social login button */
+.cl-socialButtonsBlockButton:has([data-provider="linkedin"]),
+.cl-socialButtonsIconButton:has([data-provider="linkedin"]),
+.cl-socialButtons .cl-socialButtonsBlockButton:nth-child(2),
+[data-id*="linkedin"],
+[data-provider="linkedin"] {
+  display: none !important;
+}
+
+/* Hide development mode badge - all possible selectors */
+.cl-badge,
+.cl-footer .cl-badge,
+[data-localization-key="badge__developmentMode"],
+.cl-internal-badge,
+div[class*="badge"],
+div[class*="developmentMode"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Hide any orange development text */
+*[style*="color: rgb(249, 115, 22)"],
+*[style*="color: #f97316"],
+.text-orange-500 {
+  display: none !important;
+}
+
+/* Hide footer sections that might contain dev badge */
+.cl-footerPages:has([data-localization-key="badge__developmentMode"]) {
+  display: none !important;
+}
+
+/* Make Google button full width when LinkedIn is hidden */
+.cl-socialButtons {
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.cl-socialButtonsBlockButton:first-child {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Additional hiding attempts for LinkedIn */
+.cl-socialButtonsBlockButton[data-id$="linkedin"],
+.cl-socialButtonsIconButton[data-id$="linkedin"] {
+  display: none !important;
+}

@@ -111,7 +111,7 @@ export function DefaultTemplates({
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "JUNIOR":
-        return "bg-green-50 text-green-700 border-green-200";
+        return "bg-teal-50 text-teal-700 border-teal-200";
       case "MEDIUM":
         return "bg-yellow-50 text-yellow-700 border-yellow-200";
       case "SENIOR":
