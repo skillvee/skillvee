@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+
+// Load test environment variables
+dotenv.config({ path: '.env.test' });
 
 /**
  * Playwright configuration for UI testing and verification
@@ -18,25 +22,59 @@ export default defineConfig({
   },
 
   projects: [
+    // Setup project for authentication
+    { 
+      name: 'setup', 
+      testMatch: /.*\.setup\.simplified\.ts/,
+    },
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        storageState: './playwright/.auth/user.json',
+      },
+      dependencies: ['setup'],
     },
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: { 
+        ...devices['Desktop Firefox'],
+        storageState: './playwright/.auth/user.json',
+      },
+      dependencies: ['setup'],
     },
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      use: { 
+        ...devices['Desktop Safari'],
+        storageState: './playwright/.auth/user.json',
+      },
+      dependencies: ['setup'],
     },
     {
       name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
+      use: { 
+        ...devices['Pixel 5'],
+        storageState: './playwright/.auth/user.json',
+      },
+      dependencies: ['setup'],
     },
     {
       name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
+      use: { 
+        ...devices['iPhone 12'],
+        storageState: './playwright/.auth/user.json',
+      },
+      dependencies: ['setup'],
+    },
+    // Unauthenticated tests project
+    {
+      name: 'unauthenticated',
+      use: { 
+        ...devices['Desktop Chrome'],
+        // No storageState - these tests run without authentication
+      },
+      testMatch: /.*\.unauth\.spec\.ts$/,
     },
   ],
 
