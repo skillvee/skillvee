@@ -1,4 +1,5 @@
 import "~/styles/globals.css";
+import "~/styles/clerk-custom.css";
 
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";

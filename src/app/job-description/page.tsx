@@ -212,7 +212,7 @@ Requirements:
                   onClick={handleAnalyzeJob}
                   disabled={description.trim().length < 10}
                   size="lg"
-                  className="px-12 py-4 text-lg font-semibold bg-blue-600 hover:bg-blue-700"
+                  className="px-12 py-4 text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <Sparkles className="h-5 w-5 mr-3" />
                   Analyze with AI

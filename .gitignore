@@ -44,3 +44,9 @@ yarn-error.log*
 
 # idea files
 .idea
+
+# Playwright
+playwright-screenshots/
+playwright-report/
+test-results/
+playwright/.cache/

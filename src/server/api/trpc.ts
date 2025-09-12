@@ -8,7 +8,7 @@
  */
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 import { db } from "~/server/db";
 import { formatError } from "./types/errors";
@@ -45,9 +45,53 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
           role: true,
         },
       });
+      
+      // If user doesn't exist, create a placeholder user
+      // This handles cases where webhook hasn't fired yet
+      if (!user) {
+        const clerkUser = await currentUser();
+        if (clerkUser) {
+          // Create a basic user record
+          user = await db.user.create({
+            data: {
+              clerkId: userId,
+              email: clerkUser.emailAddresses[0]?.emailAddress || `${userId}@placeholder.com`,
+              firstName: clerkUser.firstName,
+              lastName: clerkUser.lastName,
+              profileImage: clerkUser.imageUrl,
+              role: "INTERVIEWER",
+            },
+            select: {
+              id: true,
+              clerkId: true,
+              email: true,
+              role: true,
+            },
+          });
+          console.log("Created placeholder user:", user.id);
+        }
+      }
     } catch (error) {
       // Log error but don't fail context creation
-      console.error("Failed to fetch user in tRPC context:", error);
+      console.error("Failed to fetch/create user in tRPC context:", error);
+      
+      // Development fallback: Create a mock user if database is unavailable
+      if (process.env.NODE_ENV === "development" && userId) {
+        try {
+          const clerkUser = await currentUser();
+          if (clerkUser) {
+            user = {
+              id: `mock-${userId}`,
+              clerkId: userId,
+              email: clerkUser.emailAddresses[0]?.emailAddress || `${userId}@dev.local`,
+              role: "INTERVIEWER" as const,
+            };
+            console.log("Using mock user for development:", user.id);
+          }
+        } catch (mockError) {
+          console.error("Failed to create mock user:", mockError);
+        }
+      }
     }
   }
   

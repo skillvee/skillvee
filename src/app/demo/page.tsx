@@ -116,7 +116,7 @@ export default async function DemoPage() {
                       <Button 
                         type="submit" 
                         size="lg" 
-                        className="w-full font-medium bg-blue-600 hover:bg-blue-700 btn-hover-lift"
+                        className="w-full font-medium bg-blue-600 hover:bg-blue-700 text-white btn-hover-lift"
                       >
                         <Calendar className="w-4 h-4 mr-2 animate-bounce-subtle" />
                         Let's Talk
@@ -161,7 +161,7 @@ export default async function DemoPage() {
                 <h3 className="font-semibold mb-4 text-gray-800">For Candidates</h3>
                 <ul className="space-y-2 text-gray-600">
                   <li><Link href="/candidates" className="hover:text-gray-800">Get Started</Link></li>
-                  <li><Link href="/interview" className="hover:text-gray-800">Practice Interviews</Link></li>
+                  <li><Link href="/practice" className="hover:text-gray-800">Practice Interviews</Link></li>
                   <li><Link href="/faq" className="hover:text-gray-800">FAQ</Link></li>
                 </ul>
               </div>

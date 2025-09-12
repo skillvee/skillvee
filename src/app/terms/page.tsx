@@ -59,7 +59,7 @@ export default function TermsPage() {
                 </div>
               </div>
               <Link href="/candidate-terms" target="_blank">
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                   View Candidate Terms
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>

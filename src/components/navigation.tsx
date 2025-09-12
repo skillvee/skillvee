@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "~/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
+import { usePathname } from "next/navigation";
 
 interface NavigationProps {
   currentPage?: string;
@@ -15,8 +16,14 @@ interface NavigationProps {
 export default function Navigation({ currentPage }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useUser();
+  const pathname = usePathname();
 
   const toggleMenu = () => setIsOpen(!isOpen);
+
+  // Create redirect URL for authentication
+  const getRedirectUrl = () => {
+    return encodeURIComponent(pathname);
+  };
 
   const navLinks = [
     { href: "/companies", label: "Companies" },
@@ -64,12 +71,12 @@ export default function Navigation({ currentPage }: NavigationProps) {
               </>
             ) : (
               <>
-                <SignInButton mode="modal">
+                <Link href={`/sign-in?redirect_url=${getRedirectUrl()}`}>
                   <Button variant="outline">Log in</Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button className="bg-blue-600 hover:bg-blue-700">Sign up</Button>
-                </SignUpButton>
+                </Link>
+                <Link href={`/sign-up?redirect_url=${getRedirectUrl()}`}>
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">Sign up</Button>
+                </Link>
               </>
             )}
         </div>
@@ -116,12 +123,12 @@ export default function Navigation({ currentPage }: NavigationProps) {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <SignInButton mode="modal">
+                  <Link href={`/sign-in?redirect_url=${getRedirectUrl()}`} onClick={() => setIsOpen(false)}>
                     <Button variant="outline" className="w-full">Log in</Button>
-                  </SignInButton>
-                  <SignUpButton mode="modal">
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700">Sign up</Button>
-                  </SignUpButton>
+                  </Link>
+                  <Link href={`/sign-up?redirect_url=${getRedirectUrl()}`} onClick={() => setIsOpen(false)}>
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">Sign up</Button>
+                  </Link>
                 </div>
               )}
             </div>

@@ -107,7 +107,7 @@ export default async function CandidatesPage() {
                         </Button>
                       </SignUpButton>
                     )}
-                    <Link href="/interview">
+                    <Link href="/practice">
                       <Button size="lg" variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors rounded-xl btn-hover-lift">
                         Practice with AI
                       </Button>
@@ -310,7 +310,7 @@ export default async function CandidatesPage() {
                       <span className="text-gray-700">Real-world data science case studies</span>
                     </li>
                   </ul>
-                  <Link href="/interview">
+                  <Link href="/practice">
                     <Button size="lg" className="font-medium px-8 rounded-xl">
                       Start practicing now
                     </Button>
@@ -463,7 +463,7 @@ export default async function CandidatesPage() {
                     </Button>
                   </SignUpButton>
                 )}
-                <Link href="/interview">
+                <Link href="/practice">
                   <Button size="lg" className="bg-primary text-white border-2 border-white hover:bg-white hover:text-primary transition-colors font-medium px-8 rounded-xl">
                     Practice with AI
                   </Button>
@@ -501,7 +501,7 @@ export default async function CandidatesPage() {
                 <h3 className="font-semibold mb-4 text-gray-800">For Candidates</h3>
                 <ul className="space-y-2 text-gray-600">
                   <li><Link href="/candidates" className="hover:text-gray-800">Get Started</Link></li>
-                  <li><Link href="/interview" className="hover:text-gray-800">Practice Interviews</Link></li>
+                  <li><Link href="/practice" className="hover:text-gray-800">Practice Interviews</Link></li>
                   <li><Link href="/faq" className="hover:text-gray-800">FAQ</Link></li>
                 </ul>
               </div>

@@ -40,12 +40,19 @@ AI-powered mock interview platform for data science roles:
 - `npx prisma db push` - Push schema to database
 - `npx prisma studio` - Database management UI
 - `supabase db pull` - Pull remote schema changes
+- `npm run ui:check [url]` - Visual UI testing across all browsers
+- `npm run ui:responsive [url]` - Test responsive design across viewports
+- `npm run ui:accessibility [url]` - Run accessibility checks
+- `npm run playwright` - Run Playwright test suite
+- `npm run playwright:ui` - Interactive Playwright UI mode
+- `npm run playwright:headed` - Run tests with visible browser
 
 ## Development Guidelines
 - **Clean, minimal approach** - Remove unnecessary boilerplate
 - **Type safety first** - Strong TypeScript usage
 - **Modern tooling** - Latest versions and best practices  
 - **Testing before deployment** - Verify connections and builds
+- **Visual UI verification** - Always run Playwright checks before completing UI tasks
 - **Conventional Commits** - Use format: `type(scope): short description`
   - Examples: `feat(auth): add Clerk integration`, `fix(db): resolve connection pooling issue`
 - **NO Claude attribution** - Do not add "Generated with Claude Code" or "Co-Authored-By: Claude" to commits or PRs
@@ -118,10 +125,11 @@ src/lib/
 - **Assessment System**: Comprehensive evaluation with analytics and benchmarking
 
 ## Testing Framework
-**Status**: ✅ Jest configured with 120+ comprehensive tests
+**Status**: ✅ Jest configured with 120+ comprehensive tests + Playwright for UI verification
 
 ### Testing Infrastructure
 - **Framework**: Jest 29.7.0 with TypeScript + React Testing Library
+- **UI Testing**: Playwright for cross-browser visual verification and accessibility
 - **Coverage**: API middleware, media capture hooks, React components, integration flows
 - **Mock Strategy**: MediaRecorder API, tRPC endpoints, browser permissions, DOM environment
 
@@ -130,6 +138,7 @@ src/lib/
 - **Media Capture**: Hooks, components, browser compatibility, error scenarios (56+ tests)
 - **Integration**: Full interview flow, job description creation, recording lifecycle
 - **Error Handling**: Permission denied, device failures, network timeouts, upload failures
+- **UI Verification**: Cross-browser testing (Chrome, Firefox, Safari), responsive design, accessibility
 
 ### Key Test Suites
 ```bash
@@ -137,7 +146,41 @@ src/hooks/__tests__/           # Hook testing with mocked APIs
 src/components/ui/__tests__/   # Component integration tests  
 src/app/interview/__tests__/   # End-to-end flow testing
 src/lib/__tests__/            # Utility and compatibility tests
+scripts/ui-check.ts           # Playwright UI verification helper
+playwright-tests/             # Playwright test specifications
 ```
+
+## Playwright UI Verification
+**Status**: ✅ Complete with automated visual testing capabilities
+
+### Core Features
+- **Cross-Browser Testing**: Automated checks in Chromium, Firefox, and WebKit
+- **Responsive Testing**: Viewport testing across desktop, tablet, and mobile sizes
+- **Accessibility Checks**: Alt text validation, heading hierarchy, form labels
+- **Screenshot Capture**: Automatic screenshots saved to `playwright-screenshots/`
+- **Interactive Mode**: Headed browser mode for visual debugging
+
+### Usage Workflow
+```bash
+# Start development server
+npm run dev
+
+# Run UI verification (in separate terminal)
+npm run ui:check [url]           # Check all browsers
+npm run ui:responsive [url]      # Test responsive design
+npm run ui:accessibility [url]   # Accessibility audit
+
+# Run Playwright tests
+npm run playwright               # Headless mode
+npm run playwright:headed        # With visible browser
+npm run playwright:ui           # Interactive UI mode
+```
+
+### Configuration
+- **Base URL**: http://localhost:3000 (auto-starts dev server)
+- **Browsers**: Desktop Chrome/Firefox/Safari, Mobile Chrome/Safari
+- **Reports**: HTML reports with screenshots and video on failure
+- **Parallel Execution**: Fully parallel test execution for speed
 
 ## Supabase CLI Essentials
 **Status**: ✅ Configured with project ID: buyxawgqsxvmxbzooekf

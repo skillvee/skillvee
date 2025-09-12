@@ -15,7 +15,8 @@ import {
   ThumbsUp, 
   Shield,
   Star,
-  ArrowRight
+  ArrowRight,
+  Brain
 } from "lucide-react";
 import Navigation from "~/components/navigation";
 
@@ -35,7 +36,7 @@ export default async function CompaniesPage() {
               <div className="md:flex md:items-center md:justify-between">
                 <div className="md:w-1/2 mb-10 md:mb-0 animate-fade-in">
                   <h1 className="text-4xl md:text-5xl font-bold mb-4 animate-slide-up">
-                    Hire <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">pre-vetted</span> data scientists
+                    Hire <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">pre-vetted</span> data scientists
                   </h1>
                   <p className="text-xl text-gray-800 font-medium mb-6 animate-fade-in-delay">
                     Stop losing $240K on failed hires
@@ -43,7 +44,7 @@ export default async function CompaniesPage() {
                   <p className="text-lg text-gray-700 mb-6 animate-fade-in-delay-2">
                     Skip resume screening and technical interviews. Every candidate has already proven their skills through real projects.
                   </p>
-                  <div className="bg-blue-100/50 rounded-lg p-4 mb-6 border-l-4 border-primary animate-fade-in-delay-3">
+                  <div className="bg-blue-100/50 rounded-lg p-4 mb-6 border-l-4 border-blue-600 animate-fade-in-delay-3">
                     <p className="font-semibold text-gray-800">From hire to shipping code in 48 hours ⚡</p>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-delay-4">
@@ -53,7 +54,7 @@ export default async function CompaniesPage() {
                       </Button>
                     </Link>
                     <Link href="/pricing">
-                      <Button size="lg" variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors rounded-xl btn-hover-lift">
+                      <Button size="lg" variant="outline" className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors rounded-xl btn-hover-lift">
                         View pricing
                       </Button>
                     </Link>
@@ -175,14 +176,14 @@ export default async function CompaniesPage() {
                 <Card className="bg-white hover:shadow-xl transition-all duration-300 border-0 shadow-md h-full animate-on-scroll-zoom card-hover">
                   <CardContent className="p-8 h-full flex flex-col">
                     <div className="flex items-start gap-4 mb-6">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg flex-shrink-0 animate-bounce-subtle">1</div>
-                      <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center animate-float">
-                        <Search className="w-8 h-8 text-primary" />
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg flex-shrink-0 animate-bounce-subtle">1</div>
+                      <div className="w-16 h-16 bg-blue-600/10 rounded-xl flex items-center justify-center animate-float">
+                        <Search className="w-8 h-8 text-blue-600" />
                       </div>
                     </div>
                     <h3 className="text-2xl font-bold mb-3 text-gray-900">Browse vetted talent</h3>
                     <p className="text-gray-600 mb-4 leading-relaxed flex-grow">See portfolio projects, validated skills, and performance metrics. Every candidate has proven they can ship production code.</p>
-                    <div className="flex items-center text-sm font-medium text-primary mt-auto">
+                    <div className="flex items-center text-sm font-medium text-blue-600 mt-auto">
                       <ArrowRight className="w-4 h-4 mr-2" />
                       Skip months of screening
                     </div>
@@ -226,7 +227,7 @@ export default async function CompaniesPage() {
               
               <div className="mt-16 text-center">
                 <Link href="/demo">
-                  <Button size="lg" className="font-medium px-8 py-4 text-lg rounded-xl bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-primary transition-all duration-300">
+                  <Button size="lg" className="font-medium px-8 py-4 text-lg rounded-xl bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white transition-all duration-300">
                     See available candidates →
                   </Button>
                 </Link>
@@ -332,11 +333,11 @@ export default async function CompaniesPage() {
           <section className="py-20 bg-white overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-20">
-                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/10 to-orange-200/10 px-6 py-2 rounded-full mb-6">
-                  <Star className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-semibold text-primary">Why companies choose us</span>
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600/10 to-orange-200/10 px-6 py-2 rounded-full mb-6">
+                  <Star className="w-5 h-5 text-blue-600" />
+                  <span className="text-sm font-semibold text-blue-600">Why companies choose us</span>
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-primary to-orange-600 bg-clip-text text-transparent">
+                <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-blue-600 to-orange-600 bg-clip-text text-transparent">
                   The hiring experience you've been waiting for
                 </h2>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -346,12 +347,12 @@ export default async function CompaniesPage() {
               
               {/* Hero Feature Card */}
               <div className="mb-16">
-                <Card className="bg-gradient-to-br from-primary/5 via-white to-orange-200/5 border-0 shadow-2xl hover:shadow-3xl transition-all duration-500">
+                <Card className="bg-gradient-to-br from-blue-600/5 via-white to-orange-200/5 border-0 shadow-2xl hover:shadow-3xl transition-all duration-500">
                   <CardContent className="p-12">
                     <div className="grid md:grid-cols-2 gap-12 items-center">
                       <div>
                         <div className="inline-flex items-center gap-3 mb-6">
-                          <div className="w-16 h-16 bg-gradient-to-br from-primary to-blue-600 rounded-2xl flex items-center justify-center">
+                          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl flex items-center justify-center">
                             <Zap className="w-8 h-8 text-white" />
                           </div>
                           <div className="text-4xl">⚡</div>
@@ -376,7 +377,7 @@ export default async function CompaniesPage() {
                         </div>
                       </div>
                       <div className="relative">
-                        <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-orange-200/20 rounded-3xl blur-xl"></div>
+                        <div className="absolute -inset-4 bg-gradient-to-r from-blue-600/20 to-orange-200/20 rounded-3xl blur-xl"></div>
                         <div className="relative bg-white rounded-2xl p-8 shadow-xl">
                           <div className="text-center mb-6">
                             <div className="text-sm text-gray-500 mb-2">Traditional hiring</div>
@@ -452,116 +453,37 @@ export default async function CompaniesPage() {
 
 
           {/* CTA */}
-          <section className="relative py-24 overflow-hidden" style={{background: 'linear-gradient(135deg, #1E3A8A 0%, #1e40af 50%, #1d4ed8 100%)'}}>
-            {/* Background Effects */}
-            <div className="absolute inset-0">
-              <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml,%3Csvg%20width=%2760%27%20height=%2760%27%20viewBox=%270%200%2060%2060%27%20xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cg%20fill=%27none%27%20fill-rule=%27evenodd%27%3E%3Cg%20fill=%27%2314B8A6%27%20fill-opacity=%270.05%27%3E%3Cpath%20d=%27m36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%27/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
-              <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full blur-3xl" style={{backgroundColor: 'rgba(20, 184, 166, 0.1)'}}></div>
-              <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full blur-3xl" style={{backgroundColor: 'rgba(20, 184, 166, 0.08)'}}></div>
+          <section className="py-12 sm:py-16 bg-gradient-to-br from-teal-500 via-blue-600 to-blue-800 relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 left-0 w-full h-full opacity-10">
+              <div className="absolute top-10 left-10 w-20 h-20 border border-white rounded-full"></div>
+              <div className="absolute top-32 right-20 w-16 h-16 bg-white rounded-full"></div>
+              <div className="absolute bottom-20 left-1/4 w-12 h-12 border-2 border-white rounded-full"></div>
+              <div className="absolute bottom-10 right-10 w-24 h-24 border border-white rounded-full"></div>
             </div>
             
-            <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid lg:grid-cols-2 gap-12 items-center">
-                {/* Left side - Content */}
-                <div className="text-center lg:text-left">
-                  <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-                    <div className="w-2 h-2 rounded-full animate-pulse" style={{backgroundColor: '#14B8A6'}}></div>
-                    <span className="text-sm font-medium text-white">Available now</span>
-                  </div>
-                  
-                  <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white leading-tight">
-                    Ready to hire data scientists who actually 
-                    <span className="relative">
-                      <span style={{background: 'linear-gradient(135deg, #14B8A6, #0d9488)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}> ship code?</span>
-                      <div className="absolute -bottom-2 left-0 w-full h-1 rounded-full" style={{background: 'linear-gradient(135deg, #14B8A6, #0d9488)'}}></div>
-                    </span>
-                  </h2>
-                  
-                  <p className="text-xl text-white/90 mb-8 leading-relaxed">
-                    See how pre-validated talent can transform your hiring. Every candidate has proven they can build real products and solve real problems.
-                  </p>
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center relative z-10">
+              <Badge className="bg-yellow-400 text-yellow-900 mb-6 sm:mb-8 text-sm font-semibold">
+                ✨ Available now
+              </Badge>
+              
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+                Ready to hire data scientists who actually <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">ship code?</span>
+              </h2>
+              
+              <p className="text-lg sm:text-xl lg:text-2xl text-blue-100 mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed">
+                See how pre-validated talent can transform your hiring. Every candidate has proven they can build real products and solve real problems.
+              </p>
 
-                  <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                    <Link href="/demo">
-                      <Button size="lg" className="bg-white text-primary hover:bg-gray-100 font-medium px-8 py-4 rounded-xl shadow-2xl hover:shadow-white/20 transition-all duration-300 group">
-                        <span className="mr-2">Schedule a demo</span>
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </Link>
-                    <Link href="/pricing">
-                      <Button size="lg" className="bg-transparent text-white border-2 border-white/30 hover:bg-white hover:text-primary transition-all duration-300 font-medium px-8 py-4 rounded-xl backdrop-blur-sm">
-                        View pricing
-                      </Button>
-                    </Link>
-                  </div>
-
-                  <div className="flex items-center gap-8 text-white/80 text-sm">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-teal-400" />
-                      <span>No setup fees</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-teal-400" />
-                      <span>90-day guarantee</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-teal-400" />
-                      <span>48-hour placement</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right side - Visual Element */}
-                <div className="relative">
-                  <div className="absolute -inset-4 rounded-3xl blur-2xl" style={{background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.2), rgba(13, 148, 136, 0.15))'}}></div>
-                  
-                  <Card className="relative bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl">
-                    <CardContent className="p-8">
-                      <div className="text-center mb-6">
-                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{background: 'linear-gradient(135deg, #14B8A6, #0d9488)'}}>
-                          <Zap className="w-8 h-8 text-white" />
-                        </div>
-                        <h3 className="text-2xl font-bold text-white mb-2">Transform your hiring</h3>
-                        <p className="text-white/80">Join the companies already winning with pre-vetted talent</p>
-                      </div>
-
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                          <span className="text-white/90">Time to hire</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-red-400 line-through">4 months</span>
-                            <ArrowRight className="w-4 h-4 text-white/60" />
-                            <span className="font-bold" style={{color: '#14B8A6'}}>48 hours</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                          <span className="text-white/90">Interview rounds</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-red-400 line-through">5-8 rounds</span>
-                            <ArrowRight className="w-4 h-4 text-white/60" />
-                            <span className="font-bold" style={{color: '#14B8A6'}}>1 culture fit</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between bg-white/10 rounded-lg p-3">
-                          <span className="text-white/90">Failure rate</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-red-400 line-through">46%</span>
-                            <ArrowRight className="w-4 h-4 text-white/60" />
-                            <span className="font-bold" style={{color: '#14B8A6'}}>0%</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-6 pt-6 border-t border-white/20 text-center">
-                        <div className="text-3xl font-bold text-white mb-1">10x faster</div>
-                        <div className="text-white/80 text-sm">than traditional hiring</div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+              <div className="flex justify-center mb-8 sm:mb-12">
+                <Link href="/demo">
+                  <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 shadow-xl">
+                    <Zap className="w-5 h-5 mr-2" />
+                    Schedule a Demo Now
+                  </Button>
+                </Link>
               </div>
+
             </div>
           </section>
         </main>
@@ -594,7 +516,7 @@ export default async function CompaniesPage() {
                 <h3 className="font-semibold mb-4 text-gray-800">For Candidates</h3>
                 <ul className="space-y-2 text-gray-600">
                   <li><Link href="/candidates" className="hover:text-gray-800">Get Started</Link></li>
-                  <li><Link href="/interview" className="hover:text-gray-800">Practice Interviews</Link></li>
+                  <li><Link href="/practice" className="hover:text-gray-800">Practice Interviews</Link></li>
                   <li><Link href="/faq" className="hover:text-gray-800">FAQ</Link></li>
                 </ul>
               </div>

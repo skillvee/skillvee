@@ -6,6 +6,21 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 export const userRouter = createTRPCRouter({
   // Get current user profile
   getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
+    // Development fallback for when database is unavailable
+    if (process.env.NODE_ENV === "development" && ctx.user.id.startsWith("mock-")) {
+      return {
+        id: ctx.user.id,
+        clerkId: ctx.user.clerkId,
+        email: ctx.user.email,
+        firstName: "Development",
+        lastName: "User",
+        profileImage: null,
+        role: ctx.user.role,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    }
+
     const user = await ctx.db.user.findUnique({
       where: { 
         clerkId: ctx.userId,
@@ -113,6 +128,16 @@ export const userRouter = createTRPCRouter({
 
   // Get user stats (interviews, assessments, etc.)
   getUserStats: protectedProcedure.query(async ({ ctx }) => {
+    // Development fallback for when database is unavailable
+    if (process.env.NODE_ENV === "development" && ctx.user.id.startsWith("mock-")) {
+      return {
+        totalInterviews: 0,
+        completedInterviews: 0,
+        averageScore: null,
+        recentInterviews: [],
+      };
+    }
+
     const [
       totalInterviews,
       completedInterviews,

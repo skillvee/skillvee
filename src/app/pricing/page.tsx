@@ -85,14 +85,14 @@ export default async function PricingPage() {
                     </div>
                     
                     {user ? (
-                      <Link href="/interview">
-                        <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 btn-hover-lift">
+                      <Link href="/practice">
+                        <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white btn-hover-lift">
                           Start Practicing Free
                         </Button>
                       </Link>
                     ) : (
                       <SignUpButton>
-                        <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 btn-hover-lift">
+                        <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white btn-hover-lift">
                           Start Practicing Free
                         </Button>
                       </SignUpButton>
@@ -139,7 +139,7 @@ export default async function PricingPage() {
                     </div>
                     
                     <Link href="/demo">
-                      <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 btn-hover-lift">
+                      <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white btn-hover-lift">
                         Let's Talk
                       </Button>
                     </Link>
@@ -200,7 +200,7 @@ export default async function PricingPage() {
                 <h3 className="font-semibold mb-4 text-gray-800">For Candidates</h3>
                 <ul className="space-y-2 text-gray-600">
                   <li><Link href="/candidates" className="hover:text-gray-800">Get Started</Link></li>
-                  <li><Link href="/interview" className="hover:text-gray-800">Practice Interviews</Link></li>
+                  <li><Link href="/practice" className="hover:text-gray-800">Practice Interviews</Link></li>
                   <li><Link href="/faq" className="hover:text-gray-800">FAQ</Link></li>
                 </ul>
               </div>

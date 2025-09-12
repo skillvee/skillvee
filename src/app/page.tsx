@@ -64,14 +64,14 @@ export default async function Home() {
 
                 <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 animate-fade-in-delay-3 justify-center lg:justify-start">
                   {user ? (
-                    <Link href="/interview">
-                      <Button size="lg" className="w-full sm:w-auto min-w-[200px] bg-blue-600 hover:bg-blue-700 transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
+                    <Link href="/practice">
+                      <Button size="lg" className="w-full sm:w-auto min-w-[200px] bg-blue-600 hover:bg-blue-700 text-white transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
                         Start Practicing Free
                       </Button>
                     </Link>
                   ) : (
                     <SignUpButton>
-                      <Button size="lg" className="w-full sm:w-auto min-w-[200px] bg-blue-600 hover:bg-blue-700 transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
+                      <Button size="lg" className="w-full sm:w-auto min-w-[200px] bg-blue-600 hover:bg-blue-700 text-white transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
                         Start Practicing Free
                       </Button>
                     </SignUpButton>
@@ -297,8 +297,8 @@ export default async function Home() {
             </div>
             
             <div className="mt-16 text-center animate-fade-in-delay-3">
-              <Link href="/interview">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 transform hover:scale-110 transition-all duration-300 hover:shadow-xl">
+              <Link href="/practice">
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white transform hover:scale-110 transition-all duration-300 hover:shadow-xl">
                   <span className="text-lg mr-2">⚡</span>
                   Start Practicing Free
                 </Button>
@@ -871,7 +871,7 @@ export default async function Home() {
 
             <div className="flex justify-center mb-8 sm:mb-12">
               {user ? (
-                <Link href="/interview">
+                <Link href="/practice">
                   <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 shadow-xl">
                     <Brain className="w-5 h-5 mr-2" />
                     Start Practicing Free Now
@@ -919,7 +919,7 @@ export default async function Home() {
                 <h3 className="font-semibold mb-4 text-gray-800">For Candidates</h3>
                 <ul className="space-y-2 text-gray-600">
                   <li><Link href="/candidates" className="hover:text-gray-800">Get Started</Link></li>
-                  <li><Link href="/interview" className="hover:text-gray-800">Practice Interviews</Link></li>
+                  <li><Link href="/practice" className="hover:text-gray-800">Practice Interviews</Link></li>
                   <li><Link href="/faq" className="hover:text-gray-800">FAQ</Link></li>
                 </ul>
               </div>
