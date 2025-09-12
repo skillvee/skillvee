@@ -82,7 +82,7 @@ setup('authenticate', async ({ page }) => {
         }
       }
     } catch (error) {
-      console.log(`⚠️  Google OAuth flow issue: ${error.message}`);
+      console.log(`⚠️  Google OAuth flow issue: ${error instanceof Error ? error.message : String(error)}`);
       console.log('🔄 Trying email/password fallback...');
     }
   } else {
@@ -132,7 +132,7 @@ setup('authenticate', async ({ page }) => {
       page.waitForURL('**/dashboard**', { timeout: 20000 }),
       page.waitForURL('/', { timeout: 20000 }),
       page.waitForURL('**/practice**', { timeout: 20000 }),
-      page.waitForURL(url => !url.includes('/sign-in'), { timeout: 20000 })
+      page.waitForURL(url => !url.href.includes('/sign-in'), { timeout: 20000 })
     ]);
     
     console.log(`✅ Authentication redirect detected! Current URL: ${page.url()}`);

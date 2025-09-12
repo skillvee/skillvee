@@ -1,14 +1,17 @@
 import { SignIn } from "@clerk/nextjs";
 import { clerkAppearance } from "~/lib/clerk-theme";
 
-export default function SignInPage({
+export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: { redirect_url?: string };
+  searchParams: Promise<{ redirect_url?: string }>;
 }) {
+  // Await searchParams in Next.js 15+
+  const params = await searchParams;
+  
   // Determine where to redirect after sign-in
   const getRedirectUrl = () => {
-    const redirectUrl = searchParams.redirect_url;
+    const redirectUrl = params.redirect_url;
     
     if (redirectUrl) {
       // If coming from practice flow, keep them in practice
@@ -31,7 +34,7 @@ export default function SignInPage({
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <SignIn 
         appearance={clerkAppearance}
-        signUpUrl={`/sign-up${searchParams.redirect_url ? `?redirect_url=${encodeURIComponent(searchParams.redirect_url)}` : ''}`}
+        signUpUrl={`/sign-up${params.redirect_url ? `?redirect_url=${encodeURIComponent(params.redirect_url)}` : ''}`}
         afterSignInUrl={getRedirectUrl()}
       />
     </div>

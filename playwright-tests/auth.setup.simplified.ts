@@ -81,7 +81,7 @@ setup('authenticate', async ({ page }) => {
   try {
     await Promise.race([
       // Wait for redirect away from sign-in
-      page.waitForURL(url => !url.includes('/sign-in'), { timeout: 15000 }),
+      page.waitForURL(url => !url.href.includes('/sign-in'), { timeout: 15000 }),
       // Or wait for specific pages
       page.waitForURL('**/dashboard**', { timeout: 15000 }),
       page.waitForURL('/', { timeout: 15000 })
