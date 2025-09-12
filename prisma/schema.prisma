@@ -9,19 +9,19 @@ datasource db {
 }
 
 model User {
-  id              String           @id @default(cuid())
-  clerkId         String           @unique
-  email           String           @unique
-  firstName       String?
-  lastName        String?
-  profileImage    String?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  deletedAt       DateTime?
-  role            UserRole         @default(INTERVIEWER)
-  interviewNotes  InterviewNote[]
-  interviews      Interview[]
-  jobDescriptions JobDescription[]
+  id               String                @id @default(cuid())
+  clerkId          String                @unique
+  email            String                @unique
+  firstName        String?
+  lastName         String?
+  profileImage     String?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  deletedAt        DateTime?
+  role             UserRole              @default(INTERVIEWER)
+  interviewNotes   InterviewNote[]
+  interviews       Interview[]
+  jobDescriptions  JobDescription[]
   skillAssessments UserSkillAssessment[]
 
   @@index([clerkId])
@@ -32,23 +32,23 @@ model User {
 }
 
 model JobDescription {
-  id           String      @id @default(cuid())
+  id           String         @id @default(cuid())
   title        String
   company      String?
   description  String
   requirements String[]
   focusAreas   String[]
-  isTemplate   Boolean     @default(false)
+  isTemplate   Boolean        @default(false)
   userId       String?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   deletedAt    DateTime?
   companyName  String?
-  difficulty   Difficulty  @default(MEDIUM)
+  difficulty   Difficulty     @default(MEDIUM)
   archetypeId  String?
   interviews   Interview[]
-  user         User?       @relation(fields: [userId], references: [id])
   archetype    RoleArchetype? @relation(fields: [archetypeId], references: [id])
+  user         User?          @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([isTemplate])
@@ -58,30 +58,30 @@ model JobDescription {
 }
 
 model Interview {
-  id               String           @id @default(cuid())
-  userId           String
-  jobDescriptionId String
-  status           InterviewStatus  @default(SCHEDULED)
-  scheduledAt      DateTime?
-  startedAt        DateTime?
-  completedAt      DateTime?
-  duration         Int?
-  geminiSessionId  String?
-  notes            String?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  deletedAt        DateTime?
-  endedAt          DateTime?
-  geminiConfig     String?
-  focusDomainId    String?
-  assessment       Assessment?
-  interviewNotes   InterviewNote[]
-  jobDescription   JobDescription   @relation(fields: [jobDescriptionId], references: [id])
-  user             User             @relation(fields: [userId], references: [id])
-  focusDomain      SkillDomain?     @relation(fields: [focusDomainId], references: [id])
-  mediaRecordings  MediaRecording[]
-  questions        Question[]
-  interviewSkills  InterviewSkill[]
+  id                   String                @id @default(cuid())
+  userId               String
+  jobDescriptionId     String
+  status               InterviewStatus       @default(SCHEDULED)
+  scheduledAt          DateTime?
+  startedAt            DateTime?
+  completedAt          DateTime?
+  duration             Int?
+  geminiSessionId      String?
+  notes                String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  deletedAt            DateTime?
+  endedAt              DateTime?
+  geminiConfig         String?
+  focusDomainId        String?
+  assessment           Assessment?
+  interviewNotes       InterviewNote[]
+  interviewSkills      InterviewSkill[]
+  focusDomain          SkillDomain?          @relation(fields: [focusDomainId], references: [id])
+  jobDescription       JobDescription        @relation(fields: [jobDescriptionId], references: [id])
+  user                 User                  @relation(fields: [userId], references: [id])
+  mediaRecordings      MediaRecording[]
+  questions            Question[]
   userSkillAssessments UserSkillAssessment[]
 
   @@index([userId])
@@ -176,6 +176,153 @@ model InterviewNote {
   @@map("interview_notes")
 }
 
+model RoleArchetype {
+  id                String             @id @default(cuid())
+  name              String             @unique
+  description       String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  deletedAt         DateTime?
+  jobDescriptions   JobDescription[]
+  roleSkillMappings RoleSkillMapping[]
+  roles             Role[]
+
+  @@index([name])
+  @@index([deletedAt])
+  @@map("role_archetypes")
+}
+
+model Role {
+  id          String        @id @default(cuid())
+  title       String
+  archetypeId String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+  archetype   RoleArchetype @relation(fields: [archetypeId], references: [id], onDelete: Cascade)
+
+  @@unique([archetypeId, title])
+  @@index([archetypeId])
+  @@index([deletedAt])
+  @@map("roles")
+}
+
+model SkillDomain {
+  id         String      @id @default(cuid())
+  name       String      @unique
+  order      Int
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  deletedAt  DateTime?
+  interviews Interview[]
+  skills     Skill[]
+
+  @@index([name])
+  @@index([order])
+  @@index([deletedAt])
+  @@map("skill_domains")
+}
+
+model Skill {
+  id                   String                @id @default(cuid())
+  name                 String
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  deletedAt            DateTime?
+  domainId             String
+  interviewSkills      InterviewSkill[]
+  roleSkillMappings    RoleSkillMapping[]
+  skillLevels          SkillLevel[]
+  domain               SkillDomain           @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  userSkillAssessments UserSkillAssessment[]
+
+  @@unique([domainId, name])
+  @@index([domainId])
+  @@index([deletedAt])
+  @@map("skills")
+}
+
+model SkillLevel {
+  id                  String    @id @default(cuid())
+  skillId             String
+  level               Int
+  levelName           String
+  generalDescription  String
+  observableBehaviors String
+  exampleResponses    String
+  commonMistakes      String
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  deletedAt           DateTime?
+  skill               Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([skillId, level])
+  @@index([skillId])
+  @@index([level])
+  @@index([deletedAt])
+  @@map("skill_levels")
+}
+
+model RoleSkillMapping {
+  id          String          @id @default(cuid())
+  archetypeId String
+  skillId     String
+  importance  SkillImportance
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  deletedAt   DateTime?
+  archetype   RoleArchetype   @relation(fields: [archetypeId], references: [id], onDelete: Cascade)
+  skill       Skill           @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([archetypeId, skillId])
+  @@index([archetypeId])
+  @@index([skillId])
+  @@index([importance])
+  @@index([deletedAt])
+  @@map("role_skill_mappings")
+}
+
+model InterviewSkill {
+  id          String    @id @default(cuid())
+  interviewId String
+  skillId     String
+  isSelected  Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  interview   Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  skill       Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([interviewId, skillId])
+  @@index([interviewId])
+  @@index([skillId])
+  @@index([deletedAt])
+  @@map("interview_skills")
+}
+
+model UserSkillAssessment {
+  id             String     @id @default(cuid())
+  userId         String
+  skillId        String
+  currentLevel   Int?
+  assessmentDate DateTime   @default(now())
+  interviewId    String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  deletedAt      DateTime?
+  interview      Interview? @relation(fields: [interviewId], references: [id])
+  skill          Skill      @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId, interviewId])
+  @@index([userId])
+  @@index([skillId])
+  @@index([interviewId])
+  @@index([currentLevel])
+  @@index([deletedAt])
+  @@map("user_skill_assessments")
+}
+
 enum InterviewStatus {
   SCHEDULED
   IN_PROGRESS
@@ -223,176 +370,8 @@ enum UserRole {
   INTERVIEWER
 }
 
-// Skills Management System - New Taxonomy Structure
-// RoleArchetype → Role
-// SkillDomain → Skill → SkillLevel (1,2,3)
-// RoleSkillMapping (✔/✔✔/✔✔✔ matrix)
-
-model RoleArchetype {
-  id                String              @id @default(cuid())
-  name              String              @unique // "Data Infrastructure Engineering"
-  description       String              @db.Text // "Collect, store, and serve high-quality data at scale"
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  deletedAt         DateTime?
-
-  // Relations
-  roles               Role[]
-  roleSkillMappings   RoleSkillMapping[]
-  jobDescriptions     JobDescription[]
-
-  @@map("role_archetypes")
-  @@index([name])
-  @@index([deletedAt])
-}
-
-model Role {
-  id            String        @id @default(cuid())
-  title         String        // "Data Engineer", "Data Architect", "Analytics Engineer"
-  archetypeId   String
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  deletedAt     DateTime?
-
-  // Relations
-  archetype RoleArchetype @relation(fields: [archetypeId], references: [id], onDelete: Cascade)
-
-  @@unique([archetypeId, title])
-  @@map("roles")
-  @@index([archetypeId])
-  @@index([deletedAt])
-}
-
-model SkillDomain {
-  id        String      @id @default(cuid())
-  name      String      @unique // "Coding & Programming", "Machine Learning & AI"
-  order     Int         // Display order in UI
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  deletedAt DateTime?
-
-  // Relations
-  skills     Skill[]
-  interviews Interview[]
-
-  @@map("skill_domains")
-  @@index([name])
-  @@index([order])
-  @@index([deletedAt])
-}
-
-model Skill {
-  id        String      @id @default(cuid())
-  name      String      // "SQL", "Python", "Classical ML algorithms"
-  domainId  String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  deletedAt DateTime?
-
-  // Relations
-  domain               SkillDomain         @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  skillLevels          SkillLevel[]
-  roleSkillMappings    RoleSkillMapping[]
-  interviewSkills      InterviewSkill[]
-  userSkillAssessments UserSkillAssessment[]
-
-  @@unique([domainId, name])
-  @@map("skills")
-  @@index([domainId])
-  @@index([deletedAt])
-}
-
-model SkillLevel {
-  id                   String   @id @default(cuid())
-  skillId              String
-  level                Int      // 1, 2, 3
-  levelName            String   // "Developing", "Proficient", "Advanced"
-  generalDescription   String   @db.Text
-  observableBehaviors  String   @db.Text
-  exampleResponses     String   @db.Text
-  commonMistakes       String   @db.Text
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  deletedAt            DateTime?
-
-  // Relations
-  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
-
-  @@unique([skillId, level])
-  @@map("skill_levels")
-  @@index([skillId])
-  @@index([level])
-  @@index([deletedAt])
-}
-
-model RoleSkillMapping {
-  id            String          @id @default(cuid())
-  archetypeId   String
-  skillId       String
-  importance    SkillImportance // LOW (✔), MEDIUM (✔✔), HIGH (✔✔✔)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  deletedAt     DateTime?
-
-  // Relations
-  archetype RoleArchetype @relation(fields: [archetypeId], references: [id], onDelete: Cascade)
-  skill     Skill         @relation(fields: [skillId], references: [id], onDelete: Cascade)
-
-  @@unique([archetypeId, skillId])
-  @@map("role_skill_mappings")
-  @@index([archetypeId])
-  @@index([skillId])
-  @@index([importance])
-  @@index([deletedAt])
-}
-
-model InterviewSkill {
-  id          String    @id @default(cuid())
-  interviewId String
-  skillId     String
-  isSelected  Boolean   @default(true) // User can select/deselect skills within domain
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-
-  // Relations
-  interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
-  skill     Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
-
-  @@unique([interviewId, skillId])
-  @@map("interview_skills")
-  @@index([interviewId])
-  @@index([skillId])
-  @@index([deletedAt])
-}
-
-model UserSkillAssessment {
-  id             String    @id @default(cuid())
-  userId         String
-  skillId        String
-  currentLevel   Int?      // 1, 2, 3 or null if not assessed yet
-  assessmentDate DateTime  @default(now())
-  interviewId    String?   // Which interview led to this assessment
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
-
-  // Relations
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  skill     Skill      @relation(fields: [skillId], references: [id], onDelete: Cascade)
-  interview Interview? @relation(fields: [interviewId], references: [id])
-
-  @@unique([userId, skillId, interviewId])
-  @@map("user_skill_assessments")
-  @@index([userId])
-  @@index([skillId])
-  @@index([interviewId])
-  @@index([currentLevel])
-  @@index([deletedAt])
-}
-
 enum SkillImportance {
-  LOW    // ✔
-  MEDIUM // ✔✔
-  HIGH   // ✔✔✔
+  LOW
+  MEDIUM
+  HIGH
 }

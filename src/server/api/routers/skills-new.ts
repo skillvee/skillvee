@@ -6,6 +6,7 @@ import {
   protectedProcedure, 
   publicProcedure,
   adminProcedure,
+  csvAdminProcedure,
 } from "~/server/api/trpc";
 
 import { createError } from "../types/errors";
@@ -263,7 +264,7 @@ Coding & Programming,SQL,3,Advanced,"Expert-level SQL mastery with deep understa
   /**
    * CSV VALIDATION ENDPOINT (Full implementation)
    */
-  validateCSV: adminProcedure
+  validateCSV: csvAdminProcedure
     .input(z.object({
       csvContent: z.string().min(1, "CSV content is required"),
       csvType: z.enum(['skills', 'archetypes']).optional(),
@@ -275,16 +276,25 @@ Coding & Programming,SQL,3,Advanced,"Expert-level SQL mastery with deep understa
         // Auto-detect CSV type if not specified
         let detectedType = csvType;
         if (!detectedType) {
-          const firstLine = csvContent.split('\n')[0];
+          const lines = csvContent.split('\n').filter(line => line.trim());
+          const firstLine = lines[0];
+          const secondLine = lines[1] || '';
+          
+          // Check for skills format
           if (firstLine?.includes('Domain') && firstLine.includes('Level') && firstLine.includes('Level_Name')) {
             detectedType = 'skills';
-          } else if (firstLine?.includes('Bucket') && firstLine.includes('Description') && firstLine.includes('Example_Titles')) {
+          }
+          // Check for archetypes format (headers might be in second line)
+          else if (firstLine?.includes('Bucket') && firstLine.includes('Description')) {
+            detectedType = 'archetypes';
+          }
+          else if (secondLine?.includes('Bucket') && secondLine.includes('Description') && secondLine.includes('Example Titles')) {
             detectedType = 'archetypes';
           } else {
             return {
               isValid: false,
               stats: { totalRows: 0, validRows: 0 },
-              errors: [{ row: 1, field: 'headers', message: 'Cannot determine CSV type. Please ensure headers match expected format.' }],
+              errors: [{ row: 1, field: 'headers', message: 'Cannot determine CSV type. Please ensure headers match expected format. For archetypes: need Bucket, Description, Example Titles columns. For skills: need Domain, Level, Level_Name columns.' }],
               preview: [],
               csvType: 'unknown',
             };
@@ -395,7 +405,7 @@ Coding & Programming,SQL,3,Advanced,"Expert-level SQL mastery with deep understa
   /**
    * CSV IMPORT ENDPOINT (Full implementation)
    */
-  importCSV: adminProcedure
+  importCSV: csvAdminProcedure
     .input(z.object({
       csvContent: z.string().min(1, "CSV content is required"),
       skipErrors: z.boolean().default(true),
@@ -408,10 +418,19 @@ Coding & Programming,SQL,3,Advanced,"Expert-level SQL mastery with deep understa
         // Auto-detect CSV type if not specified
         let detectedType = csvType;
         if (!detectedType) {
-          const firstLine = csvContent.split('\n')[0];
+          const lines = csvContent.split('\n').filter(line => line.trim());
+          const firstLine = lines[0];
+          const secondLine = lines[1] || '';
+          
+          // Check for skills format
           if (firstLine?.includes('Domain') && firstLine.includes('Level') && firstLine.includes('Level_Name')) {
             detectedType = 'skills';
-          } else if (firstLine?.includes('Bucket') && firstLine.includes('Description') && firstLine.includes('Example_Titles')) {
+          }
+          // Check for archetypes format (headers might be in second line)
+          else if (firstLine?.includes('Bucket') && firstLine.includes('Description')) {
+            detectedType = 'archetypes';
+          }
+          else if (secondLine?.includes('Bucket') && secondLine.includes('Description') && secondLine.includes('Example Titles')) {
             detectedType = 'archetypes';
           } else {
             throw new Error('Cannot determine CSV type from headers');
@@ -430,80 +449,79 @@ Coding & Programming,SQL,3,Advanced,"Expert-level SQL mastery with deep understa
             errorsEncountered: 0,
           };
 
-          // Import skills taxonomy in a transaction
-          await ctx.db.$transaction(async (tx) => {
-            for (const domainData of parsed.domains) {
-              // Create or get skill domain
-              let skillDomain = await tx.skillDomain.findFirst({
-                where: { 
+          // Import skills taxonomy without large transactions to avoid timeout
+          for (const domainData of parsed.domains) {
+            // Create or get skill domain first (non-transactional for speed)
+            let skillDomain = await ctx.db.skillDomain.findFirst({
+              where: { 
+                name: domainData.name,
+                deletedAt: null,
+              },
+            });
+            
+            if (!skillDomain) {
+              skillDomain = await ctx.db.skillDomain.create({
+                data: { 
                   name: domainData.name,
+                  order: domainData.order,
+                },
+              });
+              stats.domainsCreated++;
+            }
+
+            // Process each skill separately to avoid transaction timeouts
+            for (const skillData of domainData.skills) {
+              // Create or get skill (non-transactional)
+              let skill = await ctx.db.skill.findFirst({
+                where: { 
+                  name: skillData.name,
+                  domainId: skillDomain.id,
                   deletedAt: null,
                 },
               });
               
-              if (!skillDomain) {
-                skillDomain = await tx.skillDomain.create({
+              if (!skill) {
+                skill = await ctx.db.skill.create({
                   data: { 
-                    name: domainData.name,
-                    order: domainData.order,
-                  },
-                });
-                stats.domainsCreated++;
-              }
-
-              for (const skillData of domainData.skills) {
-                // Create or get skill
-                let skill = await tx.skill.findFirst({
-                  where: { 
                     name: skillData.name,
                     domainId: skillDomain.id,
+                  },
+                });
+                stats.skillsCreated++;
+              }
+
+              // Create skill levels (minimal transaction per level)
+              for (const levelData of skillData.levels) {
+                // Check for existing skill level
+                const existingLevel = await ctx.db.skillLevel.findFirst({
+                  where: { 
+                    skillId: skill.id,
+                    level: levelData.level,
                     deletedAt: null,
                   },
                 });
                 
-                if (!skill) {
-                  skill = await tx.skill.create({
-                    data: { 
-                      name: skillData.name,
-                      domainId: skillDomain.id,
-                    },
-                  });
-                  stats.skillsCreated++;
+                if (existingLevel) {
+                  stats.duplicatesSkipped++;
+                  continue;
                 }
 
-                // Create skill levels
-                for (const levelData of skillData.levels) {
-                  // Check for existing skill level
-                  const existingLevel = await tx.skillLevel.findFirst({
-                    where: { 
-                      skillId: skill.id,
-                      level: levelData.level,
-                      deletedAt: null,
-                    },
-                  });
-                  
-                  if (existingLevel) {
-                    stats.duplicatesSkipped++;
-                    continue;
-                  }
-
-                  // Create skill level
-                  await tx.skillLevel.create({
-                    data: { 
-                      skillId: skill.id,
-                      level: levelData.level,
-                      levelName: levelData.levelName,
-                      generalDescription: levelData.generalDescription,
-                      observableBehaviors: levelData.observableBehaviors,
-                      exampleResponses: levelData.exampleResponses,
-                      commonMistakes: levelData.commonMistakes,
-                    },
-                  });
-                  stats.skillLevelsCreated++;
-                }
+                // Create skill level (individual operation)
+                await ctx.db.skillLevel.create({
+                  data: { 
+                    skillId: skill.id,
+                    level: levelData.level,
+                    levelName: levelData.levelName,
+                    generalDescription: levelData.generalDescription,
+                    observableBehaviors: levelData.observableBehaviors,
+                    exampleResponses: levelData.exampleResponses,
+                    commonMistakes: levelData.commonMistakes,
+                  },
+                });
+                stats.skillLevelsCreated++;
               }
             }
-          });
+          }
 
           return {
             success: true,
@@ -523,66 +541,93 @@ Coding & Programming,SQL,3,Advanced,"Expert-level SQL mastery with deep understa
             errorsEncountered: 0,
           };
 
-          // Import role archetypes in a transaction
-          await ctx.db.$transaction(async (tx) => {
-            for (const archetypeData of parsed.archetypes) {
-              // Create or get role archetype
-              let roleArchetype = await tx.roleArchetype.findFirst({
-                where: { 
+          // Import role archetypes without large transactions to avoid timeout
+          for (const archetypeData of parsed.archetypes) {
+            // Create or get role archetype
+            let roleArchetype = await ctx.db.roleArchetype.findFirst({
+              where: { 
+                name: archetypeData.name,
+                deletedAt: null,
+              },
+            });
+            
+            if (!roleArchetype) {
+              roleArchetype = await ctx.db.roleArchetype.create({
+                data: { 
                   name: archetypeData.name,
+                  description: archetypeData.description,
+                },
+              });
+              stats.archetypesCreated++;
+            }
+
+            // Create roles
+            for (const roleTitle of archetypeData.roles) {
+              const existingRole = await ctx.db.role.findFirst({
+                where: { 
+                  title: roleTitle,
+                  archetypeId: roleArchetype.id,
                   deletedAt: null,
                 },
               });
               
-              if (!roleArchetype) {
-                roleArchetype = await tx.roleArchetype.create({
+              if (!existingRole) {
+                await ctx.db.role.create({
                   data: { 
-                    name: archetypeData.name,
-                    description: archetypeData.description,
-                  },
-                });
-                stats.archetypesCreated++;
-              }
-
-              // Create roles
-              for (const roleTitle of archetypeData.roles) {
-                const existingRole = await tx.role.findFirst({
-                  where: { 
                     title: roleTitle,
                     archetypeId: roleArchetype.id,
+                  },
+                });
+                stats.rolesCreated++;
+              } else {
+                stats.duplicatesSkipped++;
+              }
+            }
+
+            // Create skill mappings
+            for (const mapping of archetypeData.skillMappings) {
+              try {
+                // Find skill by name across all domains
+                const skill = await ctx.db.skill.findFirst({
+                  where: { 
+                    name: mapping.skill,
                     deletedAt: null,
                   },
                 });
                 
-                if (!existingRole) {
-                  await tx.role.create({
-                    data: { 
-                      title: roleTitle,
+                if (!skill) {
+                  console.warn(`Skill not found for mapping: ${mapping.skill}`);
+                  continue;
+                }
+
+                // Check if mapping already exists
+                const existingMapping = await ctx.db.roleSkillMapping.findFirst({
+                  where: {
+                    archetypeId: roleArchetype.id,
+                    skillId: skill.id,
+                    deletedAt: null,
+                  },
+                });
+
+                if (!existingMapping) {
+                  // Create the skill mapping
+                  await ctx.db.roleSkillMapping.create({
+                    data: {
                       archetypeId: roleArchetype.id,
+                      skillId: skill.id,
+                      importance: mapping.importance as 'LOW' | 'MEDIUM' | 'HIGH',
                     },
                   });
-                  stats.rolesCreated++;
+                  stats.skillMappingsCreated++;
                 } else {
                   stats.duplicatesSkipped++;
                 }
-              }
-
-              // Create skill mappings
-              for (const mapping of archetypeData.skillMappings) {
-                // Find skill by name - we'll need to create a mapping to the domain later
-                // For now, skip mappings since we need the skills to exist first
-                // This would be handled in a separate import step for archetypes
-                // after skills taxonomy is imported
-                
-                // Note: In a real implementation, you'd want to:
-                // 1. Import skills taxonomy first
-                // 2. Then import archetypes with proper skill references
-                // 3. Or provide a mapping mechanism in the CSV
-                
-                stats.skillMappingsCreated++;
+              } catch (error) {
+                console.error(`Error creating skill mapping for ${mapping.skill}:`, error);
+                stats.errorsEncountered++;
               }
             }
-          });
+          }
 
           return {
             success: true,
@@ -640,6 +685,62 @@ Coding & Programming,SQL,3,Advanced,"Expert-level SQL mastery with deep understa
    * CRUD ENDPOINTS for individual operations
    */
   
+  /**
+   * MATRIX VIEW ENDPOINT
+   */
+  getSkillsArchetypesMatrix: protectedProcedure
+    .query(async ({ ctx }) => {
+      // Get all archetypes with their roles and skill mappings
+      const archetypes = await ctx.db.roleArchetype.findMany({
+        where: { deletedAt: null },
+        include: {
+          roles: {
+            where: { deletedAt: null },
+            orderBy: { title: 'asc' },
+          },
+          roleSkillMappings: {
+            where: { deletedAt: null },
+            include: {
+              skill: {
+                include: {
+                  domain: true,
+                  skillLevels: {
+                    where: { deletedAt: null },
+                    orderBy: { level: 'asc' },
+                  },
+                },
+              },
+            },
+            orderBy: { importance: 'desc' },
+          },
+        },
+        orderBy: { name: 'asc' },
+      });
+
+      // Get all skill domains with their skills
+      const domains = await ctx.db.skillDomain.findMany({
+        where: { deletedAt: null },
+        include: {
+          skills: {
+            where: { deletedAt: null },
+            include: {
+              skillLevels: {
+                where: { deletedAt: null },
+                orderBy: { level: 'asc' },
+              },
+            },
+            orderBy: { name: 'asc' },
+          },
+        },
+        orderBy: { order: 'asc' },
+      });
+
+      return {
+        archetypes,
+        domains,
+      };
+    }),
+
   // Create a new skill domain
   createDomain: adminProcedure
     .input(z.object({

@@ -8,6 +8,7 @@ import { CreateDomainForm } from "~/components/admin/skills/create-domain-form";
 import { CSVImportDialog } from "~/components/admin/skills/csv-import-dialog";
 import { SkillsDataTable } from "~/components/admin/skills/skills-data-table";
 import { SkillsTreeView } from "~/components/admin/skills/skills-tree-view";
+import { SkillsArchetypesMatrix } from "~/components/admin/skills/skills-archetypes-matrix";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogTrigger } from "~/components/ui/dialog";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
@@ -27,6 +28,8 @@ export default function AdminSkillsPage() {
     });
   const { data: hierarchyData, isLoading: hierarchyLoading } =
     api.skills.getHierarchy.useQuery({});
+  const { data: matrixData, isLoading: matrixLoading } =
+    api.skills.getSkillsArchetypesMatrix.useQuery();
 
   return (
     <SidebarProvider>
@@ -74,8 +77,9 @@ export default function AdminSkillsPage() {
               {/* Main Content Tabs */}
               <div className="px-4 lg:px-6">
                 <Tabs defaultValue="hierarchy" className="space-y-6">
-                  <TabsList className="grid w-full grid-cols-2 lg:w-[300px]">
+                  <TabsList className="grid w-full grid-cols-3 lg:w-[450px]">
                     <TabsTrigger value="hierarchy">Hierarchy</TabsTrigger>
+                    <TabsTrigger value="matrix">Matrix View</TabsTrigger>
                     <TabsTrigger value="table">Data Table</TabsTrigger>
                   </TabsList>
 
@@ -85,6 +89,13 @@ export default function AdminSkillsPage() {
                       isLoading={hierarchyLoading}
                       searchQuery={searchQuery}
                       onSearchChange={setSearchQuery}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="matrix" className="space-y-6">
+                    <SkillsArchetypesMatrix
+                      data={matrixData}
+                      isLoading={matrixLoading}
                     />
                   </TabsContent>
 

@@ -14,7 +14,7 @@ export interface SkillTaxonomyRow {
 export interface RoleArchetypeRow {
   Bucket: string;
   Description: string;
-  Example_Titles: string;
+  "Example Titles": string;
   [skillName: string]: string; // For all the skill columns with ✔/✔✔/✔✔✔
 }
 
@@ -158,29 +158,30 @@ export function parseRoleArchetypesCSV(csvContent: string): ParsedRoleArchetypes
   try {
     const lines = csvContent.split('\n').filter(line => line.trim());
     
-    if (lines.length < 2) {
-      throw new CSVParsingError('CSV must contain at least header and one data row');
+    if (lines.length < 3) {
+      throw new CSVParsingError('CSV must contain domain header, skill header, and at least one data row');
     }
 
-    // Parse header to extract skill domains and skills
-    const headers = parse(lines[0]!, {
+    // Parse the skill headers from the second row (first row is domain groupings)
+    const skillHeaderLine = lines[1]!;
+    const headers = parse(skillHeaderLine, {
       skip_empty_lines: true,
       trim: true,
     })[0] as string[];
 
-    // Find skill domain headers (they start after Example_Titles column)
+    // Find skill headers (they start after Example_Titles column)
     const skillDomainStartIndex = 3;
     const skillHeaders = headers.slice(skillDomainStartIndex);
     
     // Extract unique skill domains from the skill headers
     const skillDomains = [...new Set(skillHeaders)].filter(header => header.trim());
 
-    // Parse data rows
+    // Parse data rows (skip both header rows)
     const records = parse(csvContent, {
       columns: headers,
       skip_empty_lines: true,
       trim: true,
-      from: 2, // Skip header row
+      from: 3, // Skip both header rows
     }) as RoleArchetypeRow[];
 
     const archetypes = records.map((record, index) => {
@@ -191,12 +192,12 @@ export function parseRoleArchetypesCSV(csvContent: string): ParsedRoleArchetypes
       if (!record.Description?.trim()) {
         throw new CSVParsingError('Description is required', index + 2);
       }
-      if (!record.Example_Titles?.trim()) {
-        throw new CSVParsingError('Example_Titles is required', index + 2);
+      if (!record["Example Titles"]?.trim()) {
+        throw new CSVParsingError('Example Titles is required', index + 2);
       }
 
-      // Parse roles from Example_Titles
-      const roleText = record.Example_Titles.replace(/^•\s*/gm, '').trim();
+      // Parse roles from Example Titles
+      const roleText = record["Example Titles"].replace(/^•\s*/gm, '').trim();
       const roles = roleText
         .split(/\n|•/)
         .map(role => role.trim())
@@ -260,13 +261,25 @@ export function validateCSVContent(content: string, type: 'skills' | 'archetypes
 
   const lines = content.split('\n').filter(line => line.trim());
   
-  if (lines.length < 2) {
+  if (type === 'skills' && lines.length < 2) {
     errors.push('CSV must contain at least a header row and one data row');
+    return { isValid: false, errors };
+  }
+  
+  if (type === 'archetypes' && lines.length < 3) {
+    errors.push('Archetypes CSV must contain domain header, skill header, and at least one data row');
     return { isValid: false, errors };
   }
 
   try {
-    const headers = parse(lines[0]!, { trim: true })[0] as string[];
+    let headers: string[];
+    
+    if (type === 'skills') {
+      headers = parse(lines[0]!, { trim: true })[0] as string[];
+    } else {
+      // For archetypes, headers are in the second line
+      headers = parse(lines[1]!, { trim: true })[0] as string[];
+    }
     
     if (type === 'skills') {
       const requiredColumns = ['Domain', 'Skill', 'Level', 'Level_Name', 'General_Description', 'Observable_Behaviors', 'Example_Responses', 'Common_Mistakes'];
@@ -276,7 +289,7 @@ export function validateCSVContent(content: string, type: 'skills' | 'archetypes
         errors.push(`Missing required columns for skills CSV: ${missingColumns.join(', ')}`);
       }
     } else if (type === 'archetypes') {
-      const requiredColumns = ['Bucket', 'Description', 'Example_Titles'];
+      const requiredColumns = ['Bucket', 'Description', 'Example Titles'];
       const missingColumns = requiredColumns.filter(col => !headers.includes(col));
       
       if (missingColumns.length > 0) {

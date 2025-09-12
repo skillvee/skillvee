@@ -34,8 +34,10 @@ import {
 interface TreeNode {
   id: string;
   name: string;
-  type: "domain" | "category" | "skill" | "competency";
-  priority?: "PRIMARY" | "SECONDARY" | "NONE";
+  type: "domain" | "skill" | "level";
+  level?: number;
+  levelName?: string;
+  description?: string;
   children?: TreeNode[];
 }
 
@@ -44,17 +46,18 @@ interface SkillsTreeViewProps {
     domains?: Array<{
       id: string;
       name: string;
-      categories?: Array<{
+      order: number;
+      skills?: Array<{
         id: string;
         name: string;
-        skills?: Array<{
+        skillLevels?: Array<{
           id: string;
-          name: string;
-          competencies?: Array<{
-            id: string;
-            name: string;
-            priority: "PRIMARY" | "SECONDARY" | "NONE";
-          }>;
+          level: number;
+          levelName: string;
+          generalDescription: string;
+          observableBehaviors: string;
+          exampleResponses: string;
+          commonMistakes: string;
         }>;
       }>;
     }>;
@@ -83,35 +86,30 @@ function TreeItem({ node, level, searchQuery, onSelect }: TreeItemProps) {
     switch (node.type) {
       case "domain":
         return <Building2 className="h-4 w-4 text-blue-600" />;
-      case "category":
-        return <FolderOpen className="h-4 w-4 text-green-600" />;
       case "skill":
         return <Target className="h-4 w-4 text-orange-600" />;
-      case "competency":
+      case "level":
         return <Award className="h-4 w-4 text-purple-600" />;
       default:
         return null;
     }
   };
 
-  const getPriorityBadge = () => {
-    if (node.type !== "competency" || !node.priority) return null;
+  const getLevelBadge = () => {
+    if (node.type !== "level" || !node.level || !node.levelName) return null;
     
-    const variants = {
-      PRIMARY: { variant: "destructive" as const, icon: Star },
-      SECONDARY: { variant: "secondary" as const, icon: AlertTriangle },
-      NONE: { variant: "outline" as const, icon: null },
+    const levelConfig = {
+      1: { variant: "secondary" as const, color: "bg-yellow-100 text-yellow-800 border-yellow-300" },
+      2: { variant: "default" as const, color: "bg-blue-100 text-blue-800 border-blue-300" },
+      3: { variant: "destructive" as const, color: "bg-green-100 text-green-800 border-green-300" },
     };
     
-    const config = variants[node.priority];
-    if (!config || node.priority === "NONE") return null;
-    
-    const Icon = config.icon;
+    const config = levelConfig[node.level as keyof typeof levelConfig];
+    if (!config) return null;
     
     return (
-      <Badge variant={config.variant} className="text-xs gap-1">
-        {Icon && <Icon className="h-3 w-3" />}
-        {node.priority.toLowerCase()}
+      <Badge className={`text-xs px-2 py-1 ${config.color}`}>
+        Level {node.level} - {node.levelName}
       </Badge>
     );
   };
@@ -151,7 +149,7 @@ function TreeItem({ node, level, searchQuery, onSelect }: TreeItemProps) {
             >
               {node.name}
             </span>
-            {getPriorityBadge()}
+            {getLevelBadge()}
           </div>
           
           <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
@@ -194,27 +192,28 @@ export function SkillsTreeView({ data, isLoading, searchQuery, onSearchChange }:
   const transformToTreeNodes = (): TreeNode[] => {
     if (!data?.domains) return [];
     
-    return data.domains.map(domain => ({
-      id: domain.id,
-      name: domain.name,
-      type: "domain" as const,
-      children: domain.categories?.map(category => ({
-        id: category.id,
-        name: category.name,
-        type: "category" as const,
-        children: category.skills?.map(skill => ({
+    return data.domains
+      .sort((a, b) => a.order - b.order) // Sort domains by order
+      .map(domain => ({
+        id: domain.id,
+        name: domain.name,
+        type: "domain" as const,
+        children: domain.skills?.map(skill => ({
           id: skill.id,
           name: skill.name,
           type: "skill" as const,
-          children: skill.competencies?.map(competency => ({
-            id: competency.id,
-            name: competency.name,
-            type: "competency" as const,
-            priority: competency.priority,
-          })),
+          children: skill.skillLevels
+            ?.sort((a, b) => a.level - b.level) // Sort levels 1, 2, 3
+            ?.map(skillLevel => ({
+              id: skillLevel.id,
+              name: `${skillLevel.levelName}`,
+              type: "level" as const,
+              level: skillLevel.level,
+              levelName: skillLevel.levelName,
+              description: skillLevel.generalDescription,
+            })),
         })),
-      })),
-    }));
+      }));
   };
 
   const treeNodes = transformToTreeNodes();
@@ -264,7 +263,7 @@ export function SkillsTreeView({ data, isLoading, searchQuery, onSearchChange }:
               Skills Hierarchy
             </CardTitle>
             <CardDescription>
-              Navigate through domains, categories, skills, and competencies
+              Navigate through domains, skills, and proficiency levels (1: Developing, 2: Proficient, 3: Advanced)
             </CardDescription>
             {/* Search Input */}
             <div className="relative">
@@ -295,10 +294,10 @@ export function SkillsTreeView({ data, isLoading, searchQuery, onSearchChange }:
                 <div className="text-center py-12">
                   <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                    No domains yet
+                    No skill domains yet
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    Create your first domain to start building the skills hierarchy
+                    Import your skills taxonomy CSV or create your first domain to start building the skills hierarchy
                   </p>
                   <Button className="gap-2">
                     <Plus className="h-4 w-4" />
@@ -323,32 +322,37 @@ export function SkillsTreeView({ data, isLoading, searchQuery, onSearchChange }:
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   {selectedNode.type === "domain" && <Building2 className="h-5 w-5 text-blue-600" />}
-                  {selectedNode.type === "category" && <FolderOpen className="h-5 w-5 text-green-600" />}
                   {selectedNode.type === "skill" && <Target className="h-5 w-5 text-orange-600" />}
-                  {selectedNode.type === "competency" && <Award className="h-5 w-5 text-purple-600" />}
+                  {selectedNode.type === "level" && <Award className="h-5 w-5 text-purple-600" />}
                   <div>
                     <h3 className="font-medium">{selectedNode.name}</h3>
                     <p className="text-sm text-gray-600 capitalize">
-                      {selectedNode.type}
+                      {selectedNode.type === "level" ? "Skill Level" : selectedNode.type}
                     </p>
                   </div>
                 </div>
 
-                {selectedNode.priority && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">Priority:</span>
-                    <Badge 
-                      variant={
-                        selectedNode.priority === "PRIMARY" 
-                          ? "destructive" 
-                          : selectedNode.priority === "SECONDARY"
-                          ? "secondary"
-                          : "outline"
-                      }
-                      className="text-xs"
-                    >
-                      {selectedNode.priority.toLowerCase()}
-                    </Badge>
+                {selectedNode.type === "level" && selectedNode.level && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">Level:</span>
+                      <Badge className={`text-xs px-2 py-1 ${
+                        selectedNode.level === 1 ? "bg-yellow-100 text-yellow-800 border-yellow-300" :
+                        selectedNode.level === 2 ? "bg-blue-100 text-blue-800 border-blue-300" :
+                        "bg-green-100 text-green-800 border-green-300"
+                      }`}>
+                        Level {selectedNode.level} - {selectedNode.levelName}
+                      </Badge>
+                    </div>
+                    
+                    {selectedNode.description && (
+                      <div>
+                        <span className="text-sm font-medium block mb-1">Description:</span>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          {selectedNode.description}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 

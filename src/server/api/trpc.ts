@@ -144,6 +144,18 @@ const aiRateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
 });
 
 /**
+ * CSV operations rate limiting (more lenient for bulk operations)
+ */
+const csvRateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
+  const rateLimiter = createRateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 10, // Allow 10 CSV operations per minute
+  });
+  await rateLimiter({ ctx, next: async () => undefined });
+  return next();
+});
+
+/**
  * Public (unauthenticated) procedure
  *
  * This is the base piece you use to build new queries and mutations on your tRPC API. It does not
@@ -219,6 +231,35 @@ export const aiProcedure = t.procedure
   .use(async ({ ctx, next }) => {
     if (!ctx.userId || !ctx.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    
+    return next({
+      ctx: {
+        ...ctx,
+        userId: ctx.userId,
+        user: ctx.user,
+      },
+    });
+  });
+
+/**
+ * CSV admin procedure for CSV operations
+ *
+ * Admin-only with appropriate rate limiting for bulk CSV operations.
+ */
+export const csvAdminProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(csvRateLimitMiddleware)
+  .use(async ({ ctx, next }) => {
+    if (!ctx.userId || !ctx.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    
+    if (ctx.user.role !== "ADMIN") {
+      throw new TRPCError({ 
+        code: "FORBIDDEN",
+        message: "Admin access required",
+      });
     }
     
     return next({
