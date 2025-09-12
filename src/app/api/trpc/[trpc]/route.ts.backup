@@ -5,6 +5,14 @@ import { env } from "~/env";
 import { appRouter } from "~/server/api/root";
 import { createTRPCContext } from "~/server/api/trpc";
 
+console.log("[API-HANDLER] tRPC API handler loaded - v2");
+console.log("[API-HANDLER] appRouter type:", typeof appRouter);
+console.log("[API-HANDLER] appRouter keys:", Object.keys(appRouter));
+console.log("[API-HANDLER] appRouter.skills exists:", !!appRouter.skills);
+if (appRouter.skills) {
+  console.log("[API-HANDLER] appRouter.skills keys:", Object.keys(appRouter.skills));
+}
+
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
  * handling a HTTP request (e.g. when you make requests from Client Components).
@@ -15,8 +23,13 @@ const createContext = async (req: NextRequest) => {
   });
 };
 
-const handler = (req: NextRequest) =>
-  fetchRequestHandler({
+const handler = (req: NextRequest) => {
+  const url = new URL(req.url);
+  const path = url.pathname;
+  console.log(`[API-HANDLER] Processing request: ${req.method} ${path}`);
+  console.log(`[API-HANDLER] Search params:`, url.searchParams.toString());
+  
+  return fetchRequestHandler({
     endpoint: "/api/trpc",
     req,
     router: appRouter,
@@ -27,8 +40,10 @@ const handler = (req: NextRequest) =>
             console.error(
               `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
             );
+            console.error(`❌ Error details:`, error);
           }
         : undefined,
   });
+};
 
 export { handler as GET, handler as POST };

@@ -48,7 +48,7 @@ interface Domain {
   createdAt: Date;
   updatedAt: Date;
   _count?: {
-    categories: number;
+    skills: number;
   };
 }
 
@@ -80,7 +80,7 @@ export function SkillsDataTable({ domains, isLoading }: SkillsDataTableProps) {
       id: domain.id,
       type: "domain" as const,
       name: domain.name,
-      childrenCount: domain._count?.categories || 0,
+      childrenCount: domain._count?.skills || 0,
       createdAt: domain.createdAt,
       updatedAt: domain.updatedAt,
     }));

@@ -44,6 +44,9 @@ export default async function Home() {
                   <Link href="/dashboard">
                     <Button variant="outline">Dashboard</Button>
                   </Link>
+                  <Link href="/admin">
+                    <Button variant="outline" size="sm">Admin</Button>
+                  </Link>
                   <UserButton />
                 </div>
               ) : (

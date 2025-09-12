@@ -31,15 +31,14 @@ const navigationItems = [
     href: "/admin",
   },
   {
-    title: "Skills Management",
+    title: "Skills Taxonomy",
     icon: Target,
     href: "/admin/skills",
-    isActive: true,
   },
   {
-    title: "Competencies", 
-    icon: Award,
-    href: "/admin/competencies",
+    title: "Role Archetypes", 
+    icon: Building2,
+    href: "/admin/archetypes",
   },
   {
     title: "Interviews",
@@ -60,9 +59,14 @@ const navigationItems = [
 
 const quickActions = [
   {
-    title: "Add Domain",
+    title: "Add Skill Domain",
     icon: PlusCircle,
     href: "/admin/skills?action=create-domain",
+  },
+  {
+    title: "Add Archetype", 
+    icon: Building2,
+    href: "/admin/archetypes?action=create",
   },
   {
     title: "Import CSV", 
@@ -97,7 +101,7 @@ export function AppSidebar({ variant = "inset" }: AppSidebarProps) {
         <SidebarMenu>
           {navigationItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton asChild isActive={item.isActive}>
+              <SidebarMenuButton asChild>
                 <Link href={item.href}>
                   <item.icon className="size-4" />
                   <span>{item.title}</span>

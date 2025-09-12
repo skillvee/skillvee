@@ -42,11 +42,19 @@ interface ImportPreview {
   validRows: number;
   errors: ValidationError[];
   sample: Array<{
-    domain: string;
-    category: string;
-    skill: string;
-    competency: string;
-    priority: string;
+    domain?: string;
+    skill?: string;
+    level?: string;
+    level_name?: string;
+    general_description?: string;
+    bucket?: string;
+    description?: string;
+    roles_count?: number;
+    mappings_count?: number;
+    // Legacy fields for backward compatibility
+    category?: string;
+    competency?: string;
+    priority?: string;
   }>;
 }
 
@@ -123,7 +131,11 @@ export function CSVImportDialog({ onClose }: CSVImportDialogProps) {
       
       setUploadProgress(100);
       
-      toast.success(`Successfully imported ${result.stats.competenciesCreated} competencies across ${result.stats.domainsCreated} domains!`);
+      const message = 'domainsCreated' in result.stats 
+        ? `Successfully imported ${result.stats.skillLevelsCreated} skill levels across ${result.stats.domainsCreated} domains and ${result.stats.skillsCreated} skills!`
+        : `Successfully imported ${result.stats.archetypesCreated} role archetypes with ${result.stats.rolesCreated} roles!`;
+      
+      toast.success(message);
       
       // Refresh the page data (you might want to invalidate queries here)
       setTimeout(() => {
@@ -165,7 +177,7 @@ export function CSVImportDialog({ onClose }: CSVImportDialogProps) {
           Import Skills Data
         </DialogTitle>
         <DialogDescription>
-          Upload a CSV file to bulk import domains, categories, skills, and competencies
+          Upload CSV files to bulk import skills taxonomy (domains, skills, skill levels) or role archetypes with skill mappings
         </DialogDescription>
       </DialogHeader>
 
@@ -256,13 +268,28 @@ export function CSVImportDialog({ onClose }: CSVImportDialogProps) {
               <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
                 CSV Format Requirements
               </h4>
-              <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                <li>• Headers: Domain, Category, Skill, Competency, Priority, Rubric_Level_1, Rubric_Level_2, etc.</li>
-                <li>• Priority values: PRIMARY, SECONDARY, or NONE</li>
-                <li>• All 5 rubric levels must be provided (Rubric_Level_1 through Rubric_Level_5)</li>
-                <li>• Domain and category names will be created if they don't exist</li>
-                <li>• Maximum file size: 10MB</li>
-              </ul>
+              <div className="space-y-3">
+                <div>
+                  <h5 className="text-sm font-medium text-blue-800 dark:text-blue-200">Skills Taxonomy CSV:</h5>
+                  <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1 ml-2">
+                    <li>• Headers: Domain, Skill, Level, Level_Name, General_Description, Observable_Behaviors, Example_Responses, Common_Mistakes</li>
+                    <li>• Level values: 1, 2, 3 (Developing, Proficient, Advanced)</li>
+                    <li>• Level_Name values: "Developing", "Proficient", "Advanced"</li>
+                  </ul>
+                </div>
+                <div>
+                  <h5 className="text-sm font-medium text-blue-800 dark:text-blue-200">Role Archetypes CSV:</h5>
+                  <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1 ml-2">
+                    <li>• Headers: Bucket, Description, Example_Titles, [Skill Names with ✔/✔✔/✔✔✔]</li>
+                    <li>• Bucket = Archetype name (e.g., "Data Infrastructure Engineering")</li>
+                    <li>• Example_Titles = Job roles separated by newlines or bullet points</li>
+                    <li>• Skills marked with ✔ (LOW), ✔✔ (MEDIUM), or ✔✔✔ (HIGH) importance</li>
+                  </ul>
+                </div>
+                <div className="text-sm text-blue-700 dark:text-blue-300">
+                  • Maximum file size: 10MB
+                </div>
+              </div>
             </div>
           </div>
         </TabsContent>
