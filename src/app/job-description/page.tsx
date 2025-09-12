@@ -212,7 +212,7 @@ Requirements:
                   onClick={handleAnalyzeJob}
                   disabled={description.trim().length < 10}
                   size="lg"
-                  className="px-12 py-4 text-lg font-semibold bg-blue-600 hover:bg-blue-700"
+                  className="px-12 py-4 text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <Sparkles className="h-5 w-5 mr-3" />
                   Analyze with AI
@@ -302,7 +302,7 @@ Requirements:
                     </div>
                     <Badge 
                       variant="secondary" 
-                      className="bg-green-50 text-green-700 border-green-200 px-3 py-1"
+                      className="bg-teal-50 text-teal-700 border-teal-200 px-3 py-1"
                     >
                       <CheckCircle2 className="h-4 w-4 mr-1" />
                       AI Extracted
@@ -385,7 +385,7 @@ Requirements:
                         ) : (
                           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                             <div className="flex items-start space-x-3 flex-1">
-                              <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                              <CheckCircle2 className="h-5 w-5 text-teal-600 mt-0.5 flex-shrink-0" />
                               <span className="text-gray-700">{req}</span>
                             </div>
                             <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
