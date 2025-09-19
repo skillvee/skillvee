@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { Separator } from "~/components/ui/separator";
 import {
@@ -38,18 +39,22 @@ export function SiteHeader({
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumbs.map((breadcrumb, index) => (
-              <BreadcrumbItem key={index}>
-                {index === breadcrumbs.length - 1 ? (
-                  <BreadcrumbPage>{breadcrumb.title}</BreadcrumbPage>
-                ) : (
-                  <>
+              <React.Fragment key={index}>
+                <BreadcrumbItem>
+                  {index === breadcrumbs.length - 1 ? (
+                    <BreadcrumbPage>{breadcrumb.title}</BreadcrumbPage>
+                  ) : (
                     <BreadcrumbLink href={breadcrumb.href}>
                       {breadcrumb.title}
                     </BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+                {index < breadcrumbs.length - 1 && (
+                  <li>
                     <BreadcrumbSeparator />
-                  </>
+                  </li>
                 )}
-              </BreadcrumbItem>
+              </React.Fragment>
             ))}
           </BreadcrumbList>
         </Breadcrumb>

@@ -13,6 +13,7 @@ export const SKILLVEE_ERROR_CODES = {
   ASSESSMENT_NOT_READY: "ASSESSMENT_NOT_READY",
   MEDIA_UPLOAD_FAILED: "MEDIA_UPLOAD_FAILED",
   AI_SERVICE_UNAVAILABLE: "AI_SERVICE_UNAVAILABLE",
+  UNSUPPORTED_JOB_TYPE: "UNSUPPORTED_JOB_TYPE",
   
   // Permission errors
   INSUFFICIENT_PERMISSIONS: "INSUFFICIENT_PERMISSIONS",
@@ -77,6 +78,7 @@ function mapToTRPCCode(code: SkillVeeErrorCode | TRPCError["code"]): TRPCError["
     [SKILLVEE_ERROR_CODES.ASSESSMENT_NOT_READY]: "PRECONDITION_FAILED",
     [SKILLVEE_ERROR_CODES.MEDIA_UPLOAD_FAILED]: "INTERNAL_SERVER_ERROR",
     [SKILLVEE_ERROR_CODES.AI_SERVICE_UNAVAILABLE]: "SERVICE_UNAVAILABLE",
+    [SKILLVEE_ERROR_CODES.UNSUPPORTED_JOB_TYPE]: "BAD_REQUEST",
     [SKILLVEE_ERROR_CODES.INSUFFICIENT_PERMISSIONS]: "FORBIDDEN",
     [SKILLVEE_ERROR_CODES.ADMIN_ACCESS_REQUIRED]: "FORBIDDEN",
     [SKILLVEE_ERROR_CODES.RESOURCE_ACCESS_DENIED]: "FORBIDDEN",
@@ -139,6 +141,13 @@ export const createError = {
       code: SKILLVEE_ERROR_CODES.AI_SERVICE_UNAVAILABLE,
       message: `AI service '${service}' is currently unavailable${details ? `: ${details}` : ""}`,
       context: { service, details },
+    }),
+
+  unsupportedJobType: (jobTitle?: string) =>
+    new SkillVeeError({
+      code: SKILLVEE_ERROR_CODES.UNSUPPORTED_JOB_TYPE,
+      message: `We currently only support data science job descriptions. Please try with a data science, machine learning, or analytics role.${jobTitle ? ` (Detected: ${jobTitle})` : ""}`,
+      context: { jobTitle, supportedTypes: ["Data Science", "Machine Learning", "Analytics", "Data Engineering"] },
     }),
 };
 

@@ -10,16 +10,16 @@ export const clerkAppearance: Appearance = {
     animations: false,
   },
   variables: {
-    colorPrimary: "#374151",
+    colorPrimary: "rgb(35, 124, 241)",
     colorText: "#000000",
     colorTextSecondary: "#6b7280",
     colorBackground: "#ffffff",
     colorInputBackground: "#ffffff",
     colorInputText: "#000000",
-    
+
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     fontSize: "0.9375rem",
-    
+
     borderRadius: "0.5rem",
     spacingUnit: "1rem",
   },
@@ -148,7 +148,7 @@ export const clerkAppearance: Appearance = {
     },
     
     formButtonPrimary: {
-      backgroundColor: "#374151",
+      backgroundColor: "rgb(35, 124, 241)",
       color: "#ffffff",
       fontSize: "0.9375rem",
       fontWeight: "600",
@@ -160,20 +160,16 @@ export const clerkAppearance: Appearance = {
       cursor: "pointer",
       transition: "background-color 0.15s",
       "&:hover": {
-        backgroundColor: "#1f2937",
+        backgroundColor: "rgba(35, 124, 241, 0.9)",
       },
       "&:active": {
-        backgroundColor: "#111827",
+        backgroundColor: "rgba(35, 124, 241, 0.8)",
       },
       "&:focus": {
         outline: "none",
       },
     },
     
-    footer: {
-      marginTop: "2rem",
-      textAlign: "center",
-    },
     
     footerAction: {
       textAlign: "center",
@@ -248,30 +244,34 @@ export const clerkAppearance: Appearance = {
         textDecoration: "underline",
       },
     },
-    
-    // Clerk branding
+
+    // Completely hide all footer and branding elements
     footerPages: {
-      marginTop: "2rem",
-      paddingTop: "1.5rem",
-      borderTop: "1px solid #f3f4f6",
-      textAlign: "center",
+      display: "none !important",
+      visibility: "hidden !important",
+      height: "0 !important",
+      margin: "0 !important",
+      padding: "0 !important",
     },
-    
+
     footerPagesLink: {
-      color: "#6b7280",
-      fontSize: "0.75rem",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "0.25rem",
-      textDecoration: "none",
-      "&:hover": {
-        color: "#374151",
-      },
+      display: "none !important",
     },
-    
+
+    footer: {
+      display: "none !important",
+      visibility: "hidden !important",
+      height: "0 !important",
+      margin: "0 !important",
+      padding: "0 !important",
+    },
+
     badge: {
-      display: "none", // Hide development mode badge (note: still shows in production)
+      display: "none !important",
+      visibility: "hidden !important",
+      height: "0 !important",
+      margin: "0 !important",
+      padding: "0 !important",
     },
     
     // Hide elements we don't want

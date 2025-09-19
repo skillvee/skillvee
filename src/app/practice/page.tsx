@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import { AutoResizeTextarea } from "~/components/ui/auto-resize-textarea";
 
 export default function PracticePage() {
   const router = useRouter();
@@ -14,8 +13,13 @@ export default function PracticePage() {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
   // Redirect to sign-in if not authenticated
+  useEffect(() => {
+    if (isLoaded && !user) {
+      router.push('/sign-in?redirect_url=%2Fpractice');
+    }
+  }, [isLoaded, user, router]);
+
   if (isLoaded && !user) {
-    router.push('/sign-in?redirect_url=%2Fpractice');
     return null;
   }
 
@@ -42,61 +46,86 @@ export default function PracticePage() {
   ];
 
   const hasMinimumWords = jobDescription.trim().split(/\s+/).filter(word => word.length > 0).length >= 5;
+  const hasJobDescription = hasMinimumWords;
   const isButtonActive = hasMinimumWords || selectedRole !== null;
 
   const handleRoleSelect = (role: string) => {
+    // Don't allow role selection if there's a job description
+    if (hasJobDescription) return;
     setSelectedRole(selectedRole === role ? null : role);
   };
 
-  const handleCreateInterview = () => {
-    if (isButtonActive) {
-      // Navigate to results page
-      router.push("/practice/results");
+  const handleJobDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    setJobDescription(newValue);
+    
+    // Clear selected role when typing job description
+    if (newValue.trim() && selectedRole) {
+      setSelectedRole(null);
+    }
+  };
+
+  const handleCreateInterview = async () => {
+    if (!isButtonActive || isProcessing) return;
+
+    // Immediately navigate to results page with creating state
+    if (hasMinimumWords && jobDescription.trim()) {
+      router.push(`/practice/results?creating=true&type=job&description=${encodeURIComponent(jobDescription.trim())}`);
+    } else if (selectedRole) {
+      router.push(`/practice/results?creating=true&type=role&role=${encodeURIComponent(selectedRole)}`);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       <div className="flex items-center justify-center min-h-screen p-4">
-        <Card className="w-full max-w-4xl shadow-xl border">
-          <CardContent className="p-12">
+        <Card className="w-full max-w-2xl shadow-lg border border-gray-200 bg-white">
+          <CardContent className="p-8">
             <div className="text-center space-y-6">
               <div className="space-y-4">
-                <h1 className="text-3xl font-bold text-foreground">
+                <h1 className="text-2xl font-semibold text-gray-900">
                   Paste the job description to start your mock interview
                 </h1>
-                <p className="text-lg text-muted-foreground">
+                <p className="text-base text-gray-600">
                   Adding your job description will help us create a relevant interview for you
                 </p>
               </div>
 
               <div className="space-y-8">
-                <div>
-                  <AutoResizeTextarea
-                    placeholder="Paste the job description here..."
+                <div className={`transition-opacity duration-200 ${selectedRole ? 'opacity-50' : ''}`}>
+                  <textarea
+                    placeholder={selectedRole ? "Job description disabled - role selected below" : "Paste the job description here..."}
                     value={jobDescription}
-                    onChange={(e) => setJobDescription(e.target.value)}
-                    className="min-h-[200px] text-base border-2 border-input focus-visible:border-primary focus-visible:ring-0 focus-visible:ring-offset-0 rounded-md"
-                    maxRows={12}
+                    onChange={handleJobDescriptionChange}
+                    disabled={!!selectedRole}
+                    className={`w-full min-h-[180px] max-h-[400px] text-sm border focus:ring-2 focus:ring-blue-100 focus:outline-none rounded-lg p-4 resize-none transition-all duration-200 ${
+                      selectedRole 
+                        ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed" 
+                        : "border-gray-300 focus:border-blue-500 bg-white text-gray-900 placeholder-gray-400"
+                    }`}
+                    rows={6}
                   />
                 </div>
 
                 <div className="space-y-6">
-                  <p className="text-muted-foreground text-base">
+                  <p className="text-gray-600 text-sm">
                     Or select opportunities of interest:
                   </p>
                   
-                  <div className="flex flex-wrap gap-3 justify-center">
+                  <div className={`flex flex-wrap gap-3 justify-center transition-opacity duration-200 ${hasJobDescription ? 'opacity-50' : ''}`}>
                     {roles.map((role) => (
                       <Button
                         key={role}
-                        variant={selectedRole === role ? "default" : "outline"}
+                        variant="outline"
                         onClick={() => handleRoleSelect(role)}
+                        disabled={hasJobDescription}
                         className={`
-                          px-6 py-3 rounded-full text-base font-medium transition-all duration-200
-                          ${selectedRole === role 
-                            ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90" 
-                            : "bg-card text-foreground border-border hover:bg-accent hover:border-accent"
+                          px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 border
+                          ${hasJobDescription 
+                            ? "bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed" 
+                            : selectedRole === role 
+                              ? "bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100" 
+                              : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300"
                           }
                         `}
                       >
@@ -106,15 +135,16 @@ export default function PracticePage() {
                   </div>
                 </div>
 
+
                 <div className="pt-4">
                   <Button
                     onClick={handleCreateInterview}
                     disabled={!isButtonActive}
                     className={`
-                      w-full max-w-md mx-auto px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-200
+                      w-full max-w-sm mx-auto px-6 py-3 text-sm font-semibold rounded-lg transition-all duration-200
                       ${isButtonActive
-                        ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
-                        : "bg-muted text-muted-foreground cursor-not-allowed"
+                        ? "bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md"
+                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
                       }
                     `}
                   >

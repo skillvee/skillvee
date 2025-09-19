@@ -108,7 +108,7 @@ export default async function CandidatesPage() {
                       </SignUpButton>
                     )}
                     <Link href="/practice">
-                      <Button size="lg" variant="outline" className="border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors rounded-xl btn-hover-lift">
+                      <Button size="lg" variant="outline" className="text-primary hover:bg-primary hover:text-white transition-colors rounded-xl btn-hover-lift">
                         Practice with AI
                       </Button>
                     </Link>

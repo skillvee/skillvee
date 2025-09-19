@@ -54,7 +54,7 @@ export default function Navigation({ currentPage }: NavigationProps) {
               href={link.href} 
               className={`${
                 currentPage === link.label.toLowerCase() 
-                  ? "text-blue-600 font-medium" 
+                  ? "text-primary font-medium" 
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -67,7 +67,98 @@ export default function Navigation({ currentPage }: NavigationProps) {
                 <Link href="/dashboard">
                   <Button variant="outline">Dashboard</Button>
                 </Link>
-                <UserButton />
+                <UserButton
+                  appearance={{
+                    variables: {
+                      colorPrimary: "rgb(35, 124, 241)",
+                      colorBackground: "#ffffff",
+                      colorText: "#000000",
+                    },
+                    elements: {
+                      userButtonBox: {
+                        backgroundColor: "transparent",
+                        border: "1px solid #e5e7eb",
+                        borderRadius: "50%",
+                        padding: "0",
+                        transition: "all 0.15s ease",
+                        "&:hover": {
+                          borderColor: "rgb(35, 124, 241)",
+                          boxShadow: "0 0 0 1px rgba(35, 124, 241, 0.1)",
+                        },
+                      },
+                      userButtonTrigger: {
+                        backgroundColor: "rgb(35, 124, 241)",
+                        border: "none",
+                        borderRadius: "50%",
+                        padding: "0",
+                        width: "32px",
+                        height: "32px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      },
+                      avatarBox: {
+                        width: "32px",
+                        height: "32px",
+                        backgroundColor: "rgb(35, 124, 241)",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      },
+                      avatarImage: {
+                        borderRadius: "50%",
+                        width: "100%",
+                        height: "100%",
+                      },
+                      // For users without profile image (initials/fallback)
+                      userPreviewMainIdentifier: {
+                        color: "#000000",
+                        backgroundColor: "transparent",
+                        fontSize: "1rem",
+                        fontWeight: "600",
+                      },
+                      userPreviewSecondaryIdentifier: {
+                        color: "#6b7280",
+                        backgroundColor: "transparent",
+                        fontSize: "0.875rem",
+                      },
+                      // Dropdown/Popover styling
+                      userButtonPopoverBox: {
+                        backgroundColor: "#ffffff",
+                        border: "1px solid #e5e7eb",
+                        borderRadius: "0.5rem",
+                        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                      },
+                      userButtonPopoverCard: {
+                        backgroundColor: "#ffffff",
+                        borderRadius: "0.5rem",
+                        padding: "1rem",
+                      },
+                      // Hide branding elements
+                      footerPages: {
+                        display: "none !important",
+                        visibility: "hidden !important",
+                        height: "0 !important",
+                      },
+                      footer: {
+                        display: "none !important",
+                        visibility: "hidden !important",
+                        height: "0 !important",
+                      },
+                      badge: {
+                        display: "none !important",
+                        visibility: "hidden !important",
+                        height: "0 !important",
+                      },
+                      userButtonPopoverFooter: {
+                        display: "none !important",
+                        visibility: "hidden !important",
+                        height: "0 !important",
+                      },
+                    },
+                  }}
+                />
               </>
             ) : (
               <>
@@ -75,7 +166,7 @@ export default function Navigation({ currentPage }: NavigationProps) {
                   <Button variant="outline">Log in</Button>
                 </Link>
                 <Link href={`/sign-up?redirect_url=${getRedirectUrl()}`}>
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">Sign up</Button>
+                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">Sign up</Button>
                 </Link>
               </>
             )}
@@ -85,7 +176,7 @@ export default function Navigation({ currentPage }: NavigationProps) {
         <div className="md:hidden">
           <button
             onClick={toggleMenu}
-            className="p-2 text-gray-600 hover:text-gray-900 focus:outline-none focus:text-gray-900 focus:ring-2 focus:ring-blue-600 rounded-lg"
+            className="p-2 text-gray-600 hover:text-gray-900 focus:outline-none focus:text-gray-900 focus:ring-2 focus:ring-primary rounded-lg"
             aria-label="Toggle mobile menu"
             aria-expanded={isOpen}
           >
@@ -104,7 +195,7 @@ export default function Navigation({ currentPage }: NavigationProps) {
                 href={link.href}
                 className={`block py-2 px-2 text-lg rounded-lg transition-colors ${
                   currentPage === link.label.toLowerCase()
-                    ? "text-blue-600 font-medium bg-blue-50"
+                    ? "text-primary font-medium bg-primary/5"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 }`}
                 onClick={() => setIsOpen(false)}
@@ -119,7 +210,98 @@ export default function Navigation({ currentPage }: NavigationProps) {
                   <Link href="/dashboard" onClick={() => setIsOpen(false)}>
                     <Button variant="outline" className="w-full">Dashboard</Button>
                   </Link>
-                  <UserButton />
+                  <UserButton
+                    appearance={{
+                      variables: {
+                        colorPrimary: "rgb(35, 124, 241)",
+                        colorBackground: "#ffffff",
+                        colorText: "#000000",
+                      },
+                      elements: {
+                        userButtonBox: {
+                          backgroundColor: "transparent",
+                          border: "1px solid #e5e7eb",
+                          borderRadius: "50%",
+                          padding: "0",
+                          transition: "all 0.15s ease",
+                          "&:hover": {
+                            borderColor: "rgb(35, 124, 241)",
+                            boxShadow: "0 0 0 1px rgba(35, 124, 241, 0.1)",
+                          },
+                        },
+                        userButtonTrigger: {
+                          backgroundColor: "rgb(35, 124, 241)",
+                          border: "none",
+                          borderRadius: "50%",
+                          padding: "0",
+                          width: "32px",
+                          height: "32px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        },
+                        avatarBox: {
+                          width: "32px",
+                          height: "32px",
+                          backgroundColor: "rgb(35, 124, 241)",
+                          borderRadius: "50%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        },
+                        avatarImage: {
+                          borderRadius: "50%",
+                          width: "100%",
+                          height: "100%",
+                        },
+                        // For users without profile image (initials/fallback)
+                        userPreviewMainIdentifier: {
+                          color: "#000000",
+                          backgroundColor: "transparent",
+                          fontSize: "1rem",
+                          fontWeight: "600",
+                        },
+                        userPreviewSecondaryIdentifier: {
+                          color: "#6b7280",
+                          backgroundColor: "transparent",
+                          fontSize: "0.875rem",
+                        },
+                        // Dropdown/Popover styling
+                        userButtonPopoverBox: {
+                          backgroundColor: "#ffffff",
+                          border: "1px solid #e5e7eb",
+                          borderRadius: "0.5rem",
+                          boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                        },
+                        userButtonPopoverCard: {
+                          backgroundColor: "#ffffff",
+                          borderRadius: "0.5rem",
+                          padding: "1rem",
+                        },
+                        // Hide branding elements
+                        footerPages: {
+                          display: "none !important",
+                          visibility: "hidden !important",
+                          height: "0 !important",
+                        },
+                        footer: {
+                          display: "none !important",
+                          visibility: "hidden !important",
+                          height: "0 !important",
+                        },
+                        badge: {
+                          display: "none !important",
+                          visibility: "hidden !important",
+                          height: "0 !important",
+                        },
+                        userButtonPopoverFooter: {
+                          display: "none !important",
+                          visibility: "hidden !important",
+                          height: "0 !important",
+                        },
+                      },
+                    }}
+                  />
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -127,7 +309,7 @@ export default function Navigation({ currentPage }: NavigationProps) {
                     <Button variant="outline" className="w-full">Log in</Button>
                   </Link>
                   <Link href={`/sign-up?redirect_url=${getRedirectUrl()}`} onClick={() => setIsOpen(false)}>
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">Sign up</Button>
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">Sign up</Button>
                   </Link>
                 </div>
               )}

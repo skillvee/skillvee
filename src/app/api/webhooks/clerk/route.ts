@@ -100,8 +100,15 @@ async function handleUserCreated(data: ClerkWebhookEvent["data"]) {
     throw new Error("No email found in webhook data");
   }
 
-  // Default to INTERVIEWER role, can be changed to ADMIN via Clerk metadata
-  const role = data.public_metadata?.role === "admin" ? "ADMIN" : "INTERVIEWER";
+  // Admin email addresses
+  const adminEmails = ['hi@skillvee.com', 'greyesma@gmail.com'];
+  
+  // Default to INTERVIEWER role, can be changed to ADMIN via Clerk metadata or specific admin emails
+  let role: "ADMIN" | "INTERVIEWER" = "INTERVIEWER";
+  
+  if (data.public_metadata?.role === "admin" || adminEmails.includes(email)) {
+    role = "ADMIN";
+  }
 
   console.log("Attempting to create user in database:", {
     clerkId: data.id,
@@ -160,8 +167,15 @@ async function handleUserUpdated(data: ClerkWebhookEvent["data"]) {
     return;
   }
 
-  // Update role if changed in Clerk metadata
-  const role = data.public_metadata?.role === "admin" ? "ADMIN" : "INTERVIEWER";
+  // Admin email addresses
+  const adminEmails = ['hi@skillvee.com', 'greyesma@gmail.com'];
+  
+  // Update role if changed in Clerk metadata or specific admin emails
+  let role: "ADMIN" | "INTERVIEWER" = "INTERVIEWER";
+  
+  if (data.public_metadata?.role === "admin" || adminEmails.includes(email)) {
+    role = "ADMIN";
+  }
 
   await db.user.update({
     where: { clerkId: data.id },

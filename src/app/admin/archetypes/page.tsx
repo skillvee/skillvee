@@ -101,7 +101,7 @@ export default function AdminArchetypesPage() {
                         {isLoading ? (
                           <div className="h-8 w-16 animate-pulse bg-muted rounded" />
                         ) : (
-                          archetypesData?.items.reduce((acc, archetype) => 
+                          archetypesData?.items.reduce((acc: number, archetype: any) => 
                             acc + (archetype.roles?.length ?? 0), 0
                           ) ?? 0
                         )}
@@ -124,7 +124,7 @@ export default function AdminArchetypesPage() {
                         {isLoading ? (
                           <div className="h-8 w-16 animate-pulse bg-muted rounded" />
                         ) : (
-                          archetypesData?.items.reduce((acc, archetype) => 
+                          archetypesData?.items.reduce((acc: number, archetype: any) => 
                             acc + (archetype.roleSkillMappings?.length ?? 0), 0
                           ) ?? 0
                         )}
@@ -167,7 +167,7 @@ export default function AdminArchetypesPage() {
                           </Card>
                         ))
                       ) : (
-                        archetypesData?.items.map((archetype) => (
+                        archetypesData?.items.map((archetype: any) => (
                           <Card key={archetype.id} className="cursor-pointer transition-colors hover:bg-muted/50">
                             <CardHeader>
                               <CardTitle className="text-base">{archetype.name}</CardTitle>
@@ -182,7 +182,7 @@ export default function AdminArchetypesPage() {
                                     Job Roles ({archetype.roles?.length ?? 0})
                                   </p>
                                   <div className="flex flex-wrap gap-1">
-                                    {archetype.roles?.slice(0, 3).map((role) => (
+                                    {archetype.roles?.slice(0, 3).map((role: any) => (
                                       <Badge key={role.id} variant="outline" className="text-xs">
                                         {role.title}
                                       </Badge>
@@ -200,7 +200,7 @@ export default function AdminArchetypesPage() {
                                     Key Skills
                                   </p>
                                   <div className="flex flex-wrap gap-1">
-                                    {archetype.roleSkillMappings?.slice(0, 3).map((mapping) => (
+                                    {archetype.roleSkillMappings?.slice(0, 3).map((mapping: any) => (
                                       <Badge 
                                         key={mapping.id} 
                                         variant={

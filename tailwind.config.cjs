@@ -34,12 +34,12 @@ module.exports = {
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
+        ring: "rgb(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "rgb(var(--primary))",
+          foreground: "rgb(var(--primary-foreground))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -126,8 +126,8 @@ module.exports = {
           "50%": { opacity: "0.4", transform: "scale(1.05)" },
         },
         pulseButton: {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(59, 130, 246, 0.4)" },
-          "50%": { boxShadow: "0 0 0 10px rgba(59, 130, 246, 0)" },
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(35, 124, 241, 0.4)" },
+          "50%": { boxShadow: "0 0 0 10px rgba(35, 124, 241, 0)" },
         },
         rotate: {
           from: { transform: "rotate(0deg)" },
