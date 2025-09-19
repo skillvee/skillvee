@@ -3,8 +3,7 @@
 ## Project Overview
 
 **Name**: Skillvee - AI-Powered Technical Interview Platform  
-**Type**: T3 Stack Application  
-**Owner**: Matias (@matiashoyld)  
+**Type**: T3 Stack Application
 **Repository**: <https://github.com/matiashoyld/skillvee>  
 **Live URL**: <https://skillvee.vercel.app>  
 
@@ -40,10 +39,7 @@ AI-powered mock interview platform for data science roles:
 - `npm run typecheck` - TypeScript checking  
 - `npm run lint` - ESLint checking
 - `npm test` - Run Jest test suite
-- `npm run test:watch` - Run tests in watch mode
-- `npm run test:coverage` - Run tests with coverage report
 - `npx prisma db push` - Push schema to database
-- `npx prisma studio` - Database management UI
 - `supabase db pull` - Pull remote schema changes
 
 ## Development Guidelines
@@ -57,83 +53,101 @@ AI-powered mock interview platform for data science roles:
 - **NO Claude attribution** - Do not add "Generated with Claude Code" or "Co-Authored-By: Claude" to commits or PRs
 - **NO secrets in PRs** - Never include actual secrets, tokens, or API keys in pull request descriptions or commit messages
 - **NO secrets in documentation** - Never commit actual secrets to CLAUDE.md, README.md, or any tracked files
+-
 
-## Key Technical Insights
+## File Structure
 
-### Critical Architecture Decisions
-
-- **AI Services**: Gemini 2.5 Flash for job description parsing, Gemini 2.5 Pro for case generation
-- **Media Capture**: Browser MediaRecorder API with cross-browser compatibility (Chrome, Firefox, Safari, Edge)
-- **Processing Pipeline**: Background job queues for video processing and AI assessment
-- **Upload Strategy**: Chunked uploads via tRPC with progress tracking and error recovery
-
-## Media Capture Implementation
-
-**Status**: ✅ Complete with comprehensive browser support
-
-### Core Components
-
-- **`useMediaCapture`**: Screen/audio recording with MediaRecorder API
-- **`usePermissions`**: Unified permission management for camera/mic/screen
-- **`useMediaUpload`**: tRPC integration with chunked uploads and progress tracking
-- **`InterviewRecorder`**: Complete recording UI with controls and real-time feedback
-- **Media Compatibility**: Cross-browser MIME type detection and Safari fallbacks
-
-### Key Features
-
-- **Recording Types**: Screen-only, audio-only, or combined screen+audio
-- **Real-time Controls**: Start/stop/pause/resume with live duration and file size
-- **Permission Flow**: Graceful permission requests with detailed error handling
-- **Upload Integration**: Auto-upload with progress tracking and cancellation
-- **Browser Support**: Optimized constraints and bitrates per browser
-- **Error Recovery**: Comprehensive error handling for all failure modes
-
-### File Structure
+### Core Application Structure
 
 ```bash
-src/hooks/
-├── useMediaCapture.ts     # Core recording functionality
-├── usePermissions.ts      # Permission management
-└── useMediaUpload.ts      # Upload integration
-
-src/components/ui/
-├── interview-recorder.tsx # Complete recording interface
-└── media-recorder.tsx     # Basic recorder component
-
-src/lib/
-└── media-compatibility.ts # Cross-browser compatibility
+src/
+├── app/                           # Next.js App Router pages
+│   ├── (auth)/                   # Authentication-protected routes
+│   │   ├── dashboard/           # User dashboard
+│   │   ├── interview/           # Interview session pages
+│   │   │   ├── [id]/           # Dynamic interview routes
+│   │   │   └── prepare/        # Interview preparation
+│   │   ├── jobs/               # Job description management
+│   │   └── results/            # Interview results & feedback
+│   ├── api/                     # API routes
+│   │   ├── trpc/               # tRPC endpoints
+│   │   └── webhooks/           # External service webhooks
+│   ├── layout.tsx              # Root layout
+│   └── page.tsx                # Landing page
+│
+├── components/
+│   ├── ui/                      # Shadcn/ui components
+│   │   ├── interview-recorder.tsx
+│   │   ├── media-recorder.tsx
+│   │   ├── job-form.tsx
+│   │   └── [shadcn components]
+│   ├── interview/               # Interview-specific components
+│   │   ├── question-display.tsx
+│   │   ├── timer.tsx
+│   │   └── controls.tsx
+│   └── shared/                  # Reusable components
+│       ├── navigation.tsx
+│       └── footer.tsx
+│
+├── hooks/
+│   ├── useMediaCapture.ts      # Core recording functionality
+│   ├── usePermissions.ts       # Browser permissions
+│   ├── useMediaUpload.ts       # Upload to storage
+│   ├── useInterview.ts         # Interview state management
+│   └── useTimer.ts             # Interview timer logic
+│
+├── lib/
+│   ├── ai/                     # AI service integrations
+│   │   ├── gemini.ts          # Gemini API client
+│   │   └── prompts.ts         # AI prompt templates
+│   ├── db/                    # Database utilities
+│   │   └── prisma.ts         # Prisma client singleton
+│   ├── media/                 # Media handling
+│   │   ├── compatibility.ts  # Browser compatibility
+│   │   └── processing.ts     # Video/audio processing
+│   ├── utils.ts               # General utilities
+│   └── validators.ts          # Zod schemas & validation
+│
+├── server/
+│   ├── api/
+│   │   ├── routers/          # tRPC routers
+│   │   │   ├── interview.ts
+│   │   │   ├── job.ts
+│   │   │   └── assessment.ts
+│   │   ├── root.ts          # Root router
+│   │   └── trpc.ts          # tRPC configuration
+│   └── services/             # Business logic services
+│       ├── interview.service.ts
+│       ├── assessment.service.ts
+│       └── job.service.ts
+│
+├── styles/
+│   └── globals.css           # Tailwind CSS v4
+│
+└── types/
+    ├── interview.ts          # Interview-related types
+    ├── job.ts               # Job description types
+    └── api.ts               # API response types
 ```
 
-## tRPC API Implementation
+### Configuration Files
 
-**Status**: ✅ Complete with comprehensive testing framework
-
-### Architecture Overview
-
-- **Type-Safe Procedures**: Public, protected, admin, and AI-specific endpoints
-- **Enhanced Middleware**: Rate limiting (3 tiers), validation with XSS protection, timing
-- **5 Main Routers**: JobDescription, Interview, AI, Media, Assessment
-- **Advanced Features**: Cursor-based pagination, role-based access control, error handling
-
-### Key Features Implemented
-
-- **Authentication Integration**: Seamless Clerk integration with user role checking
-- **Rate Limiting**: Multiple tiers (strict: 5/min, moderate: 30/min, AI: 20/min)
-- **Input Validation**: XSS protection, file upload validation, business rule validation
-- **Error Handling**: Custom error types with detailed formatting
-- **Mock AI Integrations**: Ready for Gemini 2.5 Pro implementation
-
-### Production-Ready Capabilities
-
-- **Job Description Management**: CRUD operations with template system and AI focus detection
-- **Interview Lifecycle**: Complete workflow from scheduling to completion with real-time session management
-- **AI Operations**: Case generation, assessment analysis, transcription, response validation
-- **Media Handling**: Recording management with upload/download capabilities
-- **Assessment System**: Comprehensive evaluation with analytics and benchmarking
+```bash
+/
+├── .env.local               # Local environment variables
+├── .eslintrc.json          # ESLint configuration
+├── next.config.ts          # Next.js configuration
+├── tailwind.config.ts      # Tailwind CSS v4 config
+├── tsconfig.json           # TypeScript configuration
+├── prisma/
+│   └── schema.prisma       # Database schema
+├── supabase/
+│   ├── config.toml        # Supabase configuration
+│   └── migrations/        # Database migrations
+└── playwright.config.ts    # Playwright E2E config
+```
 
 ## Testing Framework
-
-**Status**: ✅ Jest configured with 120+ comprehensive tests
 
 ### Testing Infrastructure
 
@@ -141,25 +155,94 @@ src/lib/
 - **Coverage**: API middleware, media capture hooks, React components, integration flows
 - **Mock Strategy**: MediaRecorder API, tRPC endpoints, browser permissions, DOM environment
 
-### Test Coverage Areas
+### Test Suite Structure
 
-- **API Layer**: Rate limiting, validation, tRPC routers (67 tests)
+```bash
+src/
+├── hooks/
+│   └── __tests__/
+│       ├── useMediaCapture.test.ts      # Recording functionality tests
+│       ├── usePermissions.test.ts       # Browser permission tests
+│       ├── useMediaUpload.test.ts       # Upload integration tests
+│       ├── useInterview.test.ts         # Interview state tests
+│       └── useTimer.test.ts             # Timer logic tests
+│
+├── components/
+│   ├── ui/__tests__/
+│   │   ├── interview-recorder.test.tsx  # Complete recorder tests
+│   │   ├── media-recorder.test.tsx      # Basic recorder tests
+│   │   └── job-form.test.tsx           # Job form validation tests
+│   ├── interview/__tests__/
+│   │   ├── question-display.test.tsx    # Question rendering tests
+│   │   ├── timer.test.tsx              # Timer component tests
+│   │   └── controls.test.tsx           # Interview control tests
+│   └── shared/__tests__/
+│       ├── navigation.test.tsx         # Navigation component tests
+│       └── footer.test.tsx            # Footer component tests
+│
+├── lib/
+│   ├── ai/__tests__/
+│   │   ├── gemini.test.ts             # AI service integration tests
+│   │   └── prompts.test.ts            # Prompt template tests
+│   ├── db/__tests__/
+│   │   └── prisma.test.ts            # Database client tests
+│   ├── media/__tests__/
+│   │   ├── compatibility.test.ts     # Browser compatibility tests
+│   │   └── processing.test.ts        # Media processing tests
+│   └── __tests__/
+│       ├── utils.test.ts             # Utility function tests
+│       └── validators.test.ts        # Validation schema tests
+│
+├── server/
+│   ├── api/
+│   │   └── routers/__tests__/
+│   │       ├── interview.test.ts     # Interview API tests
+│   │       ├── job.test.ts          # Job API tests
+│   │       └── assessment.test.ts   # Assessment API tests
+│   └── services/__tests__/
+│       ├── interview.service.test.ts # Interview business logic
+│       ├── assessment.service.test.ts # Assessment logic
+│       └── job.service.test.ts      # Job service tests
+│
+└── app/
+    ├── (auth)/
+    │   └── interview/__tests__/
+    │       ├── [id]/page.test.tsx   # Dynamic interview page tests
+    │       └── prepare/page.test.tsx # Preparation page tests
+    └── api/
+        └── __tests__/
+            ├── trpc/               # tRPC endpoint tests
+            └── webhooks/           # Webhook handler tests
+```
+
+### Test Configuration Files
+
+```bash
+/
+├── jest.config.js              # Jest configuration
+├── jest.setup.js              # Test environment setup
+├── __mocks__/                 # Global mocks
+│   ├── mediaRecorder.ts      # MediaRecorder API mock
+│   ├── permissions.ts        # Browser permissions mock
+│   └── clerk.ts             # Clerk authentication mock
+└── playwright-tests/
+    ├── auth.setup.simplified.ts    # Authentication setup
+    ├── auth.utils.ts               # Auth helper utilities
+    ├── authenticated-pages.spec.ts # Protected routes testing
+    ├── public-pages.unauth.spec.ts # Public routes testing
+    └── README.md                   # E2E test documentation
+```
+
+### Test Coverage Goals
+
+- **API Layer**: Rate limiting, validation, tRPC routers (67+ tests)
 - **Media Capture**: Hooks, components, browser compatibility, error scenarios (56+ tests)
 - **Integration**: Full interview flow, job description creation, recording lifecycle
 - **Error Handling**: Permission denied, device failures, network timeouts, upload failures
-
-### Key Test Suites
-
-```bash
-src/hooks/__tests__/           # Hook testing with mocked APIs
-src/components/ui/__tests__/   # Component integration tests  
-src/app/interview/__tests__/   # End-to-end flow testing
-src/lib/__tests__/            # Utility and compatibility tests
-```
+- **Business Logic**: Interview assessment, AI processing, data validation
+- **Authentication**: Clerk integration, route protection, session management
 
 ## Playwright E2E Testing
-
-**Status**: ✅ Comprehensive end-to-end testing with authentication
 
 ### Configuration
 
@@ -167,17 +250,6 @@ src/lib/__tests__/            # Utility and compatibility tests
 - **Browser**: Chromium only (optimized for speed)
 - **Authentication**: Persistent auth state with Clerk integration
 - **Projects**: Setup, authenticated, and unauthenticated test suites
-
-### Key Commands
-
-```bash
-npm run test:e2e                    # Run all E2E tests (chromium only)
-npm run test:e2e:auth              # Setup authentication state
-npm run test:e2e:authenticated     # Run authenticated tests only
-npm run test:e2e:public            # Run unauthenticated tests only
-npm run test:e2e:ui                # Run with Playwright UI
-npm run test:e2e:debug             # Debug mode with browser
-```
 
 ### Test Structure
 
@@ -189,22 +261,6 @@ playwright-tests/
 ├── public-pages.unauth.spec.ts   # Public routes testing
 └── README.md                      # Setup documentation
 ```
-
-### Environment Variables
-
-```bash
-PLAYWRIGHT_TEST_EMAIL=your-test-email@example.com
-PLAYWRIGHT_TEST_PASSWORD=your-test-password
-PLAYWRIGHT_HEADED=false            # Headless mode
-PLAYWRIGHT_SLOW_MO=false          # No slow motion
-```
-
-### Performance Optimization
-
-- **Chromium Only**: Single browser for faster execution
-- **Parallel Execution**: fullyParallel enabled for speed
-- **Authentication Caching**: Persistent auth state saved to `./playwright/.auth/user.json`
-- **CI Optimization**: Reduced workers and retry logic for CI environments
 
 ## Supabase CLI Essentials
 
@@ -218,182 +274,9 @@ supabase gen types typescript       # Generate TypeScript types
 supabase migration new <name>       # Create new migration
 ```
 
-## Build Configuration & Deployment
-
-**Status**: ✅ Production build successfully configured
-
-### Build Process
-
-- **Next.js 15.2.3**: Optimized production builds with turbo mode for development
-- **TypeScript Compilation**: Strict mode enabled with proper type checking
-- **ESLint Integration**: Comprehensive linting with custom rules for tRPC patterns
-- **Test Exclusion**: Test files properly excluded from production builds
-
-### Build Commands & Verification
-
-```bash
-npm run build                      # Production build with type checking and linting
-npm run typecheck                  # Standalone TypeScript verification
-npm run lint                       # ESLint checking with auto-fix available
-npm run preview                    # Local production preview
-```
-
-### Build Optimization Features
-
-- **Tree Shaking**: Unused code elimination for smaller bundles
-- **Static Generation**: Pre-rendered pages where possible
-- **Code Splitting**: Automatic chunking for optimal loading
-- **Image Optimization**: Built-in Next.js image optimization
-
-## Troubleshooting Notes
-
-### Common Build Issues
-
-- **Test file inclusion**: Ensure test files are excluded from production build via tsconfig.json and eslint.config.js
-- **tRPC middleware types**: Rate limiting middleware must return proper `next()` calls with correct typing
-- **ESM modules**: Jest configuration requires proper ESM handling for superjson and other dependencies
-- **Environment variables**: Mock environment files needed for test isolation
-
-### Development Issues
-
-- **TypeScript errors**: Ensure tRPC routers are not empty and middleware return types match expected signatures
-- **Database connection**: Use `npx prisma studio` to verify connection  
-- **Auth issues**: Verify Clerk keys and callback URLs in Vercel dashboard
-- **Schema sync**: Use `supabase db pull` if local/remote schemas drift
-- **Gemini API**: Rate limits may affect development - implement proper error handling
-- **React State vs Client State**: When working with WebSocket connections, avoid checking React state (`state.isConnected`) for immediate operations. Use direct client state checks (`client.isConnected`) since React state updates are asynchronous and may cause race conditions in connection flows
-
-### Testing Issues
-
-- **Jest ESM errors**: Ensure jest.config.js uses proper ESM preset and moduleNameMapper
-- **Mock dependencies**: Create proper mocks for external dependencies (superjson, env variables)
-- **Test isolation**: Use resetAllMocks() and proper test cleanup to avoid test interference
-- **Coverage reports**: Test files must be excluded from coverage collection
-
-### Production Deployment
+## Production Deployment
 
 - **Vercel Integration**: Automatic deployments on main branch push
 - **Environment Variables**: Ensure all required env vars are set in Vercel dashboard
 - **Database Migrations**: Run `npx prisma db push` before deployment if schema changes
 - **Build Verification**: Always run `npm run build` locally before pushing to production
-
-## Job Description Input with AI Focus Detection
-
-**Status**: ✅ Complete - Modern minimalist UI with full AI-powered parsing
-
-### Feature Overview
-
-Interactive job description input system that uses Gemini 2.5 Flash for intelligent parsing and extraction of key information from job postings.
-
-### User Experience Flow
-
-1. **Input Step**: Clean single-field interface for pasting job descriptions
-2. **AI Processing**: Modern typing animation with progress messages during parsing
-3. **Interactive Review**: Fully editable results with in-place editing capabilities
-
-### Key Features Implemented
-
-#### Modern UI/UX Design (2024 Best Practices)
-
-- **Minimalist Layout**: Gradient backgrounds, generous whitespace, shadow-based depth
-- **Content-First Approach**: Clear visual hierarchy with strategic use of typography
-- **Responsive Design**: Optimized for desktop and mobile experiences
-- **Performance**: 39.4 kB bundle size with optimized loading
-
-#### AI-Powered Parsing with Gemini 2.5 Flash
-
-- **Real-time Extraction**: Job title, company, experience level, requirements, focus areas
-- **Structured Output**: JSON schema validation for consistent data format
-- **Error Handling**: Robust fallback mechanisms for API failures
-- **Smart Detection**: Contextual analysis of job requirements and skill categories
-
-#### Interactive Review Features
-
-- **Collapsible Job Description**: Show/hide full content with smooth animations
-- **Editable Requirements**: In-place editing, add/remove with hover effects
-- **Experience Level Selection**: One-click editing with visual feedback
-- **Focus Areas Management**: Interactive badges for adding/removing technical domains
-- **Real-time Updates**: Form state synchronized across all components
-
-### Technical Implementation
-
-#### Component Architecture
-
-```
-src/app/job-description/page.tsx     # Main page with 3-step flow
-src/components/ui/typing-loader.tsx  # ChatGPT-style animation component
-src/components/ui/auto-resize-textarea.tsx  # Auto-resizing input field
-```
-
-#### AI Integration
-
-- **SDK**: @google/genai v1.4.0 (latest official SDK)
-- **Model**: gemini-2.5-flash-preview-05-20 for fast parsing
-- **Schema**: Comprehensive TypeScript types for structured extraction
-- **Processing**: Debounced API calls with visual feedback
-
-#### State Management
-
-- **Form Library**: React Hook Form with Zod validation
-- **Interactive States**: Local state for editing modes and UI interactions
-- **Type Safety**: Full TypeScript coverage throughout the flow
-
-### Environment Configuration
-
-```bash
-# Required environment variable
-GOOGLE_GENERATIVE_AI_API_KEY=your-gemini-api-key
-
-# Verification commands
-npm run typecheck  # Verify TypeScript compilation
-npm run build     # Test production build
-npm run dev       # Start development server
-```
-
-### API Endpoints
-
-- `ai.parseJobDescription` - Main parsing endpoint using Gemini 2.5 Flash
-- `jobDescription.create` - Saves parsed data to database
-- `jobDescription.detectFocusAreas` - Legacy endpoint (replaced by AI parsing)
-
-### Performance Metrics
-
-- **Bundle Size**: 39.4 kB (optimized)
-- **Build Time**: ~2000ms (fast compilation)
-- **API Response**: ~2-3 seconds for job description parsing
-- **TypeScript**: Zero compilation errors
-
-### Future Enhancements
-
-- **Template System**: Pre-built job description templates (implemented but disabled)
-- **Advanced Editing**: Rich text editing capabilities
-- **Collaboration**: Multi-user editing and commenting
-- **Analytics**: Usage tracking and optimization insights
-
-### Troubleshooting
-
-- **API Errors**: Check GOOGLE_GENERATIVE_AI_API_KEY environment variable
-- **Parsing Issues**: Verify job description length (minimum 10 characters)
-- **UI Issues**: Clear browser cache and restart development server
-- **Build Errors**: Run `npm run typecheck` to identify TypeScript issues
-
-## Gemini Live Audio-to-Audio Implementation
-
-**Status**: ✅ Complete - Natural conversation flow with proper audio buffering
-
-### Critical Insights
-
-- **❌ Don't use**: Complex VAD, ScriptProcessorNode, setTimeout delays for audio finishing
-- **✅ Use**: Continuous streaming, AudioWorklet, callback-based completion
-
-### Key Files
-
-- **`src/lib/gemini-live.ts`** - Core implementation (AudioRecorder, AudioStreamer, WebSocket)
-- **`src/hooks/useGeminiLive.ts`** - React hook interface
-- **`public/audio-worklet.js`** - Modern audio processor
-
-### Audio Flow
-
-1. AudioWorklet → Base64 → WebSocket → Gemini Live API
-2. WebSocket → ArrayBuffer → AudioStreamer buffering → smooth playbook
-3. Turn complete → `finishPlayback()` → callback when done → state change
