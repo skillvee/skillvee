@@ -6,6 +6,7 @@ import { aiRouter } from "~/server/api/routers/ai";
 import { mediaRouter } from "~/server/api/routers/media";
 import { assessmentRouter } from "~/server/api/routers/assessment";
 import { skillsNewRouter } from "~/server/api/routers/skills-new";
+import { practiceRouter } from "~/server/api/routers/practice";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -22,6 +23,7 @@ export const appRouter = createTRPCRouter({
   media: mediaRouter,
   assessment: assessmentRouter,
   skills: skillsNewRouter,
+  practice: practiceRouter,
 });
 
 // export type definition of API

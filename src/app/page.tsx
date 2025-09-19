@@ -21,18 +21,40 @@ export default async function Home() {
 
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-20">
+          {/* Animated Code Background */}
+          <div className="absolute inset-0 opacity-5 overflow-hidden pointer-events-none">
+            <div className="absolute top-20 left-10 animate-pulse duration-3000">
+              <div className="font-mono text-sm text-blue-600">
+                def interview_prep():<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;return success
+              </div>
+            </div>
+            <div className="absolute top-40 right-20 animate-pulse duration-4000 delay-1000">
+              <div className="font-mono text-sm text-green-600">
+                SELECT * FROM opportunities<br/>
+                WHERE skills_match = 'perfect'
+              </div>
+            </div>
+            <div className="absolute bottom-40 left-20 animate-pulse duration-5000 delay-2000">
+              <div className="font-mono text-sm text-purple-600">
+                import pandas as pd<br/>
+                df.head()
+              </div>
+            </div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-24 relative z-10">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
               {/* Left Column */}
               <div className="space-y-6 sm:space-y-8 animate-fade-in text-center lg:text-left">
                 <div className="space-y-4 sm:space-y-6">
-                  <Badge className="bg-teal-50 text-teal-700 border-teal-200 w-fit mx-auto lg:mx-0 animate-bounce-in hover:scale-105 transition-transform duration-300">
+                  <Badge className="bg-blue-50 text-blue-700 border-blue-200 w-fit mx-auto lg:mx-0 animate-bounce-in hover:scale-105 transition-transform duration-300">
                     ✨ Free Forever
                   </Badge>
                   
                   <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight animate-slide-up">
                     <span className="text-gray-900">Turn interview prep into </span>
-                    <span className="text-blue-600 bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">real job offers</span>
+                    <span className="text-primary bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">real job offers</span>
                     <span className="text-gray-900">.</span>
                   </h1>
                   
@@ -40,21 +62,29 @@ export default async function Home() {
                     Practice with realistic, AI-powered interviews tailored to your target company and role — and unlock new job opportunities along the way.
                   </p>
 
+                  {/* Live Stats */}
+                  <div className="flex flex-wrap gap-6 justify-center lg:justify-start animate-fade-in-delay-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm font-medium text-gray-700">2,847 practice sessions this week</span>
+                    </div>
+                  </div>
+
                   <div className="space-y-2 animate-fade-in-delay-2">
                     <div className="flex items-start space-x-3 group hover:translate-x-2 transition-transform duration-300 justify-center lg:justify-start">
-                      <CheckCircle className="w-5 h-5 text-teal-600 mt-1 group-hover:scale-110 transition-transform duration-300 flex-shrink-0" />
+                      <CheckCircle className="w-5 h-5 text-blue-600 mt-1 group-hover:scale-110 transition-transform duration-300 flex-shrink-0" />
                       <div className="text-left">
                         <p className="text-gray-700 font-medium"><span className="font-bold">Interactive</span> company-specific cases</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3 group hover:translate-x-2 transition-transform duration-300 justify-center lg:justify-start">
-                      <CheckCircle className="w-5 h-5 text-teal-600 mt-1 group-hover:scale-110 transition-transform duration-300 flex-shrink-0" />
+                      <CheckCircle className="w-5 h-5 text-blue-600 mt-1 group-hover:scale-110 transition-transform duration-300 flex-shrink-0" />
                       <div className="text-left">
                         <p className="text-gray-700 font-medium"><span className="font-bold">Practical</span> role-tailored questions</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3 group hover:translate-x-2 transition-transform duration-300 justify-center lg:justify-start">
-                      <CheckCircle className="w-5 h-5 text-teal-600 mt-1 group-hover:scale-110 transition-transform duration-300 flex-shrink-0" />
+                      <CheckCircle className="w-5 h-5 text-blue-600 mt-1 group-hover:scale-110 transition-transform duration-300 flex-shrink-0" />
                       <div className="text-left">
                         <p className="text-gray-700 font-medium"><span className="font-bold">Instant</span> AI feedback</p>
                       </div>
@@ -65,13 +95,13 @@ export default async function Home() {
                 <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 animate-fade-in-delay-3 justify-center lg:justify-start">
                   {user ? (
                     <Link href="/practice">
-                      <Button size="lg" className="w-full sm:w-auto min-w-[200px] bg-blue-600 hover:bg-blue-700 text-white transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
+                      <Button size="lg" className="w-full sm:w-auto min-w-[200px] bg-primary hover:bg-primary/90 text-primary-foreground transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
                         Start Practicing Free
                       </Button>
                     </Link>
                   ) : (
                     <SignUpButton>
-                      <Button size="lg" className="w-full sm:w-auto min-w-[200px] bg-blue-600 hover:bg-blue-700 text-white transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
+                      <Button size="lg" className="w-full sm:w-auto min-w-[200px] bg-primary hover:bg-primary/90 text-primary-foreground transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
                         Start Practicing Free
                       </Button>
                     </SignUpButton>
@@ -79,19 +109,20 @@ export default async function Home() {
                   <Button 
                     size="lg"
                     variant="outline"
-                    className="w-full sm:w-auto min-w-[200px] bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 transition-all duration-300 hover:scale-105 hover:shadow-md"
+                    className="w-full sm:w-auto min-w-[200px] bg-white border border-primary text-primary hover:bg-primary/5 transition-all duration-300 hover:scale-105 hover:shadow-md"
                   >
                     See How It Works
                   </Button>
                 </div>
               </div>
 
-              {/* Right Column - Interview Illustration */}
+              {/* Right Column - Enhanced with floating elements */}
               <div className="relative overflow-visible animate-fade-in-delay-2 mt-8 lg:mt-0 hidden lg:block">
-                {/* Blueish background circle - smaller on mobile */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[580px] lg:h-[580px] rounded-full blur-lg" style={{backgroundColor: 'rgba(59, 130, 246, 0.25)'}}></div>
+                {/* Background circle */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[580px] h-[580px] rounded-full blur-lg" style={{backgroundColor: 'rgba(59, 130, 246, 0.25)'}}></div>
                 
-                {/* Interview illustration - Lottie animation */}
+                
+                {/* Main Lottie Animation */}
                 <div className="relative flex justify-center items-center overflow-visible">
                   <div className="relative z-10 overflow-visible">
                     <HeroLottie
@@ -104,240 +135,439 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Companies section */}
-        <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+        {/* Companies section with Smart Social Proof */}
+        <section className="py-16 sm:py-20 lg:py-24 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-8 sm:mb-12 animate-fade-in">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 animate-slide-up">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
                 Our candidates get amazing jobs at the top tech companies
               </h2>
+              
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-8 opacity-80">
-              {/* Company logos using actual logo files */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-8 items-center">
+              {/* Enhanced Company logos with hover effects and hiring indicators */}
               
-              <div className="flex items-center justify-center w-32 h-12 company-logo">
-                <Image 
-                  src="/airbnb.png" 
-                  alt="Airbnb" 
-                  width={100} 
-                  height={32}
-                  className="object-contain"
-                />
+              <div className="flex flex-col items-center group">
+                <div className="relative flex items-center justify-center w-32 h-12 company-logo transition-all duration-300 group-hover:scale-110">
+                  <Image 
+                    src="/airbnb.png" 
+                    alt="Airbnb" 
+                    width={100} 
+                    height={32}
+                    className="object-contain"
+                  />
+</div>
               </div>
 
-              <div className="flex items-center justify-center w-32 h-12 company-logo">
-                <Image 
-                  src="/microsoft-small.png" 
-                  alt="Microsoft" 
-                  width={100} 
-                  height={32}
-                  className="object-contain"
-                />
+              <div className="flex flex-col items-center group">
+                <div className="relative flex items-center justify-center w-32 h-12 company-logo transition-all duration-300 group-hover:scale-110">
+                  <Image 
+                    src="/microsoft-small.png" 
+                    alt="Microsoft" 
+                    width={100} 
+                    height={32}
+                    className="object-contain"
+                  />
+</div>
               </div>
 
-              <div className="flex items-center justify-center w-32 h-12 company-logo">
-                <Image 
-                  src="/google-small.png" 
-                  alt="Google" 
-                  width={100} 
-                  height={32}
-                  className="object-contain"
-                />
+              <div className="flex flex-col items-center group">
+                <div className="relative flex items-center justify-center w-32 h-12 company-logo transition-all duration-300 group-hover:scale-110">
+                  <Image 
+                    src="/google-small.png" 
+                    alt="Google" 
+                    width={100} 
+                    height={32}
+                    className="object-contain"
+                  />
+</div>
               </div>
 
-              <div className="flex items-center justify-center w-32 h-12 company-logo">
-                <Image 
-                  src="/Twitch_logo.png" 
-                  alt="Twitch" 
-                  width={100} 
-                  height={32}
-                  className="object-contain"
-                />
+              <div className="flex flex-col items-center group">
+                <div className="relative flex items-center justify-center w-32 h-12 company-logo transition-all duration-300 group-hover:scale-110">
+                  <Image 
+                    src="/Spotify.png" 
+                    alt="Spotify" 
+                    width={100} 
+                    height={32}
+                    className="object-contain"
+                  />
+</div>
               </div>
 
-              <div className="flex items-center justify-center w-32 h-12 company-logo">
-                <Image 
-                  src="/Uber_logo_2018.png" 
-                  alt="Uber" 
-                  width={100} 
-                  height={32}
-                  className="object-contain"
-                />
+              <div className="flex flex-col items-center group">
+                <div className="relative flex items-center justify-center w-32 h-12 company-logo transition-all duration-300 group-hover:scale-110">
+                  <Image 
+                    src="/netflix.png" 
+                    alt="Netflix" 
+                    width={100} 
+                    height={32}
+                    className="object-contain"
+                  />
+</div>
               </div>
 
-              <div className="flex items-center justify-center w-32 h-12 company-logo">
-                <Image 
-                  src="/Spotify.png" 
-                  alt="Spotify" 
-                  width={100} 
-                  height={32}
-                  className="object-contain"
-                />
+              <div className="flex flex-col items-center group">
+                <div className="relative flex items-center justify-center w-32 h-12 company-logo transition-all duration-300 group-hover:scale-110">
+                  <Image 
+                    src="/apple-small.png" 
+                    alt="Apple" 
+                    width={60} 
+                    height={24}
+                    className="object-contain"
+                  />
+</div>
               </div>
 
-              <div className="flex items-center justify-center w-32 h-12 company-logo">
-                <Image 
-                  src="/netflix.png" 
-                  alt="Netflix" 
-                  width={100} 
-                  height={32}
-                  className="object-contain"
-                />
+              <div className="flex flex-col items-center group">
+                <div className="relative flex items-center justify-center w-32 h-12 company-logo transition-all duration-300 group-hover:scale-110">
+                  <Image 
+                    src="/meta-small.png" 
+                    alt="Meta" 
+                    width={100} 
+                    height={32}
+                    className="object-contain"
+                  />
+</div>
               </div>
 
-              <div className="flex items-center justify-center w-32 h-12 company-logo">
-                <Image 
-                  src="/apple-small.png" 
-                  alt="Apple" 
-                  width={60} 
-                  height={24}
-                  className="object-contain"
-                />
+              <div className="flex flex-col items-center group">
+                <div className="relative flex items-center justify-center w-32 h-12 company-logo transition-all duration-300 group-hover:scale-110">
+                  <Image 
+                    src="/amazon-small.png" 
+                    alt="Amazon" 
+                    width={100} 
+                    height={32}
+                    className="object-contain"
+                  />
+</div>
               </div>
+            </div>
+            
+          </div>
+        </section>
 
-              <div className="flex items-center justify-center w-32 h-12 company-logo">
-                <Image 
-                  src="/meta-small.png" 
-                  alt="Meta" 
-                  width={100} 
-                  height={32}
-                  className="object-contain"
-                />
+        {/* How It Works section - Zigzag Layout */}
+        <section className="py-16 sm:py-20 lg:py-24 bg-white overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-16 sm:mb-20">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                How It Works
+              </h2>
+              <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+                Land your dream data science role in 3 proven steps
+              </p>
+            </div>
+            
+            {/* Step 1 - Left content, Right visual */}
+            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 mb-20">
+              <div className="lg:w-1/2 space-y-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                    1
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900">Practice Like It's Real</h3>
+                </div>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  Face actual interview questions from Google, Meta, and more. Get instant AI feedback that actually helps.
+                </p>
+                <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm">
+                  <div className="text-green-400"># Sample Python Interview Question</div>
+                  <div className="text-white mt-2">def find_missing_number(nums):</div>
+                  <div className="text-white ml-4">"""Find the missing number in array [0,n]"""</div>
+                  <div className="text-blue-400 ml-4">return sum(range(len(nums)+1)) - sum(nums)</div>
+                </div>
               </div>
-
-              <div className="flex items-center justify-center w-32 h-12 company-logo">
-                <Image 
-                  src="/amazon-small.png" 
-                  alt="Amazon" 
-                  width={100} 
-                  height={32}
-                  className="object-contain"
-                />
+              <div className="lg:w-1/2">
+                <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                  <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Brain className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="">
+                    <div className="text-xs text-gray-500 font-semibold mb-3 text-center uppercase tracking-wide">Real-Time Probing</div>
+                    <div className="space-y-2 text-sm">
+                      <div className="text-gray-900 font-medium">AI: "Why this approach over a hash set?"</div>
+                      <div className="text-gray-600 pl-3">You: "Well, it's more memory efficient..."</div>
+                      <div className="text-gray-900 font-medium">AI: "What if the array was unsorted?"</div>
+                    </div>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <div className="flex items-center justify-center w-32 h-12 company-logo">
-                <Image 
-                  src="/doordash.png" 
-                  alt="DoorDash" 
-                  width={100} 
-                  height={32}
-                  className="object-contain"
-                />
+            {/* Step 2 - Right content, Left visual */}
+            <div className="flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-16 mb-20">
+              <div className="lg:w-1/2 space-y-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                    2
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900">Stand Out Instantly</h3>
+                </div>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  Turn practice into verified credentials. Build a profile that makes recruiters stop scrolling.
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                    <div className="text-green-600 font-semibold text-sm">Python</div>
+                    <div className="text-green-800 font-bold">Expert</div>
+                  </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                    <div className="text-blue-600 font-semibold text-sm">SQL</div>
+                    <div className="text-blue-800 font-bold">Advanced</div>
+                  </div>
+                </div>
+              </div>
+              <div className="lg:w-1/2">
+                <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                  <div className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Award className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-gray-500 font-semibold mb-3 uppercase tracking-wide">Skill Validated</div>
+                    <div className="">
+                      <div className="text-lg font-bold text-gray-900">Machine Learning</div>
+                      <div className="text-sm text-gray-600">Based on 12 practice sessions</div>
+                      <div className="mt-3 text-green-700 text-xs font-semibold">
+                        ✓ Verified by SkillVee AI
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3 - Left content, Right visual */}
+            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+              <div className="lg:w-1/2 space-y-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                    3
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900">Jobs Find You</h3>
+                </div>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  Stop applying everywhere. We match you with companies that need your exact skills.
+                </p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-gray-700">Auto-applied to 23 matching roles this week</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-gray-700">3 companies requested interviews</span>
+                  </div>
+                </div>
+              </div>
+              <div className="lg:w-1/2">
+                <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                  <div className="w-14 h-14 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Target className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="">
+                    <div className="text-xs text-gray-500 font-semibold mb-3 text-center uppercase tracking-wide">Job Matches</div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">Google requested your profile</div>
+                          <div className="text-xs text-gray-500">Senior Data Scientist • 95% match</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">Meta fast-tracked you</div>
+                          <div className="text-xs text-gray-500">ML Engineer • 92% match</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* How It Works section */}
-        <section className="py-12 sm:py-16 lg:py-20 bg-white">
+        {/* The Broken Hiring Game */}
+        <section className="py-16 sm:py-20 lg:py-24 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-12 sm:mb-16 animate-fade-in">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 animate-slide-up">
-                How It Works
+            <div className="text-center mb-16 sm:mb-20">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                The Broken Hiring Game
               </h2>
-              <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto animate-fade-in-delay">
-                Land your dream data science role in 3 proven steps
+              <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+                Everyone's using AI, but nobody's getting hired. Here's why the current system doesn't work.
               </p>
             </div>
-            
-            <div className="grid md:grid-cols-3 gap-8 relative">
-              <Card className="bg-white hover:shadow-xl transition-all duration-500 border-2 border-transparent hover:border-blue-100 relative transform hover:-translate-y-2 animate-slide-up-delay-1 group">
-                <CardContent className="p-8 text-center">
-                  <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3">
-                    <Brain className="w-7 h-7 text-blue-600" />
+
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Problem Side */}
+              <div className="space-y-8">
+                <div className="text-center lg:text-left">
+                  <h3 className="text-2xl font-bold text-red-600 mb-6">The Problem</h3>
+                </div>
+                
+                <div className="space-y-6">
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <span className="text-white font-bold text-sm">1</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-red-900 mb-2">AI Resume War</h4>
+                        <p className="text-red-800 text-sm">
+                          Everyone creates AI-generated resumes with perfect keywords and inflated experiences
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3 flex items-center justify-center gap-3">
-                    <span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm group-hover:scale-110 transition-transform duration-300">1</span>
-                    Practice Like It's Real
-                  </h3>
-                  <p className="text-gray-600">
-                    Face actual interview questions from Google, Meta, and more. Get instant AI feedback that actually helps.
-                  </p>
-                  {/* Arrow to next step */}
-                  <div className="hidden md:block absolute top-[50%] -right-[28px] -translate-y-1/2 text-gray-300 z-10 animate-bounce-x">
-                    <ArrowRight className="w-8 h-8" />
+
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <span className="text-white font-bold text-sm">2</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-red-900 mb-2">AI Resume Screeners</h4>
+                        <p className="text-red-800 text-sm">
+                          Companies use AI to filter resumes, creating an endless AI vs AI battle
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-white hover:shadow-xl transition-all duration-500 border-2 border-transparent hover:border-yellow-100 relative transform hover:-translate-y-2 animate-slide-up-delay-2 group">
-                <CardContent className="p-8 text-center">
-                  <div className="w-14 h-14 rounded-lg flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3" style={{backgroundColor: '#fef3c7'}}>
-                    <Award className="w-7 h-7" style={{color: '#facc15'}} />
+
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <span className="text-white font-bold text-sm">3</span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-red-900 mb-2">Nobody Gets Hired</h4>
+                        <p className="text-red-800 text-sm">
+                          Real talent gets lost in the noise. The best candidates never get noticed.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3 flex items-center justify-center gap-3">
-                    <span className="w-8 h-8 text-white rounded-full flex items-center justify-center font-bold text-sm group-hover:scale-110 transition-transform duration-300" style={{backgroundColor: '#facc15'}}>2</span>
-                    Stand Out Instantly
-                  </h3>
-                  <p className="text-gray-600">
-                    Turn practice into verified credentials. Build a profile that makes recruiters stop scrolling.
-                  </p>
-                  {/* Arrow to next step */}
-                  <div className="hidden md:block absolute top-[50%] -right-[28px] -translate-y-1/2 text-gray-300 z-10 animate-bounce-x">
-                    <ArrowRight className="w-8 h-8" />
+                </div>
+              </div>
+
+              {/* Solution Side */}
+              <div className="space-y-8">
+                <div className="text-center lg:text-left">
+                  <h3 className="text-2xl font-bold text-green-600 mb-6">SkillVee's Solution</h3>
+                </div>
+                
+                <div className="space-y-6">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-green-900 mb-2">Skill Validation Over Resumes</h4>
+                        <p className="text-green-800 text-sm">
+                          Prove your abilities through real interviews, not keyword-stuffed documents
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-white hover:shadow-xl transition-all duration-500 border-2 border-transparent hover:border-teal-100 transform hover:-translate-y-2 animate-slide-up-delay-3 group">
-                <CardContent className="p-8 text-center">
-                  <div className="w-14 h-14 bg-teal-100 rounded-lg flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3">
-                    <Target className="w-7 h-7 text-teal-600" />
+
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-green-900 mb-2">Direct Company Access</h4>
+                        <p className="text-green-800 text-sm">
+                          Companies request top performers directly, bypassing the broken application process
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3 flex items-center justify-center gap-3">
-                    <span className="w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center font-bold text-sm group-hover:scale-110 transition-transform duration-300">3</span>
-                    Jobs Find You
-                  </h3>
-                  <p className="text-gray-600">
-                    Stop applying everywhere. We match you with companies that need your exact skills.
-                  </p>
-                </CardContent>
-              </Card>
+
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-green-900 mb-2">Merit-Based Matching</h4>
+                        <p className="text-green-800 text-sm">
+                          Your proven skills speak louder than any resume. Companies find you, not the other way around.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <div className="mt-16 text-center animate-fade-in-delay-3">
-              <Link href="/practice">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white transform hover:scale-110 transition-all duration-300 hover:shadow-xl">
-                  <span className="text-lg mr-2">⚡</span>
-                  Start Practicing Free
-                </Button>
-              </Link>
+
+            <div className="mt-16 text-center">
+              <div className="bg-blue-600 rounded-2xl p-8 text-white">
+                <h4 className="text-xl font-bold mb-4">Ready to break free from the broken system?</h4>
+                <p className="text-blue-100 mb-6">
+                  Join thousands of data scientists who've escaped the resume game and landed their dream jobs
+                </p>
+                {user ? (
+                  <Link href="/practice">
+                    <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-50 font-semibold">
+                      Start Validating Your Skills
+                    </Button>
+                  </Link>
+                ) : (
+                  <SignUpButton>
+                    <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-50 font-semibold">
+                      Start Validating Your Skills
+                    </Button>
+                  </SignUpButton>
+                )}
+              </div>
             </div>
           </div>
         </section>
 
         {/* Key Features */}
-        <section className="py-12 sm:py-16 bg-gradient-to-r from-blue-600 to-blue-700 relative">
+        <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-white">
-              <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 shadow-lg">
-                  <CheckCircle className="w-8 h-8 text-teal-400 drop-shadow-md" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+              <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100">
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+                    <CheckCircle className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 text-gray-900">Free Forever</h3>
+                  <p className="text-gray-600 leading-relaxed">Unlimited AI practice sessions, no credit card needed</p>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Free Forever</h3>
-                <p className="text-white/90 text-sm">Unlimited AI practice sessions, no credit card needed</p>
               </div>
-              <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 shadow-lg">
-                  <Target className="w-8 h-8 text-orange-400 drop-shadow-md" />
+              <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100">
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+                    <Target className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 text-gray-900">Auto Job Matching</h3>
+                  <p className="text-gray-600 leading-relaxed">We apply you to perfect-fit roles automatically</p>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Auto Job Matching</h3>
-                <p className="text-white/90 text-sm">We apply you to perfect-fit roles automatically</p>
               </div>
-              <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 shadow-lg">
-                  <Award className="w-8 h-8 text-orange-300 drop-shadow-md" />
+              <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100">
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+                    <Award className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 text-gray-900">Skill Validation</h3>
+                  <p className="text-gray-600 leading-relaxed">Employer-trusted certifications from your practice</p>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Skill Validation</h3>
-                <p className="text-white/90 text-sm">Employer-trusted certifications from your practice</p>
               </div>
             </div>
           </div>
         </section>
 
         {/* Unique Value Props - 3 Pillars */}
-        <section className="py-12 sm:py-16 lg:py-20 bg-white">
+        <section className="py-16 sm:py-20 lg:py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-12 sm:mb-16">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
@@ -348,61 +578,158 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-              <Card className="bg-white hover:shadow-lg transition-shadow border-2 border-transparent hover:border-blue-100">
-                <CardContent className="p-8 text-center">
-                  <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-6">
-                    <Brain className="w-7 h-7 text-blue-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    🤖 AI Interview Coach
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Practice with our realistic AI interviewer covering Python, SQL, machine learning, statistics, and behavioral questions. Get instant feedback and improve your confidence.
-                  </p>
-                  <div className="flex justify-center">
-                    <Badge className="bg-teal-50 text-teal-700 border-teal-200">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* AI Interview Coach - Interactive Demo */}
+              <Card className="bg-white hover:shadow-xl transition-all duration-500 border-2 border-transparent hover:border-blue-200 group overflow-hidden">
+                <CardContent className="p-8">
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                      <Brain className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      🤖 AI Interview Coach
+                    </h3>
+                    <Badge className="bg-blue-50 text-blue-700 border-blue-200">
                       Always Free
                     </Badge>
                   </div>
+                  
+                  {/* Interactive Demo */}
+                  <div className="bg-gray-900 rounded-lg p-4 mb-4 font-mono text-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <span className="text-gray-400 text-xs ml-2">SkillVee AI Interview</span>
+                    </div>
+                    <div className="text-green-400 mb-2">AI: "How would you handle missing data?"</div>
+                    <div className="text-blue-400 mb-2">You: "I'd use mean imputation..."</div>
+                    <div className="text-green-400 mb-2">AI: "Interesting choice. Why mean over median?"</div>
+                    <div className="text-blue-400 mb-2">You: "Well, the data looks normal..."</div>
+                    <div className="text-green-400 animate-pulse">● AI: "What if there were outliers?"</div>
+                  </div>
+                  
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                    <div className="text-blue-800 text-sm font-semibold mb-1">REAL-TIME PROBING:</div>
+                    <div className="text-blue-700 text-xs">AI challenges your assumptions and explores edge cases as you speak</div>
+                  </div>
+                  
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Practice with realistic AI covering Python, SQL, ML, statistics, and behavioral questions.
+                  </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white hover:shadow-lg transition-shadow border-2 border-transparent hover:border-teal-100">
-                <CardContent className="p-8 text-center">
-                  <div className="w-14 h-14 bg-teal-100 rounded-lg flex items-center justify-center mx-auto mb-6">
-                    <Award className="w-7 h-7 text-teal-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    ✅ Skill Validation
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    As you practice, we validate and certify your skills. Build a verified profile that employers trust, backed by your actual interview performance.
-                  </p>
-                  <div className="flex justify-center">
-                    <Badge className="bg-teal-50 text-teal-700 border-teal-200">
+              {/* Skill Validation - Progress Demo */}
+              <Card className="bg-white hover:shadow-xl transition-all duration-500 border-2 border-transparent hover:border-green-200 group overflow-hidden">
+                <CardContent className="p-8">
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                      <Award className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      ✅ Skill Validation
+                    </h3>
+                    <Badge className="bg-green-50 text-green-700 border-green-200">
                       Employer Trusted
                     </Badge>
                   </div>
+                  
+                  {/* Skills Progress */}
+                  <div className="space-y-4 mb-4">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="font-medium text-gray-700">Python</span>
+                        <span className="text-green-600 font-bold">Expert</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-500 h-2 rounded-full w-5/6 transition-all duration-1000 group-hover:w-full"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="font-medium text-gray-700">SQL</span>
+                        <span className="text-blue-600 font-bold">Advanced</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-blue-500 h-2 rounded-full w-3/4 transition-all duration-1000 group-hover:w-5/6"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="font-medium text-gray-700">Machine Learning</span>
+                        <span className="text-purple-600 font-bold">Intermediate</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-purple-500 h-2 rounded-full w-1/2 transition-all duration-1000 group-hover:w-2/3"></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                    <div className="text-blue-800 text-xs font-semibold mb-1">CERTIFICATION EARNED</div>
+                    <div className="text-blue-700 text-sm font-bold">Data Science Fundamentals</div>
+                    <div className="text-blue-600 text-xs">Based on 8 practice sessions</div>
+                  </div>
+                  
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Build verified credentials that employers trust, backed by your actual performance.
+                  </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white hover:shadow-lg transition-shadow border-2 border-transparent hover:border-yellow-100">
-                <CardContent className="p-8 text-center">
-                  <div className="w-14 h-14 rounded-lg flex items-center justify-center mx-auto mb-6" style={{backgroundColor: '#fef3c7'}}>
-                    <Target className="w-7 h-7" style={{color: '#facc15'}} />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    😴 Autopilot Job Applications
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Based on your validated skills, we automatically apply you to relevant data science jobs. Wake up to new interview opportunities.
-                  </p>
-                  <div className="flex justify-center">
-                    <Badge style={{backgroundColor: '#fef3c7', color: '#ca8a04', borderColor: '#fde047'}}>
-                      While You Sleep
+              {/* Autopilot Applications - Live Activity */}
+              <Card className="bg-white hover:shadow-xl transition-all duration-500 border-2 border-transparent hover:border-purple-200 group overflow-hidden">
+                <CardContent className="p-8">
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                      <Target className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      🎯 Companies Find You
+                    </h3>
+                    <Badge className="bg-blue-500 text-blue-900 border-blue-200">
+                      Top Performers Only
                     </Badge>
                   </div>
+                  
+                  {/* Company Recruitment */}
+                  <div className="space-y-3 mb-4">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-3">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold text-gray-900">Google requested your profile</div>
+                        <div className="text-xs text-gray-600">Senior Data Scientist • 2 hours ago</div>
+                      </div>
+                      <div className="text-green-600 text-xs font-bold">Top 5%</div>
+                    </div>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-3">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold text-gray-900">Meta invited you to apply</div>
+                        <div className="text-xs text-gray-600">ML Engineer • 5 hours ago</div>
+                      </div>
+                      <div className="text-blue-600 text-xs font-bold">Fast-track</div>
+                    </div>
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-center gap-3">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold text-gray-900">Direct interview offer</div>
+                        <div className="text-xs text-gray-600">Netflix • Data Analyst</div>
+                      </div>
+                      <div className="text-yellow-600 text-xs font-bold">Skip resume</div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
+                    <div className="text-purple-800 text-xs font-semibold mb-1">THIS WEEK</div>
+                    <div className="text-purple-700 text-sm font-bold">8 companies reached out</div>
+                    <div className="text-purple-600 text-xs">3 direct interview offers</div>
+                  </div>
+                  
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Top-performing candidates get discovered by companies actively seeking their skills.
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -415,7 +742,7 @@ export default async function Home() {
           {/* Decorative elements */}
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
             <div className="absolute -top-24 -left-24 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-            <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-orange-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+            <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
           </div>
           <div className="max-w-4xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-12 sm:mb-16">
@@ -432,7 +759,7 @@ export default async function Home() {
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-blue-600 font-bold text-sm">Q</span>
+                      <span className="text-primary font-bold text-sm">Q</span>
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -450,7 +777,7 @@ export default async function Home() {
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-blue-600 font-bold text-sm">Q</span>
+                      <span className="text-primary font-bold text-sm">Q</span>
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -468,7 +795,7 @@ export default async function Home() {
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-blue-600 font-bold text-sm">Q</span>
+                      <span className="text-primary font-bold text-sm">Q</span>
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -482,64 +809,11 @@ export default async function Home() {
                 </CardContent>
               </Card>
 
-              <Card className="border-2 border-gray-100 hover:border-blue-200 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-blue-600 font-bold text-sm">Q</span>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        What types of questions does it cover?
-                      </h3>
-                      <p className="text-gray-600">
-                        We cover technical questions (Python, SQL, machine learning algorithms, statistics), case studies, behavioral questions, and company-specific scenarios based on actual interview patterns from top tech companies.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-gray-100 hover:border-blue-200 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-blue-600 font-bold text-sm">Q</span>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        How long does it take to see results?
-                      </h3>
-                      <p className="text-gray-600">
-                        Most users see improved confidence within their first few practice sessions. For job matching, it typically takes 2-4 weeks of consistent practice to build a strong enough profile for companies to reach out.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-gray-100 hover:border-blue-200 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-blue-600 font-bold text-sm">Q</span>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        Do I need any experience to start?
-                      </h3>
-                      <p className="text-gray-600">
-                        No! Whether you're a complete beginner or experienced professional, our AI adapts to your level. Start wherever you are, and we'll help you improve and showcase your growing skills to employers.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
 
             <div className="mt-12 text-center">
               <p className="text-gray-600 mb-4">Have more questions?</p>
-              <Link href="/faq" className="text-blue-600 hover:text-blue-700 font-medium">
+              <Link href="/faq" className="text-primary hover:text-blue-700 font-medium">
                 View our complete FAQ →
               </Link>
             </div>
@@ -547,120 +821,9 @@ export default async function Home() {
         </section>
 
 
-        {/* University Trust Section */}
-        <section className="py-12 sm:py-16 bg-gradient-to-br from-blue-50/50 via-white to-orange-50/30">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-12 sm:mb-16">
-              <Badge className="bg-gradient-to-r from-blue-100 to-orange-100 text-blue-700 border-blue-200 mb-6">
-                🎓 Trusted by Students
-              </Badge>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                Trusted by Data Science Students at
-              </h2>
-              <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-                Students from the world's top universities choose SkillVee to prepare for their data science careers
-              </p>
-            </div>
-            
-            {/* University Logos Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 items-center mb-8">
-              
-              {/* MIT */}
-              <div className="flex items-center justify-center h-24 px-4 rounded-lg hover:bg-white/60 transition-all duration-300 group">
-                <Image 
-                  src="/mit-logo.png" 
-                  alt="MIT" 
-                  width={140} 
-                  height={70}
-                  className="object-contain opacity-60 group-hover:opacity-100 transition-all duration-300"
-                />
-              </div>
-
-              {/* Stanford */}
-              <div className="flex items-center justify-center h-24 px-4 rounded-lg hover:bg-white/60 transition-all duration-300 group">
-                <Image 
-                  src="/stanford-logo.png" 
-                  alt="Stanford University" 
-                  width={120} 
-                  height={60}
-                  className="object-contain opacity-60 group-hover:opacity-100 transition-all duration-300"
-                />
-              </div>
-
-              {/* UC Berkeley */}
-              <div className="flex items-center justify-center h-24 px-4 rounded-lg hover:bg-white/60 transition-all duration-300 group">
-                <Image 
-                  src="/Berkeley-logo.png" 
-                  alt="UC Berkeley" 
-                  width={140} 
-                  height={70}
-                  className="object-contain opacity-60 group-hover:opacity-100 transition-all duration-300"
-                />
-              </div>
-
-              {/* Carnegie Mellon */}
-              <div className="flex items-center justify-center h-24 px-4 rounded-lg hover:bg-white/60 transition-all duration-300 group">
-                <Image 
-                  src="/carnegie-mellon-png.png" 
-                  alt="Carnegie Mellon University" 
-                  width={120} 
-                  height={60}
-                  className="object-contain opacity-60 group-hover:opacity-100 transition-all duration-300"
-                />
-              </div>
-
-              {/* Harvard */}
-              <div className="flex items-center justify-center h-24 px-4 rounded-lg hover:bg-white/60 transition-all duration-300 group">
-                <Image 
-                  src="/harvard-logo.svg" 
-                  alt="Harvard University" 
-                  width={140} 
-                  height={70}
-                  className="object-contain opacity-60 group-hover:opacity-100 transition-all duration-300"
-                />
-              </div>
-
-              {/* University of Washington */}
-              <div className="flex items-center justify-center h-24 px-4 rounded-lg hover:bg-white/60 transition-all duration-300 group">
-                <Image 
-                  src="/washington-logo.png" 
-                  alt="University of Washington" 
-                  width={90} 
-                  height={45}
-                  className="object-contain opacity-60 group-hover:opacity-100 transition-all duration-300"
-                />
-              </div>
-
-              {/* Georgia Tech */}
-              <div className="flex items-center justify-center h-24 px-4 rounded-lg hover:bg-white/60 transition-all duration-300 group">
-                <Image 
-                  src="/georgiatech-logo.png" 
-                  alt="Georgia Institute of Technology" 
-                  width={140} 
-                  height={70}
-                  className="object-contain opacity-60 group-hover:opacity-100 transition-all duration-300"
-                />
-              </div>
-
-              {/* NYU */}
-              <div className="flex items-center justify-center h-24 px-4 rounded-lg hover:bg-white/60 transition-all duration-300 group">
-                <Image 
-                  src="/nyu-logo.png" 
-                  alt="New York University" 
-                  width={120} 
-                  height={60}
-                  className="object-contain opacity-60 group-hover:opacity-100 transition-all duration-300"
-                />
-              </div>
-
-            </div>
-
-
-          </div>
-        </section>
 
         {/* Comparison Table */}
-        <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+        <section className="py-16 sm:py-20 lg:py-24 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-12 sm:mb-16">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
@@ -674,13 +837,13 @@ export default async function Home() {
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-blue-600 text-white">
+                  <thead className="bg-primary text-white">
                     <tr>
                       <th className="text-left p-3 sm:p-6 font-semibold text-sm sm:text-base">Features</th>
                       <th className="text-center p-3 sm:p-6 font-semibold bg-blue-700">
                         <div className="flex flex-col items-center">
                           <span className="text-lg sm:text-xl font-bold">SkillVee</span>
-                          <Badge className="bg-yellow-500 text-yellow-900 mt-1 text-xs">
+                          <Badge className="bg-yellow-400 text-yellow-900 mt-1 text-xs font-semibold">
                             RECOMMENDED
                           </Badge>
                         </div>
@@ -694,8 +857,8 @@ export default async function Home() {
                     <tr className="border-b border-gray-100">
                       <td className="p-3 sm:p-6 font-medium text-gray-900 text-sm sm:text-base">AI-Powered Interview Practice</td>
                       <td className="p-3 sm:p-6 text-center bg-blue-50">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 mx-auto" />
-                        <div className="text-xs text-teal-700 mt-1">Advanced AI</div>
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                        <div className="text-xs text-blue-700 mt-1">Advanced AI</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
@@ -714,16 +877,16 @@ export default async function Home() {
                     <tr className="border-b border-gray-100">
                       <td className="p-3 sm:p-6 font-medium text-gray-900 text-sm sm:text-base">Free Forever Access</td>
                       <td className="p-3 sm:p-6 text-center bg-blue-50">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 mx-auto" />
-                        <div className="text-xs text-teal-700 mt-1">100% Free</div>
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                        <div className="text-xs text-blue-700 mt-1">100% Free</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
                         <div className="text-xs text-red-600 mt-1">$39/month</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 mx-auto" />
-                        <div className="text-xs text-teal-700 mt-1">Limited free</div>
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                        <div className="text-xs text-blue-700 mt-1">Limited free</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
@@ -734,8 +897,8 @@ export default async function Home() {
                     <tr className="border-b border-gray-100">
                       <td className="p-3 sm:p-6 font-medium text-gray-900 text-sm sm:text-base">Automatic Job Applications</td>
                       <td className="p-3 sm:p-6 text-center bg-blue-50">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 mx-auto" />
-                        <div className="text-xs text-teal-700 mt-1">While you sleep</div>
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                        <div className="text-xs text-blue-700 mt-1">While you sleep</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
@@ -754,8 +917,8 @@ export default async function Home() {
                     <tr className="border-b border-gray-100">
                       <td className="p-3 sm:p-6 font-medium text-gray-900 text-sm sm:text-base">Real-time Skill Validation</td>
                       <td className="p-3 sm:p-6 text-center bg-blue-50">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 mx-auto" />
-                        <div className="text-xs text-teal-700 mt-1">AI-certified</div>
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                        <div className="text-xs text-blue-700 mt-1">AI-certified</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
@@ -774,12 +937,12 @@ export default async function Home() {
                     <tr className="border-b border-gray-100">
                       <td className="p-3 sm:p-6 font-medium text-gray-900 text-sm sm:text-base">Data Science Focus</td>
                       <td className="p-3 sm:p-6 text-center bg-blue-50">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 mx-auto" />
-                        <div className="text-xs text-teal-700 mt-1">100% DS focused</div>
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                        <div className="text-xs text-blue-700 mt-1">100% DS focused</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 mx-auto" />
-                        <div className="text-xs text-teal-700 mt-1">DS focused</div>
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                        <div className="text-xs text-blue-700 mt-1">DS focused</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
@@ -794,16 +957,16 @@ export default async function Home() {
                     <tr className="border-b border-gray-100">
                       <td className="p-3 sm:p-6 font-medium text-gray-900 text-sm sm:text-base">Instant Feedback</td>
                       <td className="p-3 sm:p-6 text-center bg-blue-50">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 mx-auto" />
-                        <div className="text-xs text-teal-700 mt-1">AI-powered</div>
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                        <div className="text-xs text-blue-700 mt-1">AI-powered</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
                         <div className="text-xs text-gray-500 mt-1">Solutions only</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 mx-auto" />
-                        <div className="text-xs text-teal-700 mt-1">From peers</div>
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                        <div className="text-xs text-blue-700 mt-1">From peers</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
@@ -814,20 +977,20 @@ export default async function Home() {
                     <tr>
                       <td className="p-3 sm:p-6 font-medium text-gray-900 text-sm sm:text-base">Available 24/7</td>
                       <td className="p-3 sm:p-6 text-center bg-blue-50">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 mx-auto" />
-                        <div className="text-xs text-teal-700 mt-1">Always on</div>
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                        <div className="text-xs text-blue-700 mt-1">Always on</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 mx-auto" />
-                        <div className="text-xs text-teal-700 mt-1">Self-paced</div>
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                        <div className="text-xs text-blue-700 mt-1">Self-paced</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
                         <div className="text-xs text-gray-500 mt-1">Scheduled</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 mx-auto" />
-                        <div className="text-xs text-teal-700 mt-1">Self-paced</div>
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
+                        <div className="text-xs text-blue-700 mt-1">Self-paced</div>
                       </td>
                     </tr>
                   </tbody>
@@ -840,7 +1003,7 @@ export default async function Home() {
 
 
         {/* Final CTA Section */}
-        <section className="py-12 sm:py-16 bg-gradient-to-br from-teal-500 via-blue-600 to-blue-800 relative overflow-hidden">
+        <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-800 relative overflow-hidden">
           {/* Background decoration */}
           <div className="absolute top-0 left-0 w-full h-full opacity-10">
             <div className="absolute top-10 left-10 w-20 h-20 border border-white rounded-full"></div>
@@ -872,14 +1035,14 @@ export default async function Home() {
             <div className="flex justify-center mb-8 sm:mb-12">
               {user ? (
                 <Link href="/practice">
-                  <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 shadow-xl">
+                  <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-50 shadow-xl font-semibold border border-gray-200">
                     <Brain className="w-5 h-5 mr-2" />
                     Start Practicing Free Now
                   </Button>
                 </Link>
               ) : (
                 <SignUpButton>
-                  <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 shadow-xl">
+                  <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-50 shadow-xl font-semibold border border-gray-200">
                     <Brain className="w-5 h-5 mr-2" />
                     Start Practicing Free Now
                   </Button>

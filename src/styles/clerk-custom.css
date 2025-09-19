@@ -7,18 +7,25 @@
   display: none !important;
 }
 
-/* Hide development mode badge - all possible selectors */
+/* Hide development mode badge - comprehensive approach */
 .cl-badge,
 .cl-footer .cl-badge,
 [data-localization-key="badge__developmentMode"],
 .cl-internal-badge,
 div[class*="badge"],
-div[class*="developmentMode"] {
+div[class*="developmentMode"],
+div[class*="secured-by"],
+.cl-footerPages,
+.cl-footer,
+[class*="__badge"],
+[class*="__secured"],
+[class*="__development"] {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
+  overflow: hidden !important;
 }
 
 /* Hide any orange development text */
@@ -29,8 +36,200 @@ div[class*="developmentMode"] {
 }
 
 /* Hide footer sections that might contain dev badge */
-.cl-footerPages:has([data-localization-key="badge__developmentMode"]) {
+.cl-footerPages,
+.cl-footer,
+footer[class*="cl-"],
+[class*="cl-footer"] {
   display: none !important;
+}
+
+/* Hide any elements containing development mode badge */
+div:has([data-localization-key="badge__developmentMode"]),
+[data-localization-key*="badge"],
+[data-localization-key*="development"],
+[data-localization-key*="secured"] {
+  display: none !important;
+}
+
+/* Target specific text patterns that might appear */
+span[class*="badge"],
+div[class*="badge"],
+p[class*="badge"],
+a[class*="badge"],
+span[style*="orange"],
+div[style*="orange"] {
+  display: none !important;
+}
+
+/* Global approach to hide any clerk branding */
+*[class*="cl-footer"],
+*[class*="cl-badge"],
+*[class*="secured"],
+*[class*="development"],
+*[class*="clerk"],
+*[data-clerk*=""],
+*[id*="clerk"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  z-index: -9999 !important;
+}
+
+/* More specific targeting for Clerk React components */
+div[class*="ClerkProvider"],
+div[class*="ClerkNextOptionsProvider"],
+div[class*="ClerkContextProvider"],
+span[class*="clerk"],
+p[class*="clerk"],
+a[class*="clerk"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Target any potential Clerk JS injected elements */
+[class^="clerk-"],
+[class*="-clerk-"],
+[class$="-clerk"],
+[id^="clerk-"],
+[id*="-clerk-"],
+[id$="-clerk"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Hide any iframe or script tags from Clerk */
+iframe[src*="clerk"],
+script[src*="clerk.accounts"],
+script[data-clerk*=""] {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Additional CSS to prevent any clerk branding from showing */
+body::after,
+body::before,
+html::after,
+html::before {
+  content: none !important;
+}
+
+/* Ensure no pseudo-elements can show clerk branding */
+*::after,
+*::before {
+  content: none !important;
+}
+
+/* Note: Content-based hiding is handled by JavaScript since CSS :contains() is not standard */
+
+/* UserButton styling to match site theme */
+.cl-userButtonBox,
+.cl-userButtonTrigger {
+  background-color: rgb(35, 124, 241) !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  transition: all 0.15s ease !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.cl-userButtonTrigger:hover {
+  border-color: rgb(35, 124, 241) !important;
+  box-shadow: 0 0 0 1px rgba(35, 124, 241, 0.1) !important;
+}
+
+.cl-avatarBox {
+  width: 32px !important;
+  height: 32px !important;
+  background-color: rgb(35, 124, 241) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: white !important;
+}
+
+.cl-avatarImage {
+  border-radius: 50% !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Force blue background for avatar fallback (initials only, not text elements) */
+.cl-avatarBox .cl-avatarImage,
+.cl-avatarBox[data-avatar-fallback],
+.cl-avatarBox:not(:has(.cl-avatarImage)) {
+  background-color: rgb(35, 124, 241) !important;
+  color: white !important;
+}
+
+/* Ensure text elements in popover don't get blue background */
+.cl-userButtonPopover .cl-userPreviewMainIdentifier,
+.cl-userButtonPopover .cl-userPreviewSecondaryIdentifier {
+  background-color: transparent !important;
+  color: #000000 !important;
+}
+
+/* Only apply blue to avatar circle elements, not text */
+.cl-userButtonTrigger .cl-avatarBox,
+.cl-userButton .cl-avatarBox {
+  background-color: rgb(35, 124, 241) !important;
+}
+
+/* UserButton Popover/Dropdown specific styling */
+.cl-userButtonPopover,
+.cl-userButton [role="dialog"] {
+  background-color: white !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Hide branding in UserButton dropdown */
+.cl-userButtonPopover .cl-footer,
+.cl-userButtonPopover .cl-footerPages,
+.cl-userButtonPopover .cl-badge,
+.cl-userButtonPopover [class*="footer"],
+.cl-userButtonPopover [class*="badge"],
+.cl-userButtonPopover [class*="secured"],
+.cl-userButtonPopover [class*="development"],
+.cl-userButtonPopoverFooter,
+.cl-userButton .cl-footer,
+.cl-userButton .cl-footerPages,
+.cl-userButton .cl-badge,
+.cl-userButton [class*="footer"],
+.cl-userButton [class*="badge"],
+.cl-userButton [class*="secured"],
+.cl-userButton [class*="development"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+/* Force consistent primary color for UserButton elements */
+.cl-userButtonTrigger,
+.cl-userButtonBox {
+  background-color: rgb(35, 124, 241) !important;
+  color: white !important;
 }
 
 /* Make Google button full width when LinkedIn is hidden */

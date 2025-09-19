@@ -157,6 +157,55 @@ src/app/interview/__tests__/   # End-to-end flow testing
 src/lib/__tests__/            # Utility and compatibility tests
 ```
 
+## Playwright E2E Testing
+
+**Status**: ✅ Comprehensive end-to-end testing with authentication
+
+### Configuration
+
+- **Framework**: Playwright 1.55.0 with TypeScript
+- **Browser**: Chromium only (optimized for speed)
+- **Authentication**: Persistent auth state with Clerk integration
+- **Projects**: Setup, authenticated, and unauthenticated test suites
+
+### Key Commands
+
+```bash
+npm run test:e2e                    # Run all E2E tests (chromium only)
+npm run test:e2e:auth              # Setup authentication state
+npm run test:e2e:authenticated     # Run authenticated tests only
+npm run test:e2e:public            # Run unauthenticated tests only
+npm run test:e2e:ui                # Run with Playwright UI
+npm run test:e2e:debug             # Debug mode with browser
+```
+
+### Test Structure
+
+```bash
+playwright-tests/
+├── auth.setup.simplified.ts       # Authentication setup
+├── auth.utils.ts                  # Auth helper utilities
+├── authenticated-pages.spec.ts    # Protected routes testing
+├── public-pages.unauth.spec.ts   # Public routes testing
+└── README.md                      # Setup documentation
+```
+
+### Environment Variables
+
+```bash
+PLAYWRIGHT_TEST_EMAIL=your-test-email@example.com
+PLAYWRIGHT_TEST_PASSWORD=your-test-password
+PLAYWRIGHT_HEADED=false            # Headless mode
+PLAYWRIGHT_SLOW_MO=false          # No slow motion
+```
+
+### Performance Optimization
+
+- **Chromium Only**: Single browser for faster execution
+- **Parallel Execution**: fullyParallel enabled for speed
+- **Authentication Caching**: Persistent auth state saved to `./playwright/.auth/user.json`
+- **CI Optimization**: Reduced workers and retry logic for CI environments
+
 ## Supabase CLI Essentials
 
 **Status**: ✅ Configured with project ID: buyxawgqsxvmxbzooekf

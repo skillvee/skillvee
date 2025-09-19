@@ -23,6 +23,7 @@ model User {
   interviews       Interview[]
   jobDescriptions  JobDescription[]
   skillAssessments UserSkillAssessment[]
+  practiceSessions PracticeSession[]
 
   @@index([clerkId])
   @@index([email])
@@ -61,6 +62,7 @@ model Interview {
   id                   String                @id @default(cuid())
   userId               String
   jobDescriptionId     String
+  practiceSessionId    String?
   status               InterviewStatus       @default(SCHEDULED)
   scheduledAt          DateTime?
   startedAt            DateTime?
@@ -79,6 +81,7 @@ model Interview {
   interviewSkills      InterviewSkill[]
   focusDomain          SkillDomain?          @relation(fields: [focusDomainId], references: [id])
   jobDescription       JobDescription        @relation(fields: [jobDescriptionId], references: [id])
+  practiceSession      PracticeSession?      @relation(fields: [practiceSessionId], references: [id])
   user                 User                  @relation(fields: [userId], references: [id])
   mediaRecordings      MediaRecording[]
   questions            Question[]
@@ -86,6 +89,7 @@ model Interview {
 
   @@index([userId])
   @@index([jobDescriptionId])
+  @@index([practiceSessionId])
   @@index([focusDomainId])
   @@index([status])
   @@index([scheduledAt])
@@ -186,6 +190,7 @@ model RoleArchetype {
   jobDescriptions   JobDescription[]
   roleSkillMappings RoleSkillMapping[]
   roles             Role[]
+  practiceSessions  PracticeSession[]
 
   @@index([name])
   @@index([deletedAt])
@@ -336,6 +341,48 @@ enum QuestionType {
   CASE_STUDY
   PROBLEM_SOLVING
   SYSTEM_DESIGN
+}
+
+model PracticeSession {
+  id          String      @id @default(cuid())
+  userId      String
+  sessionType SessionType
+
+  // Extracted/Selected Data
+  jobTitle    String?
+  company     String?
+  team        String?
+  experience  String?
+  archetypeId String?
+
+  // AI Analysis Results
+  requirements  String[]
+  focusAreas    String[]
+  difficulty    Difficulty?
+  extractedInfo Json? // Additional parsed data
+
+  // Original job description (for reference)
+  originalDescription String?
+
+  // Session Management
+  createdAt DateTime @default(now())
+  expiresAt DateTime // Auto-cleanup after 7 days
+
+  // Relations
+  user       User           @relation(fields: [userId], references: [id])
+  archetype  RoleArchetype? @relation(fields: [archetypeId], references: [id])
+  interviews Interview[] // Multiple interviews can reference same session
+
+  @@index([userId])
+  @@index([sessionType])
+  @@index([archetypeId])
+  @@index([expiresAt])
+  @@map("practice_sessions")
+}
+
+enum SessionType {
+  JOB_DESCRIPTION
+  ROLE_SELECTION
 }
 
 enum Difficulty {
