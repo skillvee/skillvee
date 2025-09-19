@@ -92,7 +92,7 @@ export const practiceRouter = createTRPCRouter({
             requirements: data.requirements || [],
             focusAreas: data.focusAreas || [],
             difficulty: sanitizedDifficulty,
-            extractedInfo: data.extractedInfo || null,
+            extractedInfo: data.extractedInfo ? JSON.parse(JSON.stringify(data.extractedInfo)) : null,
             originalDescription: description,
             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
           },
@@ -127,7 +127,7 @@ export const practiceRouter = createTRPCRouter({
           ...data,
           archetypeMatch: data.archetypeMatch ? {
             ...data.archetypeMatch,
-            archetype: session.archetype,
+            archetype: (session as any).archetype ?? null,
           } : undefined,
         },
       };
@@ -160,7 +160,7 @@ export const practiceRouter = createTRPCRouter({
             requirements: data.requirements || [],
             focusAreas: data.focusAreas || [],
             difficulty: "MEDIUM", // Default for role selection
-            extractedInfo: data.extractedInfo || null,
+            extractedInfo: data.extractedInfo ? JSON.parse(JSON.stringify(data.extractedInfo)) : null,
             originalDescription: null,
             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
           },

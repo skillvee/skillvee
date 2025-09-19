@@ -72,9 +72,7 @@ export default function RootLayout({
           },
         },
       }}
-      domain={process.env.NODE_ENV === "development" ? undefined : undefined}
-      isSatellite={false}
-      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}
     >
       <html lang="en">
         <body>

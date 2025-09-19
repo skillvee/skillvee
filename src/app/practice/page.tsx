@@ -11,6 +11,7 @@ export default function PracticePage() {
   const { user, isLoaded } = useUser();
   const [jobDescription, setJobDescription] = useState("");
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Redirect to sign-in if not authenticated
   useEffect(() => {
@@ -67,6 +68,8 @@ export default function PracticePage() {
 
   const handleCreateInterview = async () => {
     if (!isButtonActive || isProcessing) return;
+
+    setIsProcessing(true);
 
     // Immediately navigate to results page with creating state
     if (hasMinimumWords && jobDescription.trim()) {
