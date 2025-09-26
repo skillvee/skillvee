@@ -79,7 +79,6 @@ export class GeminiDbLogger {
           responseTime: data.responseTime,
           success: data.success,
           errorMessage: data.errorMessage,
-          updatedAt: new Date(),
         },
       });
     } catch (error) {

@@ -98,7 +98,7 @@ Return structured JSON with title, company, team, experience, difficulty, and ar
       sessionId,
       endpoint: "analyzeJobDescription",
       prompt,
-      modelUsed: "gemini-1.5-flash",
+      modelUsed: "gemini-flash-latest",
       metadata: {
         descriptionLength: description.length,
         archetypeCount: availableArchetypes.length,
@@ -111,7 +111,7 @@ Return structured JSON with title, company, team, experience, difficulty, and ar
     let response;
     try {
       response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-flash-latest",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         config: {
           responseMimeType: "application/json",
@@ -124,7 +124,7 @@ Return structured JSON with title, company, team, experience, difficulty, and ar
       console.log(`[Gemini] Schema-based request failed, trying without schema:`, schemaError);
       // Fallback without schema
       response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-flash-latest",
         contents: [{ role: "user", parts: [{ text: prompt + "\n\nIMPORTANT: Return only valid JSON, no other text." }] }],
         config: {
           temperature: 0.1,
@@ -415,7 +415,7 @@ Return **only** a JSON object in exactly this structure (no extra keys, no missi
       jobTitle,
       company,
       skills: skillRequirements.map(s => `${s.skillName} (Level ${s.targetProficiency})`),
-      modelUsed: "gemini-1.5-flash",
+      modelUsed: "gemini-flash-latest",
       metadata: {
         experience: experience || 'Not specified',
         skillDetails: skillRequirements,
@@ -442,7 +442,7 @@ Return **only** a JSON object in exactly this structure (no extra keys, no missi
     const startTime = Date.now();
 
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-flash-latest",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: {
         responseMimeType: "application/json",
@@ -627,7 +627,7 @@ Common focus areas include: Machine Learning, Data Analysis, Statistics, Python 
 Return 5-8 most relevant focus areas.`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-flash-latest",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
