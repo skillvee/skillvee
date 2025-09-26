@@ -21,6 +21,7 @@ export interface UseGeminiLiveState {
   isConnected: boolean;
   isListening: boolean;
   isAISpeaking: boolean;
+  isScreenRecording: boolean;
   error: string | null;
   connectionState: 'disconnected' | 'connecting' | 'connected' | 'error';
   audioLevel: number;
@@ -31,10 +32,13 @@ export interface UseGeminiLiveActions {
   disconnect: () => Promise<void>;
   startListening: () => Promise<void>;
   stopListening: () => void;
+  startScreenRecording: () => Promise<void>;
+  stopScreenRecording: () => void;
   updateContext: (context: Partial<InterviewContext>) => void;
   sendInitialGreeting: () => void;
   clearError: () => void;
   reconnect: () => Promise<void>;
+  exportConversation: () => any;
 }
 
 export interface UseGeminiLiveReturn extends UseGeminiLiveState, UseGeminiLiveActions {
@@ -61,6 +65,7 @@ export function useGeminiLive(options: UseGeminiLiveOptions = {}): UseGeminiLive
     isConnected: false,
     isListening: false,
     isAISpeaking: false,
+    isScreenRecording: false,
     error: null,
     connectionState: 'disconnected',
     audioLevel: 0,
@@ -224,8 +229,30 @@ export function useGeminiLive(options: UseGeminiLiveOptions = {}): UseGeminiLive
 
   const stopListening = useCallback(() => {
     if (!clientRef.current) return;
-    
+
     clientRef.current.stopListening();
+  }, []);
+
+  const startScreenRecording = useCallback(async () => {
+    if (!clientRef.current) {
+      throw new Error('Gemini Live client not initialized');
+    }
+
+    try {
+      await clientRef.current.startScreenRecording();
+      setState(prev => ({ ...prev, isScreenRecording: true }));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to start screen recording';
+      setState(prev => ({ ...prev, error: errorMessage }));
+      throw error;
+    }
+  }, []);
+
+  const stopScreenRecording = useCallback(() => {
+    if (!clientRef.current) return;
+
+    clientRef.current.stopScreenRecording();
+    setState(prev => ({ ...prev, isScreenRecording: false }));
   }, []);
 
   const updateContext = useCallback((contextUpdate: Partial<InterviewContext>) => {
@@ -251,7 +278,7 @@ export function useGeminiLive(options: UseGeminiLiveOptions = {}): UseGeminiLive
     if (!contextRef.current || !apiKeyRef.current) {
       throw new Error('No context or API key available for reconnection');
     }
-    
+
     try {
       await connect(contextRef.current, apiKeyRef.current);
     } catch (error) {
@@ -259,6 +286,11 @@ export function useGeminiLive(options: UseGeminiLiveOptions = {}): UseGeminiLive
       throw error;
     }
   }, [connect]);
+
+  const exportConversation = useCallback(() => {
+    if (!clientRef.current) return null;
+    return clientRef.current.exportConversation();
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -279,10 +311,13 @@ export function useGeminiLive(options: UseGeminiLiveOptions = {}): UseGeminiLive
     disconnect,
     startListening,
     stopListening,
+    startScreenRecording,
+    stopScreenRecording,
     updateContext,
     sendInitialGreeting,
     clearError,
     reconnect,
+    exportConversation,
     
     // Client reference (for advanced usage)
     client: clientRef.current,

@@ -11,6 +11,9 @@ export interface GeminiLiveConfig {
   responseModalities: ('AUDIO' | 'TEXT')[];
   systemInstruction?: string;
   voice?: 'Puck' | 'Charon' | 'Kore' | 'Fenrir' | 'Aoede';
+  enableInputTranscription?: boolean;
+  enableOutputTranscription?: boolean;
+  enableScreenCapture?: boolean;
 }
 
 export interface InterviewContext {
@@ -34,11 +37,14 @@ export interface Question {
   followUpQuestions?: string[];
 }
 
-export type GeminiLiveEventType = 
+export type GeminiLiveEventType =
   | 'connected'
   | 'disconnected'
   | 'audio-received'
   | 'text-received'
+  | 'user-transcript'
+  | 'ai-transcript'
+  | 'screen-capture'
   | 'turn-complete'
   | 'interrupted'
   | 'error'
@@ -48,6 +54,53 @@ export type GeminiLiveEventType =
   | 'ai-speaking-stop';
 
 export type GeminiLiveEventHandler<T = any> = (data: T) => void;
+
+export interface ConversationTurn {
+  id: string;
+  timestamp: string;
+  role: 'user' | 'assistant';
+  content: {
+    audio?: {
+      data: string; // base64
+      mimeType: string;
+      duration?: number;
+    };
+    text?: string;
+    transcript?: string;
+  };
+  metadata?: {
+    turnComplete?: boolean;
+    interrupted?: boolean;
+  };
+}
+
+export interface ScreenCapture {
+  id: string;
+  timestamp: string;
+  data: string; // base64 image
+  mimeType: string;
+  width: number;
+  height: number;
+}
+
+export interface ConversationSession {
+  sessionId: string;
+  startTime: string;
+  endTime?: string;
+  duration?: number;
+  model: string;
+  turns: ConversationTurn[];
+  screenCaptures: ScreenCapture[];
+  analytics: {
+    totalTurns: number;
+    userTurns: number;
+    assistantTurns: number;
+    userSpeakingTime: number;
+    aiSpeakingTime: number;
+    averageResponseTime: number;
+    interruptionCount: number;
+  };
+}
 
 /**
  * AudioRecorder handles microphone input using modern AudioWorklet
@@ -144,6 +197,152 @@ class AudioRecorder {
       binary += String.fromCharCode(bytes[i]!);
     }
     return btoa(binary);
+  }
+}
+
+/**
+ * ScreenRecorder handles screen capture using MediaRecorder API
+ *
+ * Features:
+ * - Screen sharing with getDisplayMedia
+ * - Periodic screenshot capture
+ * - Stream video data to WebSocket
+ * - Automatic cleanup and error handling
+ */
+class ScreenRecorder {
+  private stream: MediaStream | null = null;
+  private videoElement: HTMLVideoElement | null = null;
+  private canvas: HTMLCanvasElement | null = null;
+  private context: CanvasRenderingContext2D | null = null;
+  private captureInterval: NodeJS.Timeout | null = null;
+  private onScreenCapture: ((capture: ScreenCapture) => void) | null = null;
+  private onVideoChunk: ((base64: string) => void) | null = null;
+  private isRecording = false;
+
+  /**
+   * Start screen recording
+   * @param onScreenCapture Callback for periodic screenshots
+   * @param onVideoChunk Callback for video stream data
+   * @param captureIntervalMs Interval for taking screenshots (default: 5000ms)
+   */
+  async start(
+    onScreenCapture: (capture: ScreenCapture) => void,
+    onVideoChunk?: (base64: string) => void,
+    captureIntervalMs: number = 5000
+  ): Promise<void> {
+    this.onScreenCapture = onScreenCapture;
+    this.onVideoChunk = onVideoChunk || null;
+
+    try {
+      // Request screen sharing permission
+      this.stream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          frameRate: { ideal: 15 }
+        } as DisplayMediaStreamOptions['video'],
+        audio: false // We handle audio separately
+      });
+
+      // Setup video element for frame capture
+      this.videoElement = document.createElement('video');
+      this.videoElement.srcObject = this.stream;
+      this.videoElement.play();
+
+      // Setup canvas for screenshot capture
+      this.canvas = document.createElement('canvas');
+      this.context = this.canvas.getContext('2d');
+
+      this.isRecording = true;
+
+      // Start periodic screenshot capture
+      this.captureInterval = setInterval(() => {
+        if (this.isRecording) {
+          this.captureScreenshot();
+        }
+      }, captureIntervalMs);
+
+      // Handle stream end (user stops sharing)
+      this.stream.getVideoTracks()[0]?.addEventListener('ended', () => {
+        this.stop();
+      });
+
+    } catch (error) {
+      throw new Error('Failed to start screen recording: ' + error);
+    }
+  }
+
+  private captureScreenshot(): void {
+    if (!this.videoElement || !this.canvas || !this.context || !this.onScreenCapture) {
+      return;
+    }
+
+    try {
+      // Set canvas dimensions to match video
+      this.canvas.width = this.videoElement.videoWidth;
+      this.canvas.height = this.videoElement.videoHeight;
+
+      // Draw current video frame to canvas
+      this.context.drawImage(this.videoElement, 0, 0);
+
+      // Convert to base64
+      const dataUrl = this.canvas.toDataURL('image/jpeg', 0.8);
+      const base64Data = dataUrl.split(',')[1]!;
+
+      const capture: ScreenCapture = {
+        id: crypto.randomUUID(),
+        timestamp: new Date().toISOString(),
+        data: base64Data,
+        mimeType: 'image/jpeg',
+        width: this.canvas.width,
+        height: this.canvas.height
+      };
+
+      this.onScreenCapture(capture);
+
+    } catch (error) {
+      console.error('Failed to capture screenshot:', error);
+    }
+  }
+
+  /**
+   * Stop screen recording and cleanup resources
+   */
+  stop(): void {
+    try {
+      if (!this.isRecording) return;
+
+      // Clear interval
+      if (this.captureInterval) {
+        clearInterval(this.captureInterval);
+        this.captureInterval = null;
+      }
+
+      // Stop all tracks
+      if (this.stream) {
+        this.stream.getTracks().forEach(track => track.stop());
+        this.stream = null;
+      }
+
+      // Cleanup video element
+      if (this.videoElement) {
+        this.videoElement.srcObject = null;
+        this.videoElement = null;
+      }
+
+      // Cleanup canvas
+      this.canvas = null;
+      this.context = null;
+
+      this.isRecording = false;
+
+    } catch (error) {
+      console.error('Failed to stop screen recording:', error);
+    }
+  }
+
+  get isActive(): boolean {
+    return this.isRecording;
   }
 }
 
@@ -422,32 +621,46 @@ class GeminiWebSocketClient {
 
       // Handle server content
       if (response.serverContent) {
-        const { serverContent } = response.serverContent;
-        
         if (response.serverContent.interrupted) {
           this.emit('interrupted', {});
           return;
         }
-        
+
         if (response.serverContent.turnComplete) {
           this.emit('turn-complete', {});
         }
-        
+
+        // Handle input transcription (user speech)
+        if (response.serverContent.inputTranscription) {
+          this.emit('user-transcript', {
+            transcript: response.serverContent.inputTranscription.text,
+            timestamp: new Date().toISOString()
+          });
+        }
+
+        // Handle output transcription (AI speech)
+        if (response.serverContent.outputTranscription) {
+          this.emit('ai-transcript', {
+            transcript: response.serverContent.outputTranscription.text,
+            timestamp: new Date().toISOString()
+          });
+        }
+
         if (response.serverContent.modelTurn) {
           const parts = response.serverContent.modelTurn.parts;
-          
+
           // Process audio parts
-          const audioParts = parts.filter((p: any) => 
+          const audioParts = parts.filter((p: any) =>
             p.inlineData && p.inlineData.mimeType.startsWith('audio/pcm')
           );
-          
+
           audioParts.forEach((part: any) => {
             if (part.inlineData?.data) {
               const audioData = this.base64ToArrayBuffer(part.inlineData.data);
               this.emit('audio', audioData);
             }
           });
-          
+
           // Process text parts
           const textParts = parts.filter((p: any) => p.text);
           textParts.forEach((part: any) => {
@@ -551,11 +764,17 @@ export class GeminiLiveClient {
   private audioRecorder: AudioRecorder | null = null;
   private audioStreamer: AudioStreamer | null = null;
   private audioContext: AudioContext | null = null;
+  private screenRecorder: ScreenRecorder | null = null;
   private eventHandlers = new Map<GeminiLiveEventType, Set<GeminiLiveEventHandler>>();
-  
+
   private _isConnected = false;
   private _isListening = false;
   private _isAISpeaking = false;
+  private _isScreenRecording = false;
+
+  // Conversation tracking
+  private conversationSession: ConversationSession | null = null;
+  private currentTurn: ConversationTurn | null = null;
 
   constructor(config: GeminiLiveConfig) {
     this.config = config;
@@ -569,6 +788,24 @@ export class GeminiLiveClient {
 
       // Store context
       this.context = context;
+
+      // Initialize conversation session
+      this.conversationSession = {
+        sessionId: crypto.randomUUID(),
+        startTime: new Date().toISOString(),
+        model: this.config.model,
+        turns: [],
+        screenCaptures: [],
+        analytics: {
+          totalTurns: 0,
+          userTurns: 0,
+          assistantTurns: 0,
+          userSpeakingTime: 0,
+          aiSpeakingTime: 0,
+          averageResponseTime: 0,
+          interruptionCount: 0
+        }
+      };
 
       // Initialize audio context
       this.audioContext = new AudioContext();
@@ -594,7 +831,14 @@ export class GeminiLiveClient {
           parts: [{
             text: this.buildSystemPrompt()
           }]
-        }
+        },
+        // Enable transcription capabilities
+        ...(this.config.enableInputTranscription && {
+          inputAudioTranscription: {}
+        }),
+        ...(this.config.enableOutputTranscription && {
+          outputAudioTranscription: {}
+        })
       };
 
       this.client = new GeminiWebSocketClient(wsUrl, geminiConfig);
@@ -636,6 +880,16 @@ export class GeminiLiveClient {
 
     this.client.on('text-received', (data) => {
       this.emit('text-received', data);
+    });
+
+    this.client.on('user-transcript', (data) => {
+      this.handleUserTranscript(data.transcript, data.timestamp);
+      this.emit('user-transcript', data);
+    });
+
+    this.client.on('ai-transcript', (data) => {
+      this.handleAITranscript(data.transcript, data.timestamp);
+      this.emit('ai-transcript', data);
     });
 
     this.client.on('turn-complete', () => {
@@ -697,11 +951,93 @@ export class GeminiLiveClient {
     this.emit('listening-stop', {});
   }
 
+  async startScreenRecording(captureIntervalMs: number = 5000): Promise<void> {
+    if (!this.config.enableScreenCapture) {
+      throw new Error('Screen capture not enabled in config');
+    }
+
+    if (this._isScreenRecording) return;
+
+    try {
+      this.screenRecorder = new ScreenRecorder();
+      await this.screenRecorder.start(
+        (capture) => {
+          this.handleScreenCapture(capture);
+          this.emit('screen-capture', capture);
+        },
+        undefined,
+        captureIntervalMs
+      );
+
+      this._isScreenRecording = true;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  stopScreenRecording(): void {
+    if (!this._isScreenRecording || !this.screenRecorder) return;
+
+    this.screenRecorder.stop();
+    this.screenRecorder = null;
+    this._isScreenRecording = false;
+  }
+
   sendInitialGreeting(): void {
     if (!this.client || !this._isConnected) return;
-    
+
     const greeting = `Hello! I'm here for the ${this.context?.jobTitle} interview. Please introduce yourself and let's begin!`;
     this.client.sendText(greeting);
+  }
+
+  private handleUserTranscript(transcript: string, timestamp: string): void {
+    if (!this.conversationSession) return;
+
+    // Create or update current user turn
+    if (!this.currentTurn || this.currentTurn.role !== 'user') {
+      this.currentTurn = {
+        id: crypto.randomUUID(),
+        timestamp,
+        role: 'user',
+        content: {
+          transcript
+        }
+      };
+      this.conversationSession.turns.push(this.currentTurn);
+      this.conversationSession.analytics.userTurns++;
+      this.conversationSession.analytics.totalTurns++;
+    } else {
+      // Append to existing transcript
+      this.currentTurn.content.transcript = (this.currentTurn.content.transcript || '') + ' ' + transcript;
+    }
+  }
+
+  private handleAITranscript(transcript: string, timestamp: string): void {
+    if (!this.conversationSession) return;
+
+    // Create or update current AI turn
+    if (!this.currentTurn || this.currentTurn.role !== 'assistant') {
+      this.currentTurn = {
+        id: crypto.randomUUID(),
+        timestamp,
+        role: 'assistant',
+        content: {
+          transcript
+        }
+      };
+      this.conversationSession.turns.push(this.currentTurn);
+      this.conversationSession.analytics.assistantTurns++;
+      this.conversationSession.analytics.totalTurns++;
+    } else {
+      // Append to existing transcript
+      this.currentTurn.content.transcript = (this.currentTurn.content.transcript || '') + ' ' + transcript;
+    }
+  }
+
+  private handleScreenCapture(capture: ScreenCapture): void {
+    if (!this.conversationSession) return;
+
+    this.conversationSession.screenCaptures.push(capture);
   }
 
   updateContext(contextUpdate: Partial<InterviewContext>): void {
@@ -709,32 +1045,81 @@ export class GeminiLiveClient {
     this.context = { ...this.context, ...contextUpdate };
   }
 
-  async endSession(): Promise<void> {
+  async endSession(): Promise<ConversationSession | null> {
     try {
       this.stopListening();
-      
+      this.stopScreenRecording();
+
+      // Finalize conversation session
+      if (this.conversationSession) {
+        this.conversationSession.endTime = new Date().toISOString();
+        const startTime = new Date(this.conversationSession.startTime);
+        const endTime = new Date(this.conversationSession.endTime);
+        this.conversationSession.duration = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
+
+        // Calculate analytics
+        this.updateSessionAnalytics();
+      }
+
       if (this.audioStreamer) {
         this.audioStreamer.stop();
         this.audioStreamer = null;
       }
-      
+
       if (this.client) {
         this.client.disconnect();
         this.client = null;
       }
-      
+
       if (this.audioContext) {
         await this.audioContext.close();
         this.audioContext = null;
       }
-      
+
       this._isConnected = false;
       this._isListening = false;
       this._isAISpeaking = false;
-      
+      this._isScreenRecording = false;
+
+      const session = this.conversationSession;
+      this.conversationSession = null;
+      this.currentTurn = null;
+
+      return session;
+
     } catch (error) {
-      // Ignore cleanup errors
+      console.error('Error ending session:', error);
+      return null;
     }
+  }
+
+  private updateSessionAnalytics(): void {
+    if (!this.conversationSession) return;
+
+    const analytics = this.conversationSession.analytics;
+    const turns = this.conversationSession.turns;
+
+    // Calculate response times, speaking times, etc.
+    let totalResponseTime = 0;
+    let responseCount = 0;
+
+    for (let i = 1; i < turns.length; i++) {
+      const prevTurn = turns[i - 1]!;
+      const currentTurn = turns[i]!;
+
+      if (prevTurn.role === 'user' && currentTurn.role === 'assistant') {
+        const prevTime = new Date(prevTurn.timestamp).getTime();
+        const currentTime = new Date(currentTurn.timestamp).getTime();
+        totalResponseTime += (currentTime - prevTime) / 1000;
+        responseCount++;
+      }
+    }
+
+    analytics.averageResponseTime = responseCount > 0 ? totalResponseTime / responseCount : 0;
+  }
+
+  exportConversation(): ConversationSession | null {
+    return this.conversationSession ? { ...this.conversationSession } : null;
   }
 
   private buildSystemPrompt(): string {
@@ -810,6 +1195,14 @@ Respond naturally as a human interviewer. The candidate is waiting for your resp
   get currentContext(): InterviewContext | null {
     return this.context;
   }
+
+  get isScreenRecording(): boolean {
+    return this._isScreenRecording;
+  }
+
+  get conversationData(): ConversationSession | null {
+    return this.conversationSession;
+  }
 }
 
 /**
@@ -818,8 +1211,11 @@ Respond naturally as a human interviewer. The candidate is waiting for your resp
 export function createGeminiLiveClient(overrides: Partial<GeminiLiveConfig> & { apiKey: string }): GeminiLiveClient {
   const config: GeminiLiveConfig = {
     model: 'models/gemini-2.0-flash-exp',
-    responseModalities: ['AUDIO'],
+    responseModalities: ['AUDIO', 'TEXT'],
     voice: 'Puck',
+    enableInputTranscription: true,
+    enableOutputTranscription: true,
+    enableScreenCapture: true,
     ...overrides,
   };
 
