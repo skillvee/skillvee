@@ -147,3 +147,24 @@ export interface CaseGenerationResponse {
     followUps: string[];
   }>;
 }
+
+/**
+ * Schema for focus area suggestions response
+ */
+export const focusAreaSchema = {
+  type: SchemaType.OBJECT,
+  properties: {
+    focusAreas: {
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.STRING,
+      },
+      description: "List of technical focus areas",
+    },
+  },
+  required: ["focusAreas"],
+};
+
+export interface FocusAreaResponse {
+  focusAreas: string[];
+}

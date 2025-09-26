@@ -10,7 +10,7 @@ import {
 } from "~/server/api/trpc";
 
 import { createError } from "../types/errors";
-import { generateFocusAreaSuggestions } from "../utils/gemini";
+import { generateFocusAreaSuggestions } from "~/server/ai";
 import {
   createPaginationArgs,
   processPaginationResults,

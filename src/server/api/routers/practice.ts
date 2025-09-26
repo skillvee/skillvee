@@ -6,7 +6,7 @@ import {
 } from "~/server/api/trpc";
 
 import { createError } from "../types/errors";
-import { createRoleSelectionSessionData } from "../utils/gemini";
+import { createRoleSelectionSessionData } from "~/server/ai";
 import { analyzeJobDescription } from "../../ai/services/job-analysis.service";
 import { generateInterviewCase } from "../../ai/services/case-generation.service";
 

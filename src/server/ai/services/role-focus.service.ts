@@ -1,10 +1,7 @@
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import { env } from "~/env";
-
-/**
- * Initialize Gemini AI client
- */
-const genAI = new GoogleGenerativeAI(env.GOOGLE_GENERATIVE_AI_API_KEY);
+import { geminiClient, DEFAULT_MODEL_CONFIG } from "../providers/gemini/client";
+import { focusAreaSchema, type FocusAreaResponse } from "../providers/gemini/types";
+import { createFocusAreaPrompt } from "../prompts/practice/focus-areas";
+import { geminiDbLogger } from "../../api/utils/gemini-db-logger";
 
 /**
  * Create practice session data for role selection (without job description)
@@ -63,42 +60,67 @@ function getDefaultFocusAreasForRole(role: string): string[] {
  */
 export async function generateFocusAreaSuggestions(
   description: string,
-  requirements: string[]
+  requirements: string[],
+  userId?: string,
+  sessionId?: string
 ): Promise<string[]> {
+  const startTime = performance.now();
+  console.log(`[FocusAreas] Starting generation at ${new Date().toISOString()}`);
+
+  let dbLogId: string | undefined;
+
   try {
-    const prompt = `
-Based on this job description and requirements, suggest relevant technical focus areas for an interview.
+    const prompt = createFocusAreaPrompt(description, requirements);
 
-Job Description: ${description}
+    console.log(`[FocusAreas] Prompt length: ${prompt.length} chars`);
+    console.log(`[FocusAreas] Using model: ${DEFAULT_MODEL_CONFIG.model}`);
 
-Requirements: ${requirements.join(", ")}
-
-Common focus areas include: Machine Learning, Data Analysis, Statistics, Python Programming, SQL, Data Visualization, Deep Learning, Natural Language Processing, Computer Vision, Big Data, Cloud Computing, A/B Testing, Business Intelligence, Data Engineering, MLOps, Product Sense, Problem Solving, System Design.
-
-Return 5-8 most relevant focus areas.`;
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: SchemaType.OBJECT,
-          properties: {
-            focusAreas: {
-              type: SchemaType.ARRAY,
-              items: {
-                type: SchemaType.STRING,
-              },
-              description: "List of technical focus areas",
-            },
-          },
-          required: ["focusAreas"],
-        },
-        temperature: 0.2,
+    // Log request to database
+    dbLogId = await geminiDbLogger.logRequest({
+      userId,
+      sessionId,
+      endpoint: "generateFocusAreaSuggestions",
+      prompt,
+      modelUsed: DEFAULT_MODEL_CONFIG.model,
+      metadata: {
+        descriptionLength: description.length,
+        requirementsCount: requirements.length,
       },
     });
-    const response = await model.generateContent(prompt);
 
+    const apiStartTime = performance.now();
+
+    // Try with schema validation first
+    let response;
+    try {
+      const model = geminiClient.getGenerativeModel({
+        model: DEFAULT_MODEL_CONFIG.model,
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: focusAreaSchema as any,
+          temperature: 0.2,
+          maxOutputTokens: DEFAULT_MODEL_CONFIG.maxOutputTokens,
+        },
+      });
+      response = await model.generateContent(prompt);
+    } catch (schemaError) {
+      console.log(`[FocusAreas] Schema validation failed, retrying without schema:`, schemaError);
+
+      // Fallback without schema
+      const model = geminiClient.getGenerativeModel({
+        model: DEFAULT_MODEL_CONFIG.model,
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: DEFAULT_MODEL_CONFIG.maxOutputTokens,
+        },
+      });
+      response = await model.generateContent(prompt);
+    }
+
+    const apiEndTime = performance.now();
+    console.log(`[FocusAreas] API response in ${(apiEndTime - apiStartTime).toFixed(2)}ms`);
+
+    // Extract response text using the correct API
     let responseText: string | undefined;
 
     // Try response.text() method first (standard API)
@@ -123,8 +145,38 @@ Return 5-8 most relevant focus areas.`;
     }
 
     const parsedData: unknown = JSON.parse(responseText);
-    return (parsedData as { focusAreas?: string[] }).focusAreas ?? [];
+    const focusAreas = (parsedData as FocusAreaResponse).focusAreas ?? [];
+
+    const totalTime = performance.now() - startTime;
+    console.log(`[FocusAreas] Completed in ${totalTime.toFixed(2)}ms`);
+    console.log(`[FocusAreas] Generated ${focusAreas.length} focus areas`);
+
+    // Log successful response
+    if (dbLogId) {
+      await geminiDbLogger.logResponse({
+        logId: dbLogId,
+        response: { focusAreas },
+        responseTime: Math.round(totalTime),
+        success: true,
+      });
+    }
+
+    return focusAreas;
+
   } catch (error) {
+    const totalTime = performance.now() - startTime;
+    console.error(`[FocusAreas] Error after ${totalTime.toFixed(2)}ms:`, error);
+
+    // Log error
+    if (dbLogId) {
+      await geminiDbLogger.logResponse({
+        logId: dbLogId,
+        responseTime: Math.round(totalTime),
+        success: false,
+        errorMessage: error instanceof Error ? error.message : String(error),
+      });
+    }
+
     console.error("Focus area generation error:", error);
     return [];
   }

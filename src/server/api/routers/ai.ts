@@ -24,7 +24,7 @@ import {
   type AnswerValidationOutput,
 } from "../schemas/ai";
 
-import { generateFocusAreaSuggestions } from "../utils/gemini";
+import { generateFocusAreaSuggestions } from "~/server/ai";
 
 export const aiRouter = createTRPCRouter({
   // NOTE: parseJobDescription endpoint removed - functionality moved to practice.analyzeJobDescription
