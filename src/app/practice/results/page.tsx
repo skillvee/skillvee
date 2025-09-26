@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "~/components/ui/button";
@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { generateInterviewCategories, type InterviewCategory, type ArchetypeWithSkills } from "~/server/api/utils/interview-categories";
 
-export default function PracticeResultsPage() {
+function PracticeResultsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoaded } = useUser();
@@ -434,5 +434,20 @@ export default function PracticeResultsPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function PracticeResultsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
+      <PracticeResultsContent />
+    </Suspense>
   );
 }
