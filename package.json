@@ -39,6 +39,7 @@
   "dependencies": {
     "@clerk/nextjs": "^6.21.0",
     "@google/genai": "^1.4.0",
+    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.1.1",
     "@lottiefiles/dotlottie-react": "^0.15.2",
     "@prisma/client": "^6.5.0",

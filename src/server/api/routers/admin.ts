@@ -17,32 +17,41 @@ export const adminRouter = createTRPCRouter({
       const stats = await geminiDbLogger.getStats();
 
       // Transform database logs to match the expected format for the UI
-      const transformedLogs = logs.map(log => ({
-        id: log.id,
-        type: log.success ? 'RESPONSE' : 'ERROR',
-        timestamp: log.timestamp,
-        jobTitle: log.jobTitle,
-        company: log.company,
-        skills: log.skills,
-        prompt: log.prompt,
-        promptLength: log.promptLength,
-        response: log.response,
-        responseTime: log.responseTime,
-        error: log.errorMessage,
-        metadata: log.metadata,
-        userId: log.userId,
-        sessionId: log.sessionId,
-      }));
+      const transformedLogs = logs.map(log => {
+        // Debug log for error cases
+        if (!log.success) {
+          console.log('[Admin] Error log from DB:', {
+            id: log.id,
+            success: log.success,
+            errorMessage: log.errorMessage,
+            errorLength: log.errorMessage?.length,
+          });
+        }
+        return {
+          id: log.id,
+          type: log.success ? 'RESPONSE' : 'ERROR',
+          timestamp: log.timestamp,
+          jobTitle: log.jobTitle,
+          company: log.company,
+          skills: log.skills,
+          prompt: log.prompt,
+          promptLength: log.promptLength,
+          response: log.response,
+          responseTime: log.responseTime,
+          error: log.errorMessage,
+          metadata: log.metadata,
+          userId: log.userId,
+          sessionId: log.sessionId,
+        };
+      });
 
       return {
         logs: transformedLogs,
         stats: {
-          total: stats.total,
+          ...stats,
           requests: stats.total - stats.failed,
           responses: stats.successful,
           errors: stats.failed,
-          averageResponseTime: stats.averageResponseTime,
-          ...stats,
         },
         totalCount: total,
       };

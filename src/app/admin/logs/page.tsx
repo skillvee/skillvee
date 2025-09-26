@@ -14,7 +14,7 @@ export default function AdminLogsPage() {
   const { data, isLoading, error, refetch } = api.admin.getGeminiLogs.useQuery(
     { limit: 100 },
     {
-      refetchInterval: 5000, // Auto-refresh every 5 seconds
+      refetchInterval: 30000, // Auto-refresh every 30 seconds to avoid rate limiting
     }
   );
 
@@ -137,10 +137,17 @@ export default function AdminLogsPage() {
           </div>
         ) : data?.logs && data.logs.length > 0 ? (
           <div className="space-y-4">
-            {data.logs.map((log) => (
-              <Card key={log.id} className="overflow-hidden">
+            {data.logs.map((log) => {
+              // Debug log to check error field
+              if (log.type === 'ERROR') {
+                console.log('Error log:', { id: log.id, type: log.type, error: log.error, errorLength: log.error?.length });
+              }
+              return (
+              <Card key={log.id} className={`overflow-hidden ${log.type === 'ERROR' ? 'border-red-200' : ''}`}>
                 <CardHeader
-                  className="cursor-pointer hover:bg-gray-50 transition-colors"
+                  className={`cursor-pointer transition-colors ${
+                    log.type === 'ERROR' ? 'hover:bg-red-50 bg-red-50/50' : 'hover:bg-gray-50'
+                  }`}
                   onClick={() => toggleLogExpansion(log.id)}
                 >
                   <div className="flex items-center justify-between">
@@ -169,6 +176,15 @@ export default function AdminLogsPage() {
                             <span className="ml-2">• {log.skills.length} skills</span>
                           )}
                         </div>
+                        {(log.error || log.type === 'ERROR') && (
+                          <div className="text-sm text-red-600 mt-1 font-medium">
+                            {log.error ? (
+                              <>Error: {log.error.substring(0, 150)}{log.error.length > 150 ? '...' : ''}</>
+                            ) : (
+                              'Error occurred (expand for details)'
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <Button
@@ -230,10 +246,21 @@ export default function AdminLogsPage() {
                       {/* Error */}
                       {log.error && (
                         <div>
-                          <h4 className="font-semibold text-sm mb-2 text-red-600">Error:</h4>
-                          <pre className="bg-red-50 p-4 rounded border border-red-200 text-xs overflow-x-auto">
-                            {log.error}
-                          </pre>
+                          <h4 className="font-semibold text-sm mb-2 text-red-600">Error Details:</h4>
+                          <div className="bg-red-50 p-4 rounded border border-red-200">
+                            <pre className="text-xs overflow-x-auto whitespace-pre-wrap break-words">
+                              {(() => {
+                                try {
+                                  // Try to parse and format JSON errors
+                                  const parsed = JSON.parse(log.error);
+                                  return JSON.stringify(parsed, null, 2);
+                                } catch {
+                                  // If not JSON, display as is
+                                  return log.error;
+                                }
+                              })()}
+                            </pre>
+                          </div>
                         </div>
                       )}
 
@@ -250,7 +277,8 @@ export default function AdminLogsPage() {
                   </CardContent>
                 )}
               </Card>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <Card>

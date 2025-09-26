@@ -484,7 +484,7 @@ model GeminiApiLog {
   skills        String[]
   modelUsed     String
   success       Boolean
-  errorMessage  String?
+  errorMessage  String?   @db.Text
   metadata      Json?
   
   // Relations

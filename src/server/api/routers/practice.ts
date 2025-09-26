@@ -498,18 +498,22 @@ export const practiceRouter = createTRPCRouter({
           'LOW': 1      // Aware
         }[mapping.importance];
 
-        // Get observable behaviors up to target level
-        const skillLevels = mapping.skill.skillLevels.filter(
-          sl => sl.level <= targetLevel
-        );
+        // Get all skill levels (1, 2, 3) to provide complete context for assessment
+        // This helps the AI understand the full progression and better discriminate between levels
+        const allSkillLevels = mapping.skill.skillLevels.filter(
+          sl => sl.level >= 1 && sl.level <= 3
+        ).sort((a, b) => a.level - b.level);
 
         const requirement = {
           skillId: mapping.skill.id,
           skillName: mapping.skill.name,
           targetProficiency: targetLevel,
-          observableBehaviors: skillLevels.map(sl => ({
+          observableBehaviors: allSkillLevels.map(sl => ({
             level: sl.level,
-            description: sl.observableBehaviors // Use observableBehaviors field
+            description: sl.observableBehaviors, // Use observableBehaviors field
+            generalDescription: sl.generalDescription,
+            exampleResponses: sl.exampleResponses,
+            commonMistakes: sl.commonMistakes
           }))
         };
 
@@ -518,7 +522,7 @@ export const practiceRouter = createTRPCRouter({
         console.log(`  - ${mapping.skill.name}:`);
         console.log(`    * Importance: ${mapping.importance}`);
         console.log(`    * Target Proficiency: Level ${targetLevel}`);
-        console.log(`    * Observable Behaviors: ${skillLevels.length} levels`);
+        console.log(`    * Observable Behaviors: ${allSkillLevels.length} levels (all levels for context)`);
       }
 
       // 3. Generate case with Gemini

@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { env } from "~/env";
 import { geminiLogStore } from "./log-store";
 import { geminiDbLogger } from "./gemini-db-logger";
@@ -6,51 +6,7 @@ import { geminiDbLogger } from "./gemini-db-logger";
 /**
  * Initialize Gemini AI client
  */
-const ai = new GoogleGenAI({ apiKey: env.GOOGLE_GENERATIVE_AI_API_KEY });
-
-/**
- * Simplified JSON Schema for fast job description analysis
- */
-const practiceJobAnalysisSchema = {
-  type: Type.OBJECT,
-  properties: {
-    title: {
-      type: Type.STRING,
-      description: "Job title/position name",
-    },
-    company: {
-      type: Type.STRING,
-      description: "Company name (use common name like 'Meta' not 'Meta Platforms, Inc.')",
-    },
-    team: {
-      type: Type.STRING,
-      description: "Team/department name (e.g., 'Data Science', 'Engineering')",
-    },
-    experience: {
-      type: Type.STRING,
-      description: "Experience range (e.g., '0-2 years', '3-5 years', '5+ years')",
-    },
-    difficulty: {
-      type: Type.STRING,
-      description: "Difficulty level: EASY, MEDIUM, HARD, JUNIOR, or SENIOR",
-    },
-    archetypeMatch: {
-      type: Type.OBJECT,
-      properties: {
-        bestMatch: {
-          type: Type.STRING,
-          description: "Best matching role archetype from the list",
-        },
-        confidence: {
-          type: Type.NUMBER,
-          description: "Confidence score 0-1",
-        },
-      },
-      description: "Role archetype matching",
-    },
-  },
-  required: ["title", "archetypeMatch"],
-};
+const genAI = new GoogleGenerativeAI(env.GOOGLE_GENERATIVE_AI_API_KEY);
 
 /**
  * Analyze job description for practice sessions using Gemini 2.5 Flash
@@ -72,21 +28,22 @@ export async function analyzePracticeJobDescription(
       ? `\n\nAvailable Role Archetypes to match against:\n${availableArchetypes.map(a => `- ${a}`).join('\n')}`
       : '';
 
-    const prompt = `Extract key information from this job description for a data science interview session.
+    const prompt = `Extract information from the job description and return it in this EXACT JSON structure:
 
-REQUIRED FORMAT:
-- Company: Use brand names (Meta not Meta Platforms Inc)
-- Experience: Use ranges (0-2 years, 3-5 years, 5+ years)
-- Team: Use title case (Data Science, Machine Learning)
+{
+  "title": "Job title here",
+  "company": "Company name here (use brand name like 'Meta' not 'Meta Platforms, Inc.')",
+  "team": "Team/department name here or 'Not specified' if not mentioned",
+  "experience": "Use one of: '0-2 years', '3-5 years', '5+ years', or 'Not specified'",
+  "archetype": "Choose from the archetypes list below"
+}
+${archetypeList}
 
-ARCHETYPE MATCHING:
-- Only match data science/ML/analytics roles
-- Return "Other" for non-data science jobs (software eng, marketing, etc.)
-- Use confidence 0.1 for non-data roles, 0.7+ for data roles
+JOB DESCRIPTION STARTS HERE:
+${description}
+JOB DESCRIPTION ENDS HERE
 
-Job Description: ${description}${archetypeList}
-
-Return structured JSON with title, company, team, experience, difficulty, and archetypeMatch.`;
+Return ONLY the JSON object with these 5 fields. Do not add any other fields or text.`;
 
     console.log(`[Gemini] Prompt prepared, length: ${prompt.length} chars`);
     console.log(`[Gemini] Making API request to Gemini 2.5 Flash`);
@@ -98,7 +55,7 @@ Return structured JSON with title, company, team, experience, difficulty, and ar
       sessionId,
       endpoint: "analyzeJobDescription",
       prompt,
-      modelUsed: "gemini-1.5-flash",
+      modelUsed: "gemini-2.0-flash",
       metadata: {
         descriptionLength: description.length,
         archetypeCount: availableArchetypes.length,
@@ -107,60 +64,57 @@ Return structured JSON with title, company, team, experience, difficulty, and ar
     
     const apiStartTime = performance.now();
     
-    // Try a more reliable model and adjust config
-    let response;
-    try {
-      response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: practiceJobAnalysisSchema,
-          temperature: 0.1, // Slightly higher for better response generation
-          maxOutputTokens: 2000, // More tokens for complex responses
-        },
-      });
-    } catch (schemaError) {
-      console.log(`[Gemini] Schema-based request failed, trying without schema:`, schemaError);
-      // Fallback without schema
-      response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
-        contents: [{ role: "user", parts: [{ text: prompt + "\n\nIMPORTANT: Return only valid JSON, no other text." }] }],
-        config: {
-          temperature: 0.1,
-          maxOutputTokens: 2000,
-        },
-      });
-    }
+    // Use simpler approach without schema validation
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.1,
+        maxOutputTokens: 500, // Reduced since we only need 5 fields
+      },
+    });
+    const response = await model.generateContent(prompt);
     
     const apiEndTime = performance.now();
     console.log(`[Gemini] API response received in ${(apiEndTime - apiStartTime).toFixed(2)}ms`);
     console.log(`[Gemini] Raw response object:`, response);
-    console.log(`[Gemini] Response.text exists:`, !!response.text);
-    console.log(`[Gemini] Response.text type:`, typeof response.text);
-    console.log(`[Gemini] Response candidates:`, response.candidates);
-    console.log(`[Gemini] First candidate:`, response.candidates?.[0]);
-    console.log(`[Gemini] First candidate content:`, response.candidates?.[0]?.content);
+    console.log(`[Gemini] Response object:`, Object.keys(response));
+    console.log(`[Gemini] Response.response exists:`, !!response.response);
     
-    // Parse the JSON response - try different access patterns
-    let responseText = response.text;
-    if (!responseText && response.candidates?.[0]?.content?.parts?.[0]?.text) {
-      responseText = response.candidates[0].content.parts[0].text;
-      console.log(`[Gemini] Using candidates path for text:`, responseText);
+    // Parse the JSON response - Google AI SDK uses response.text() directly
+    let responseText: string | undefined;
+
+    // Try response.text() first (standard Google AI SDK method)
+    if (response.text) {
+      responseText = typeof response.text === 'function' ? response.text() : response.text;
+      console.log(`[Gemini] Using response.text() method`);
     }
+    // Try response.response.text() as fallback
+    else if (response.response?.text) {
+      responseText = typeof response.response.text === 'function' ? response.response.text() : response.response.text;
+      console.log(`[Gemini] Using response.response.text() path`);
+    }
+    // Try candidates path as last resort
+    else if (response.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      responseText = response.response.candidates[0].content.parts[0].text;
+      console.log(`[Gemini] Using candidates path for text`);
+    }
+
     if (!responseText) {
+      console.error('[Gemini] Failed to extract text from response:', response);
       throw new Error("Empty response from Gemini API");
     }
     
+    console.log(`[Gemini] Response text:`, responseText);
     console.log(`[Gemini] Parsing response text, length: ${responseText.length} chars`);
     const parseStartTime = performance.now();
     const parsedData: unknown = JSON.parse(responseText);
     const parseEndTime = performance.now();
     console.log(`[Gemini] JSON parsed in ${(parseEndTime - parseStartTime).toFixed(2)}ms`);
-    
+
     const totalTime = performance.now() - startTime;
     console.log(`[Gemini] Total analysis completed in ${totalTime.toFixed(2)}ms`);
-    console.log(`[Gemini] Response data:`, JSON.stringify(parsedData, null, 2));
+    console.log(`[Gemini] Parsed data:`, JSON.stringify(parsedData, null, 2));
     
     // Log successful response to database
     if (dbLogId) {
@@ -173,32 +127,38 @@ Return structured JSON with title, company, team, experience, difficulty, and ar
       });
     }
     
-    return {
+    // Transform the simplified response to match expected format
+    const responseData = parsedData as {
+      title?: string;
+      company?: string;
+      team?: string;
+      experience?: string;
+      archetype?: string;
+    };
+
+    const result = {
       success: true,
-      data: parsedData as { 
-        title?: string; 
-        company?: string; 
-        team?: string;
-        experience?: string;
-        difficulty?: "EASY" | "MEDIUM" | "HARD" | "JUNIOR" | "SENIOR"; 
-        archetypeMatch?: {
-          bestMatch?: string;
-          confidence?: number;
-          reasoning?: string;
-        };
-        requirements?: string[]; 
-        focusAreas?: string[]; 
-        extractedInfo?: { 
-          summary?: string; 
-          location?: string; 
-          employmentType?: string; 
-          keyResponsibilities?: string[];
-          requiredSkills?: string[];
-          preferredSkills?: string[];
-          experienceLevel?: string;
-        } 
+      data: {
+        title: responseData.title,
+        company: responseData.company,
+        team: responseData.team,
+        experience: responseData.experience,
+        // Map archetype to archetypeMatch for backward compatibility
+        archetypeMatch: responseData.archetype ? {
+          bestMatch: responseData.archetype,
+          confidence: 0.8,
+          reasoning: "Matched from job description"
+        } : undefined,
+        // These fields are no longer extracted by AI - will be populated from database
+        difficulty: "MEDIUM" as const,
+        requirements: [],
+        focusAreas: [],
+        extractedInfo: undefined,
       },
     };
+
+    console.log(`[Gemini] Returning result:`, JSON.stringify(result, null, 2));
+    return result;
   } catch (error) {
     const totalTime = performance.now() - startTime;
     console.error(`[Gemini] Error after ${totalTime.toFixed(2)}ms:`, error);
@@ -222,7 +182,7 @@ Return structured JSON with title, company, team, experience, difficulty, and ar
         company: undefined,
         team: undefined,
         experience: undefined,
-        difficulty: undefined,
+        difficulty: "MEDIUM" as const,
         archetypeMatch: undefined,
         requirements: [],
         focusAreas: [],
@@ -276,6 +236,9 @@ export async function generateCaseWithGemini(params: {
     observableBehaviors: Array<{
       level: number;
       description: string;
+      generalDescription?: string;
+      exampleResponses?: string;
+      commonMistakes?: string;
     }>;
   }>;
 }) {
@@ -288,18 +251,41 @@ export async function generateCaseWithGemini(params: {
   try {
     // Build skill descriptions for the prompt
     const skillDescriptions = skillRequirements.map(sr => {
-      const behaviors = sr.observableBehaviors
-        .map(b => `  - Level ${b.level}: ${b.description}`)
-        .join('\n');
+      const levelDetails = sr.observableBehaviors
+        .map(b => {
+          let levelInfo = `  Level ${b.level}:`;
+          levelInfo += `\n    Observable Behavior: ${b.description}`;
 
-      return `${sr.skillName} (Target Proficiency Level ${sr.targetProficiency}):
-${behaviors || '  - General proficiency expected'}`;
+          if (b.generalDescription) {
+            levelInfo += `\n    General Description: ${b.generalDescription}`;
+          }
+          if (b.exampleResponses) {
+            levelInfo += `\n    Example Responses: ${b.exampleResponses}`;
+          }
+          if (b.commonMistakes) {
+            levelInfo += `\n    Common Mistakes: ${b.commonMistakes}`;
+          }
+
+          return levelInfo;
+        })
+        .join('\n\n');
+
+      return `${sr.skillName} (TARGET: Level ${sr.targetProficiency} - ${['', 'Aware', 'Competent', 'Proficient'][sr.targetProficiency] || 'Unknown'}):
+${levelDetails || '  - General proficiency expected'}
+
+  **Note**: Focus questions on Level ${sr.targetProficiency}, but use all levels to understand progression.`;
     }).join('\n\n');
 
     const prompt = `You are creating a technical interview case for a ${jobTitle}${company ? ` position at ${company}` : ''}${experience ? ` (${experience} experience)` : ''}.
 
 ## Skills to Evaluate
 - Use the provided skills and proficiency levels exactly as given below. Do not invent, rename, merge, or split skills.
+- **IMPORTANT**: All three levels (1, 2, 3) are provided for each skill to give you complete context about the progression, but focus on the TARGET PROFICIENCY LEVEL specified for each skill.
+- Pay special attention to the general descriptions, example responses, and common mistakes for each level to create questions that effectively discriminate between proficiency levels.
+- Design questions that allow candidates to demonstrate the specific behaviors for their target proficiency level while revealing if they are actually at a lower or higher level.
+- Use Level 1 descriptions to understand what basic/inadequate performance looks like
+- Use Level 2 descriptions to understand what competent/expected performance looks like
+- Use Level 3 descriptions to understand what advanced/exceptional performance looks like
 ${skillDescriptions}
 
 
@@ -317,10 +303,13 @@ ${skillDescriptions}
 
 ## Question Requirements (each item in "questions")
 1. Provide a **specific sub-context** tied to the main scenario.
-2. Write a **clear, challenging question** that demonstrates **1–3 skills**.
+2. Write a **clear, challenging question** that demonstrates **1–3 skills** at the specified target proficiency level.
+   - Questions should be designed to distinguish between levels (e.g., a Level 2 question should reveal if someone is at Level 1, 2, or 3)
+   - Use the example responses and common mistakes to calibrate difficulty appropriately
 3. Tag with the **exact skill numIds and names** from the provided list (see Tagging Rules below).
 4. Each question must be answerable in **5–10 minutes**.
 5. Include **2–4 follow-up questions** that probe different aspects (edge cases, tradeoffs, scaling, communication).
+   - Follow-ups should help identify if the candidate exceeds or falls short of the target proficiency
 6. Vary question types across:
    - Technical implementation (e.g., coding, SQL),
    - Analysis & interpretation,
@@ -415,7 +404,7 @@ Return **only** a JSON object in exactly this structure (no extra keys, no missi
       jobTitle,
       company,
       skills: skillRequirements.map(s => `${s.skillName} (Level ${s.targetProficiency})`),
-      modelUsed: "gemini-1.5-flash",
+      modelUsed: "gemini-2.0-flash",
       metadata: {
         experience: experience || 'Not specified',
         skillDetails: skillRequirements,
@@ -441,20 +430,34 @@ Return **only** a JSON object in exactly this structure (no extra keys, no missi
     console.log(`[Gemini] Generating case for ${jobTitle} with ${skillRequirements.length} skills`);
     const startTime = Date.now();
 
-    const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      config: {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      generationConfig: {
         responseMimeType: "application/json",
-        temperature: 0.3, // Lower temperature for consistent structure
-        maxOutputTokens: 4000, // Enough for detailed case
+        temperature: 0.3,
+        maxOutputTokens: 4000,
       },
     });
+    const response = await model.generateContent(prompt);
 
     // Parse response
-    let responseText = response.text;
-    if (!responseText && response.candidates?.[0]?.content?.parts?.[0]?.text) {
-      responseText = response.candidates[0].content.parts[0].text;
+    let responseText: string | undefined;
+
+    // Try response.text() method first (standard API)
+    if ((response as any).text) {
+      responseText = typeof (response as any).text === 'function' ? (response as any).text() : (response as any).text;
+    }
+    // Try response.response.text() (nested response)
+    if (!responseText && (response as any).response?.text) {
+      responseText = typeof (response as any).response.text === 'function' ? (response as any).response.text() : (response as any).response.text;
+    }
+    // Try candidates path as fallback
+    if (!responseText && (response as any).response?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      responseText = (response as any).response.candidates[0].content.parts[0].text;
+    }
+    // Try direct candidates path
+    if (!responseText && (response as any).candidates?.[0]?.content?.parts?.[0]?.text) {
+      responseText = (response as any).candidates[0].content.parts[0].text;
     }
 
     if (!responseText) {
@@ -626,18 +629,17 @@ Common focus areas include: Machine Learning, Data Analysis, Statistics, Python 
 
 Return 5-8 most relevant focus areas.`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
-      contents: prompt,
-      config: {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           properties: {
             focusAreas: {
-              type: Type.ARRAY,
+              type: SchemaType.ARRAY,
               items: {
-                type: Type.STRING,
+                type: SchemaType.STRING,
               },
               description: "List of technical focus areas",
             },
@@ -647,8 +649,26 @@ Return 5-8 most relevant focus areas.`;
         temperature: 0.2,
       },
     });
+    const response = await model.generateContent(prompt);
     
-    const responseText = response.text;
+    let responseText: string | undefined;
+
+    // Try response.text() method first (standard API)
+    if ((response as any).text) {
+      responseText = typeof (response as any).text === 'function' ? (response as any).text() : (response as any).text;
+    }
+    // Try response.response.text() (nested response)
+    if (!responseText && (response as any).response?.text) {
+      responseText = typeof (response as any).response.text === 'function' ? (response as any).response.text() : (response as any).response.text;
+    }
+    // Try candidates path as fallback
+    if (!responseText && (response as any).response?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      responseText = (response as any).response.candidates[0].content.parts[0].text;
+    }
+    // Try direct candidates path
+    if (!responseText && (response as any).candidates?.[0]?.content?.parts?.[0]?.text) {
+      responseText = (response as any).candidates[0].content.parts[0].text;
+    }
     if (!responseText) {
       throw new Error("Empty response from Gemini API");
     }

@@ -201,26 +201,32 @@ function PracticeResultsContent() {
   }
 
   // Create role insights from session data
+  console.log('[DEBUG] Session data:', session);
+  console.log('[DEBUG] Session jobTitle:', session?.jobTitle);
+  console.log('[DEBUG] Session company:', session?.company);
+  console.log('[DEBUG] Session team:', session?.team);
+  console.log('[DEBUG] Session experience:', session?.experience);
+
   const roleInsights = [
-    { 
-      icon: Briefcase, 
-      label: "Role", 
-      value: session.jobTitle || "Unknown" 
+    {
+      icon: Briefcase,
+      label: "Role",
+      value: session?.jobTitle || "Unknown"
     },
-    { 
-      icon: Building, 
-      label: "Company", 
-      value: session.company || "Unknown" 
+    {
+      icon: Building,
+      label: "Company",
+      value: session?.company || "Unknown"
     },
-    { 
-      icon: Users, 
-      label: "Team", 
-      value: session.team || "Unknown" 
+    {
+      icon: Users,
+      label: "Team",
+      value: session?.team || "Unknown"
     },
-    { 
-      icon: Calendar, 
-      label: "Experience", 
-      value: session.experience || "Unknown" 
+    {
+      icon: Calendar,
+      label: "Experience",
+      value: session?.experience || "Unknown"
     }
   ];
 

@@ -50,7 +50,7 @@ export class GeminiDbLogger {
           skills: data.skills || [],
           modelUsed: data.modelUsed,
           success: false, // Will be updated when response is received
-          metadata: data.metadata as Prisma.JsonValue,
+          metadata: data.metadata ?? undefined,
         },
       });
 
@@ -75,11 +75,10 @@ export class GeminiDbLogger {
       await db.geminiApiLog.update({
         where: { id: data.logId },
         data: {
-          response: data.response as Prisma.JsonValue,
+          response: data.response ?? undefined,
           responseTime: data.responseTime,
           success: data.success,
           errorMessage: data.errorMessage,
-          updatedAt: new Date(),
         },
       });
     } catch (error) {
