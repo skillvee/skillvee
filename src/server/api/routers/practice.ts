@@ -48,7 +48,10 @@ export const practiceRouter = createTRPCRouter({
 
       // Get available archetypes with roles for matching
       const archetypes = await ctx.db.roleArchetype.findMany({
-        where: { deletedAt: null },
+        where: {
+          deletedAt: null,
+          simpleId: { not: null } // Only include archetypes with simpleId
+        },
         include: {
           roles: {
             select: { title: true },
@@ -60,7 +63,7 @@ export const practiceRouter = createTRPCRouter({
       // Analyze with AI using new service
       const analysisResult = await analyzeJobDescription(
         description,
-        archetypes,
+        archetypes as any, // Filtered archetypes have simpleId guaranteed to be non-null
         ctx.user.id,
         undefined // sessionId will be created after analysis
       );
@@ -562,7 +565,7 @@ export const practiceRouter = createTRPCRouter({
           practiceSessionId: sessionId,
           caseTitle: generatedCase.title,
           caseContext: generatedCase.context,
-          caseData: generatedCase,
+          caseData: generatedCase as any,
           totalDuration: generatedCase.questions.length * 15, // Estimate 15 min per question
           caseQuestions: {
             create: generatedCase.questions.map((q: any, idx: number) => ({
@@ -585,7 +588,7 @@ export const practiceRouter = createTRPCRouter({
       console.log(`  - Case ID: ${interviewCase.id}`);
       console.log(`  - Title: ${interviewCase.caseTitle}`);
       console.log(`  - Total Duration: ${interviewCase.totalDuration} minutes`);
-      console.log(`  - Questions Count: ${interviewCase.caseQuestions.length}`);
+      console.log(`  - Questions Count: ${interviewCase.caseQuestions?.length || 0}`);
       console.log(`${'='.repeat(80)}\n`);
 
       return {

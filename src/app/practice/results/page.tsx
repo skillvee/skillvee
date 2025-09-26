@@ -161,7 +161,7 @@ function PracticeResultsContent() {
             itemsToSelect = firstCategory.items.slice(0, 3);
           } else {
             // For OPTIONAL, select just the first item
-            itemsToSelect = [firstCategory.items[0]];
+            itemsToSelect = firstCategory.items[0] ? [firstCategory.items[0]] : [];
           }
 
           setSelectedItems(prev => ({
@@ -299,7 +299,7 @@ function PracticeResultsContent() {
           itemsToSelect = category.items.slice(0, 3);
         } else {
           // For OPTIONAL, select just the first item
-          itemsToSelect = [category.items[0]];
+          itemsToSelect = category.items[0] ? [category.items[0]] : [];
         }
 
         setSelectedItems((prev: {[key: string]: string[]}) => ({

@@ -8,6 +8,11 @@ import { Button } from "~/components/ui/button";
 import { ChevronDown, ChevronUp, FileText, Database } from "lucide-react";
 import { cn } from "~/lib/utils";
 
+type ComponentProps = {
+  children?: React.ReactNode;
+  className?: string;
+};
+
 interface CaseContextDisplayProps {
   caseContent: string;
   title?: string;
@@ -49,63 +54,63 @@ export function CaseContextDisplay({
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
-                h1: ({ children }) => (
+                h1: ({ children }: ComponentProps) => (
                   <h1 className="text-2xl font-bold mb-4 text-foreground">{children}</h1>
                 ),
-                h2: ({ children }) => (
+                h2: ({ children }: ComponentProps) => (
                   <h2 className="text-xl font-semibold mb-3 mt-6 text-foreground">{children}</h2>
                 ),
-                h3: ({ children }) => (
+                h3: ({ children }: ComponentProps) => (
                   <h3 className="text-lg font-semibold mb-2 mt-4 text-foreground flex items-center">
                     <Database className="w-4 h-4 mr-2 text-primary" />
                     {children}
                   </h3>
                 ),
-                h4: ({ children }) => (
+                h4: ({ children }: ComponentProps) => (
                   <h4 className="text-base font-medium mb-2 mt-3 text-foreground">{children}</h4>
                 ),
-                p: ({ children }) => (
+                p: ({ children }: ComponentProps) => (
                   <p className="mb-4 text-muted-foreground leading-relaxed">{children}</p>
                 ),
-                strong: ({ children }) => (
+                strong: ({ children }: ComponentProps) => (
                   <strong className="font-semibold text-foreground">{children}</strong>
                 ),
-                ul: ({ children }) => (
+                ul: ({ children }: ComponentProps) => (
                   <ul className="mb-4 ml-4 list-disc space-y-1">{children}</ul>
                 ),
-                ol: ({ children }) => (
+                ol: ({ children }: ComponentProps) => (
                   <ol className="mb-4 ml-4 list-decimal space-y-1">{children}</ol>
                 ),
-                li: ({ children }) => (
+                li: ({ children }: ComponentProps) => (
                   <li className="text-muted-foreground">{children}</li>
                 ),
-                table: ({ children }) => (
+                table: ({ children }: ComponentProps) => (
                   <div className="overflow-x-auto mb-6">
                     <table className="min-w-full border-collapse border border-border">
                       {children}
                     </table>
                   </div>
                 ),
-                thead: ({ children }) => (
+                thead: ({ children }: ComponentProps) => (
                   <thead className="bg-muted/50">{children}</thead>
                 ),
-                tbody: ({ children }) => (
+                tbody: ({ children }: ComponentProps) => (
                   <tbody className="divide-y divide-border">{children}</tbody>
                 ),
-                tr: ({ children }) => (
+                tr: ({ children }: ComponentProps) => (
                   <tr className="hover:bg-muted/30 transition-colors">{children}</tr>
                 ),
-                th: ({ children }) => (
+                th: ({ children }: ComponentProps) => (
                   <th className="px-4 py-2 text-left font-semibold text-foreground border border-border">
                     {children}
                   </th>
                 ),
-                td: ({ children }) => (
+                td: ({ children }: ComponentProps) => (
                   <td className="px-4 py-2 text-muted-foreground border border-border">
                     {children}
                   </td>
                 ),
-                code: ({ children, className }) => {
+                code: ({ children, className }: ComponentProps) => {
                   const isInline = !className;
                   return isInline ? (
                     <code className="px-1.5 py-0.5 bg-muted rounded text-sm font-mono text-primary">
@@ -117,7 +122,7 @@ export function CaseContextDisplay({
                     </code>
                   );
                 },
-                blockquote: ({ children }) => (
+                blockquote: ({ children }: ComponentProps) => (
                   <blockquote className="border-l-4 border-primary pl-4 italic my-4 text-muted-foreground">
                     {children}
                   </blockquote>

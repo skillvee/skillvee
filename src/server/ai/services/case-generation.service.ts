@@ -60,37 +60,51 @@ export async function generateInterviewCase(
     // Try with schema validation first
     let response;
     try {
-      response = await geminiClient.models.generateContent({
+      const model = geminiClient.getGenerativeModel({
         model: DEFAULT_MODEL_CONFIG.model,
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        config: {
+        generationConfig: {
           responseMimeType: "application/json",
-          responseSchema: caseGenerationSchema,
+          responseSchema: caseGenerationSchema as any,
           temperature: 0.3, // Slightly higher for creative case generation
           maxOutputTokens: 4000, // More tokens for complex cases
         },
       });
+      response = await model.generateContent(prompt);
     } catch (schemaError) {
       console.log(`[CaseGeneration] Schema validation failed, retrying without schema:`, schemaError);
 
       // Fallback without schema
-      response = await geminiClient.models.generateContent({
+      const model = geminiClient.getGenerativeModel({
         model: DEFAULT_MODEL_CONFIG.model,
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        config: {
+        generationConfig: {
           temperature: 0.3,
           maxOutputTokens: 4000,
         },
       });
+      response = await model.generateContent(prompt);
     }
 
     const apiEndTime = performance.now();
     console.log(`[CaseGeneration] API response in ${(apiEndTime - apiStartTime).toFixed(2)}ms`);
 
-    // Extract response text
-    let responseText = response.text;
-    if (!responseText && response.candidates?.[0]?.content?.parts?.[0]?.text) {
-      responseText = response.candidates[0].content.parts[0].text;
+    // Extract response text using the correct API
+    let responseText: string | undefined;
+
+    // Try response.text() method first (standard API)
+    if ((response as any).text) {
+      responseText = typeof (response as any).text === 'function' ? (response as any).text() : (response as any).text;
+    }
+    // Try response.response.text() (nested response)
+    if (!responseText && (response as any).response?.text) {
+      responseText = typeof (response as any).response.text === 'function' ? (response as any).response.text() : (response as any).response.text;
+    }
+    // Try candidates path as fallback
+    if (!responseText && (response as any).response?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      responseText = (response as any).response.candidates[0].content.parts[0].text;
+    }
+    // Try direct candidates path
+    if (!responseText && (response as any).candidates?.[0]?.content?.parts?.[0]?.text) {
+      responseText = (response as any).candidates[0].content.parts[0].text;
     }
 
     if (!responseText) {

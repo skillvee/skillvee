@@ -6,6 +6,7 @@ import { geminiDbLogger } from "../../api/utils/gemini-db-logger";
 
 interface ArchetypeWithRoles extends RoleArchetype {
   roles: { title: string }[];
+  simpleId: number; // Required for analysis
 }
 
 /**
@@ -27,7 +28,7 @@ export async function analyzeJobDescription(
     // Prepare archetype data for the prompt
     const archetypeInfo = archetypes.map(a => ({
       id: a.id,
-      simpleId: a.simpleId!,
+      simpleId: a.simpleId,
       name: a.name,
       description: a.description,
       commonRoles: a.roles.map(r => r.title),
@@ -57,37 +58,51 @@ export async function analyzeJobDescription(
     // Try with schema validation first
     let response;
     try {
-      response = await geminiClient.models.generateContent({
+      const model = geminiClient.getGenerativeModel({
         model: DEFAULT_MODEL_CONFIG.model,
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        config: {
+        generationConfig: {
           responseMimeType: "application/json",
-          responseSchema: jobAnalysisSchema,
+          responseSchema: jobAnalysisSchema as any,
           temperature: DEFAULT_MODEL_CONFIG.temperature,
           maxOutputTokens: DEFAULT_MODEL_CONFIG.maxOutputTokens,
         },
       });
+      response = await model.generateContent(prompt);
     } catch (schemaError) {
       console.log(`[JobAnalysis] Schema validation failed, retrying without schema:`, schemaError);
 
       // Fallback without schema
-      response = await geminiClient.models.generateContent({
+      const model = geminiClient.getGenerativeModel({
         model: DEFAULT_MODEL_CONFIG.model,
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        config: {
+        generationConfig: {
           temperature: DEFAULT_MODEL_CONFIG.temperature,
           maxOutputTokens: DEFAULT_MODEL_CONFIG.maxOutputTokens,
         },
       });
+      response = await model.generateContent(prompt);
     }
 
     const apiEndTime = performance.now();
     console.log(`[JobAnalysis] API response in ${(apiEndTime - apiStartTime).toFixed(2)}ms`);
 
-    // Extract response text
-    let responseText = response.text;
-    if (!responseText && response.candidates?.[0]?.content?.parts?.[0]?.text) {
-      responseText = response.candidates[0].content.parts[0].text;
+    // Extract response text using the correct API
+    let responseText: string | undefined;
+
+    // Try response.text() method first (standard API)
+    if ((response as any).text) {
+      responseText = typeof (response as any).text === 'function' ? (response as any).text() : (response as any).text;
+    }
+    // Try response.response.text() (nested response)
+    if (!responseText && (response as any).response?.text) {
+      responseText = typeof (response as any).response.text === 'function' ? (response as any).response.text() : (response as any).response.text;
+    }
+    // Try candidates path as fallback
+    if (!responseText && (response as any).response?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      responseText = (response as any).response.candidates[0].content.parts[0].text;
+    }
+    // Try direct candidates path
+    if (!responseText && (response as any).candidates?.[0]?.content?.parts?.[0]?.text) {
+      responseText = (response as any).candidates[0].content.parts[0].text;
     }
 
     if (!responseText) {

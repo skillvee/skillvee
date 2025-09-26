@@ -1,72 +1,72 @@
-import { Type } from "@google/genai";
+import { SchemaType } from "@google/generative-ai";
 
 /**
  * Schema for job analysis response
  */
 export const jobAnalysisSchema = {
-  type: Type.OBJECT,
+  type: SchemaType.OBJECT,
   properties: {
     title: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description: "Job title/position name",
     },
     company: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description: "Company name (use common name like 'Meta' not 'Meta Platforms, Inc.')",
     },
     team: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description: "Team/department name (e.g., 'Data Science', 'Engineering')",
     },
     experience: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description: "Experience range (e.g., '0-2 years', '3-5 years', '5+ years')",
     },
     difficulty: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description: "Difficulty level: EASY, MEDIUM, HARD, JUNIOR, or SENIOR",
       enum: ["EASY", "MEDIUM", "HARD", "JUNIOR", "SENIOR"],
     },
     archetypeId: {
-      type: Type.NUMBER,
+      type: SchemaType.NUMBER,
       description: "Simple archetype ID (1-6)",
     },
     archetypeConfidence: {
-      type: Type.NUMBER,
+      type: SchemaType.NUMBER,
       description: "Confidence score 0-1 for archetype match",
     },
     extractedInfo: {
-      type: Type.OBJECT,
+      type: SchemaType.OBJECT,
       properties: {
         summary: {
-          type: Type.STRING,
+          type: SchemaType.STRING,
           description: "Brief summary of the role",
         },
         keyResponsibilities: {
-          type: Type.ARRAY,
-          items: { type: Type.STRING },
+          type: SchemaType.ARRAY,
+          items: { type: SchemaType.STRING },
           description: "Main responsibilities",
         },
         requiredSkills: {
-          type: Type.ARRAY,
-          items: { type: Type.STRING },
+          type: SchemaType.ARRAY,
+          items: { type: SchemaType.STRING },
           description: "Required technical skills",
         },
         preferredSkills: {
-          type: Type.ARRAY,
-          items: { type: Type.STRING },
+          type: SchemaType.ARRAY,
+          items: { type: SchemaType.STRING },
           description: "Nice-to-have skills",
         },
       },
     },
     requirements: {
-      type: Type.ARRAY,
-      items: { type: Type.STRING },
+      type: SchemaType.ARRAY,
+      items: { type: SchemaType.STRING },
       description: "Key requirements from the job description",
     },
     focusAreas: {
-      type: Type.ARRAY,
-      items: { type: Type.STRING },
+      type: SchemaType.ARRAY,
+      items: { type: SchemaType.STRING },
       description: "Primary technical focus areas for the interview",
     },
   },
@@ -95,37 +95,37 @@ export interface JobAnalysisResponse {
  * Schema for case generation response
  */
 export const caseGenerationSchema = {
-  type: Type.OBJECT,
+  type: SchemaType.OBJECT,
   properties: {
     title: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description: "Brief case title",
     },
     context: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description: "Detailed business scenario with context",
     },
     questions: {
-      type: Type.ARRAY,
+      type: SchemaType.ARRAY,
       items: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
           questionText: {
-            type: Type.STRING,
+            type: SchemaType.STRING,
             description: "The main question",
           },
           questionContext: {
-            type: Type.STRING,
+            type: SchemaType.STRING,
             description: "Additional context for the question",
           },
           evaluatesSkills: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING },
             description: "Skills being evaluated by this question",
           },
           followUps: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING },
             description: "Follow-up questions",
           },
         },
