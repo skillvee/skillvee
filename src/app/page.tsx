@@ -248,151 +248,8 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* How It Works section - Zigzag Layout */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-white overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-16 sm:mb-20">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                How It Works
-              </h2>
-              <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-                Land your dream data science role in 3 proven steps
-              </p>
-            </div>
-            
-            {/* Step 1 - Left content, Right visual */}
-            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 mb-20">
-              <div className="lg:w-1/2 space-y-6">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
-                    1
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Practice Like It's Real</h3>
-                </div>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Face actual interview questions from Google, Meta, and more. Get instant AI feedback that actually helps.
-                </p>
-                <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm">
-                  <div className="text-green-400"># Sample Python Interview Question</div>
-                  <div className="text-white mt-2">def find_missing_number(nums):</div>
-                  <div className="text-white ml-4">"""Find the missing number in array [0,n]"""</div>
-                  <div className="text-blue-400 ml-4">return sum(range(len(nums)+1)) - sum(nums)</div>
-                </div>
-              </div>
-              <div className="lg:w-1/2">
-                <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-                  <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Brain className="w-7 h-7 text-white" />
-                  </div>
-                  <div className="">
-                    <div className="text-xs text-gray-500 font-semibold mb-3 text-center uppercase tracking-wide">Real-Time Probing</div>
-                    <div className="space-y-2 text-sm">
-                      <div className="text-gray-900 font-medium">AI: "Why this approach over a hash set?"</div>
-                      <div className="text-gray-600 pl-3">You: "Well, it's more memory efficient..."</div>
-                      <div className="text-gray-900 font-medium">AI: "What if the array was unsorted?"</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 2 - Right content, Left visual */}
-            <div className="flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-16 mb-20">
-              <div className="lg:w-1/2 space-y-6">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
-                    2
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Stand Out Instantly</h3>
-                </div>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Turn practice into verified credentials. Build a profile that makes recruiters stop scrolling.
-                </p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                    <div className="text-green-600 font-semibold text-sm">Python</div>
-                    <div className="text-green-800 font-bold">Expert</div>
-                  </div>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
-                    <div className="text-blue-600 font-semibold text-sm">SQL</div>
-                    <div className="text-blue-800 font-bold">Advanced</div>
-                  </div>
-                </div>
-              </div>
-              <div className="lg:w-1/2">
-                <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-                  <div className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Award className="w-7 h-7 text-white" />
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xs text-gray-500 font-semibold mb-3 uppercase tracking-wide">Skill Validated</div>
-                    <div className="">
-                      <div className="text-lg font-bold text-gray-900">Machine Learning</div>
-                      <div className="text-sm text-gray-600">Based on 12 practice sessions</div>
-                      <div className="mt-3 text-green-700 text-xs font-semibold">
-                        ✓ Verified by SkillVee AI
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 3 - Left content, Right visual */}
-            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-              <div className="lg:w-1/2 space-y-6">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
-                    3
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Jobs Find You</h3>
-                </div>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Stop applying everywhere. We match you with companies that need your exact skills.
-                </p>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-gray-700">Auto-applied to 23 matching roles this week</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-gray-700">3 companies requested interviews</span>
-                  </div>
-                </div>
-              </div>
-              <div className="lg:w-1/2">
-                <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-                  <div className="w-14 h-14 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Target className="w-7 h-7 text-white" />
-                  </div>
-                  <div className="">
-                    <div className="text-xs text-gray-500 font-semibold mb-3 text-center uppercase tracking-wide">Job Matches</div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3 text-sm">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <div className="flex-1">
-                          <div className="font-medium text-gray-900">Google requested your profile</div>
-                          <div className="text-xs text-gray-500">Senior Data Scientist • 95% match</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <div className="flex-1">
-                          <div className="font-medium text-gray-900">Meta fast-tracked you</div>
-                          <div className="text-xs text-gray-500">ML Engineer • 92% match</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* The Broken Hiring Game */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-gray-50">
+        <section className="py-16 sm:py-20 lg:py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-16 sm:mb-20">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
@@ -531,6 +388,167 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* How It Works section - Zigzag Layout */}
+        <section className="py-16 sm:py-20 lg:py-24 bg-white overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-16 sm:mb-20">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                How It Works
+              </h2>
+              <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+                Land your dream data science role in 3 proven steps
+              </p>
+            </div>
+            
+            {/* Step 1 - Left content, Right visual */}
+            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 mb-20">
+              <div className="lg:w-1/2 space-y-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                    1
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900">Practice Like It's Real</h3>
+                </div>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  Face actual interview questions from Google, Meta, and more. Get instant AI feedback that actually helps.
+                </p>
+              </div>
+              <div className="lg:w-1/2">
+                <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <Brain className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="text-center mb-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      Practice Like It's Real
+                    </h3>
+                    <Badge className="bg-blue-50 text-blue-700 border-blue-200">
+                      Always Free
+                    </Badge>
+                  </div>
+                  
+                  <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                    Face actual interview questions from Google, Meta, and more. Get instant AI feedback that actually helps.
+                  </p>
+                  
+                  {/* Interactive Demo */}
+                  <div className="bg-gray-900 rounded-lg p-4 mb-4 font-mono text-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <span className="text-gray-400 text-xs ml-2">SkillVee AI Interview</span>
+                    </div>
+                    <div className="text-green-400 mb-2">AI: "How would you handle missing data?"</div>
+                    <div className="text-blue-400 mb-2">You: "I'd use mean imputation..."</div>
+                    <div className="text-green-400 mb-2">AI: "Interesting choice. Why mean over median?"</div>
+                    <div className="text-blue-400 mb-2">You: "Well, the data looks normal..."</div>
+                    <div className="text-green-400 animate-pulse">● AI: "What if there were outliers?"</div>
+                  </div>
+                  
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="text-blue-800 text-sm font-semibold mb-1">REAL-TIME PROBING:</div>
+                    <div className="text-blue-700 text-xs">AI challenges your assumptions and explores edge cases as you speak</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2 - Right content, Left visual */}
+            <div className="flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-16 mb-20">
+              <div className="lg:w-1/2 space-y-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                    2
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900">Stand Out Instantly</h3>
+                </div>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  Turn practice into verified credentials. Build a profile that makes recruiters stop scrolling.
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                    <div className="text-green-600 font-semibold text-sm">Python</div>
+                    <div className="text-green-800 font-bold">Expert</div>
+                  </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                    <div className="text-blue-600 font-semibold text-sm">SQL</div>
+                    <div className="text-blue-800 font-bold">Advanced</div>
+                  </div>
+                </div>
+              </div>
+              <div className="lg:w-1/2">
+                <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                  <div className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Award className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-gray-500 font-semibold mb-3 uppercase tracking-wide">Skill Validated</div>
+                    <div className="">
+                      <div className="text-lg font-bold text-gray-900">Machine Learning</div>
+                      <div className="text-sm text-gray-600">Based on 12 practice sessions</div>
+                      <div className="mt-3 text-green-700 text-xs font-semibold">
+                        ✓ Verified by SkillVee AI
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3 - Left content, Right visual */}
+            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+              <div className="lg:w-1/2 space-y-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                    3
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900">Jobs Find You</h3>
+                </div>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  Stop applying everywhere. We match you with companies that need your exact skills.
+                </p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-gray-700">Auto-applied to 23 matching roles this week</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-gray-700">3 companies requested interviews</span>
+                  </div>
+                </div>
+              </div>
+              <div className="lg:w-1/2">
+                <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                  <div className="w-14 h-14 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Target className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="">
+                    <div className="text-xs text-gray-500 font-semibold mb-3 text-center uppercase tracking-wide">Job Matches</div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">Google requested your profile</div>
+                          <div className="text-xs text-gray-500">Senior Data Scientist • 95% match</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">Meta fast-tracked you</div>
+                          <div className="text-xs text-gray-500">ML Engineer • 92% match</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Key Features */}
         <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -587,12 +605,16 @@ export default async function Home() {
                       <Brain className="w-8 h-8 text-white" />
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      🤖 AI Interview Coach
+                      Practice Like It's Real
                     </h3>
                     <Badge className="bg-blue-50 text-blue-700 border-blue-200">
                       Always Free
                     </Badge>
                   </div>
+                  
+                  <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                    Face actual interview questions from Google, Meta, and more. Get instant AI feedback that actually helps.
+                  </p>
                   
                   {/* Interactive Demo */}
                   <div className="bg-gray-900 rounded-lg p-4 mb-4 font-mono text-sm">
@@ -609,14 +631,10 @@ export default async function Home() {
                     <div className="text-green-400 animate-pulse">● AI: "What if there were outliers?"</div>
                   </div>
                   
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                     <div className="text-blue-800 text-sm font-semibold mb-1">REAL-TIME PROBING:</div>
                     <div className="text-blue-700 text-xs">AI challenges your assumptions and explores edge cases as you speak</div>
                   </div>
-                  
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Practice with realistic AI covering Python, SQL, ML, statistics, and behavioral questions.
-                  </p>
                 </CardContent>
               </Card>
 
@@ -628,12 +646,16 @@ export default async function Home() {
                       <Award className="w-8 h-8 text-white" />
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      ✅ Skill Validation
+                      Stand Out Instantly
                     </h3>
                     <Badge className="bg-green-50 text-green-700 border-green-200">
                       Employer Trusted
                     </Badge>
                   </div>
+                  
+                  <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                    Turn practice into verified credentials. Build a profile that makes recruiters stop scrolling.
+                  </p>
                   
                   {/* Skills Progress */}
                   <div className="space-y-4 mb-4">
@@ -666,15 +688,11 @@ export default async function Home() {
                     </div>
                   </div>
                   
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                     <div className="text-blue-800 text-xs font-semibold mb-1">CERTIFICATION EARNED</div>
                     <div className="text-blue-700 text-sm font-bold">Data Science Fundamentals</div>
                     <div className="text-blue-600 text-xs">Based on 8 practice sessions</div>
                   </div>
-                  
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Build verified credentials that employers trust, backed by your actual performance.
-                  </p>
                 </CardContent>
               </Card>
 
