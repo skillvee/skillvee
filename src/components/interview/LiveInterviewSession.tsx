@@ -4,27 +4,24 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
-import { Progress } from "~/components/ui/progress";
 import { Alert, AlertDescription } from "~/components/ui/alert";
-import { 
-  Mic, 
-  MicOff, 
-  Phone, 
-  PhoneOff, 
-  Volume2, 
+import {
+  Mic,
+  MicOff,
+  Phone,
+  PhoneOff,
   RefreshCw,
-  CheckCircle,
   AlertCircle,
   Clock,
-  MessageSquare,
   Pause,
   Play,
-  SkipForward,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useGeminiLiveInterview, useGeminiLivePermissions } from "~/hooks/useGeminiLive";
 import type { InterviewContext } from "~/lib/gemini-live";
 import { api } from "~/trpc/react";
+import { CaseContextDisplay } from "./CaseContextDisplay";
+import { InterviewNotepad } from "./InterviewNotepad";
 
 export interface LiveInterviewSessionProps {
   interview: {
@@ -46,29 +43,26 @@ export interface LiveInterviewSessionProps {
     timeAllocation?: number;
     followUpQuestions?: string[];
   }>;
+  caseContext?: string; // Add case context prop
   onQuestionComplete?: (questionId: string, answer: string) => void;
   onInterviewComplete?: () => void;
   onError?: (error: string) => void;
 }
 
-export function LiveInterviewSession({ 
-  interview, 
-  questions, 
+export function LiveInterviewSession({
+  interview,
+  questions,
+  caseContext,
   onQuestionComplete,
   onInterviewComplete,
-  onError 
+  onError
 }: LiveInterviewSessionProps) {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [interviewStartTime, setInterviewStartTime] = useState<Date | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isSessionPaused, setIsSessionPaused] = useState(false);
-  const [conversationLog, setConversationLog] = useState<Array<{
-    id: string;
-    timestamp: Date;
-    type: 'user' | 'ai' | 'system';
-    content: string;
-  }>>([]);
+  const [interviewNotes, setInterviewNotes] = useState("");
+
   // Gemini Live integration
   const geminiLive = useGeminiLiveInterview({
     onError: (error) => {
@@ -76,16 +70,16 @@ export function LiveInterviewSession({
       onError?.(error);
     },
     onTextReceived: ({ text }) => {
-      addToConversationLog('ai', text);
+      console.log('AI text:', text);
     },
     onConnected: () => {
-      addToConversationLog('system', 'AI interviewer connected and ready');
+      console.log('AI interviewer connected');
     },
     onDisconnected: () => {
-      addToConversationLog('system', 'AI interviewer disconnected');
+      console.log('AI interviewer disconnected');
     },
     onSessionRenewed: ({ sessionId }) => {
-      addToConversationLog('system', `Session renewed (${sessionId})`);
+      console.log(`Session renewed: ${sessionId}`);
     },
   });
 
@@ -105,16 +99,6 @@ export function LiveInterviewSession({
 
     return () => clearInterval(interval);
   }, [sessionStarted, interviewStartTime, isSessionPaused]);
-
-  // Add entry to conversation log
-  const addToConversationLog = useCallback((type: 'user' | 'ai' | 'system', content: string) => {
-    setConversationLog(prev => [...prev, {
-      id: `${Date.now()}_${Math.random()}`,
-      timestamp: new Date(),
-      type,
-      content,
-    }]);
-  }, []);
 
   // Start interview session
   const startSession = useCallback(async () => {
@@ -153,32 +137,31 @@ export function LiveInterviewSession({
         focusAreas: interview.jobDescription.focusAreas,
         difficulty: interview.jobDescription.difficulty,
         questions,
-        currentQuestionIndex,
+        currentQuestionIndex: 0,
       };
 
       // Connect with the API key from the server (this now waits for setup completion)
       console.log('🔌 Connecting to Gemini Live with context:', context);
       await geminiLive.connect(context, conversationResult.config.apiKey);
       console.log('✅ Connection and setup completed!');
-      
+
       console.log('🎤 Starting to listen for audio...');
       await geminiLive.startListening();
       console.log('🎯 StartListening completed, isListening:', geminiLive.isListening);
-      
+
       setSessionStarted(true);
       setInterviewStartTime(new Date());
-      addToConversationLog('system', 'Interview session started');
       console.log('🎉 Interview session fully started!');
-      
+
       // Now send the greeting to start the actual interview conversation
       console.log('🎬 Starting interview conversation...');
       setTimeout(() => {
         geminiLive.sendInitialGreeting();
       }, 500); // Brief delay to ensure UI has updated
-      
+
     } catch (error) {
       console.error('Failed to start session:', error);
-      
+
       // Provide more specific error messages
       let errorMessage = 'Failed to start interview session';
       if (error instanceof Error) {
@@ -192,15 +175,14 @@ export function LiveInterviewSession({
           errorMessage = error.message;
         }
       }
-      
+
       onError?.(errorMessage);
     }
   }, [
-    permissions.hasMicrophoneAccess, 
+    permissions.hasMicrophoneAccess,
     permissions.requestMicrophonePermission,
     interview,
     questions,
-    currentQuestionIndex,
     geminiLive,
     startConversationMutation,
     onError
@@ -212,7 +194,6 @@ export function LiveInterviewSession({
       await geminiLive.disconnect();
       setSessionStarted(false);
       setIsSessionPaused(false);
-      addToConversationLog('system', 'Interview session ended');
       onInterviewComplete?.();
     } catch (error) {
       console.error('Failed to end session:', error);
@@ -223,51 +204,11 @@ export function LiveInterviewSession({
   const togglePause = useCallback(() => {
     if (isSessionPaused) {
       geminiLive.startListening().catch(console.error);
-      addToConversationLog('system', 'Interview resumed');
     } else {
       geminiLive.stopListening();
-      addToConversationLog('system', 'Interview paused');
     }
     setIsSessionPaused(!isSessionPaused);
   }, [isSessionPaused, geminiLive]);
-
-  // Move to next question
-  const moveToNextQuestion = useCallback(() => {
-    if (currentQuestionIndex < questions.length - 1) {
-      const newIndex = currentQuestionIndex + 1;
-      setCurrentQuestionIndex(newIndex);
-      
-      // Update Gemini Live context
-      geminiLive.updateContext({ 
-        currentQuestionIndex: newIndex 
-      });
-
-      const currentQuestion = questions[currentQuestionIndex];
-      if (currentQuestion) {
-        onQuestionComplete?.(currentQuestion.id, 'Question completed via voice interaction');
-      }
-
-      addToConversationLog('system', `Moving to question ${newIndex + 1} of ${questions.length}`);
-    } else {
-      // Interview complete
-      void endSession();
-    }
-  }, [currentQuestionIndex, questions, geminiLive, onQuestionComplete, endSession]);
-
-  // Move to previous question
-  const moveToPreviousQuestion = useCallback(() => {
-    if (currentQuestionIndex > 0) {
-      const newIndex = currentQuestionIndex - 1;
-      setCurrentQuestionIndex(newIndex);
-      
-      // Update Gemini Live context
-      geminiLive.updateContext({ 
-        currentQuestionIndex: newIndex 
-      });
-
-      addToConversationLog('system', `Moving back to question ${newIndex + 1} of ${questions.length}`);
-    }
-  }, [currentQuestionIndex, geminiLive]);
 
   // Reconnect if needed
   const handleReconnect = useCallback(async () => {
@@ -283,20 +224,63 @@ export function LiveInterviewSession({
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
-    
+
     if (hours > 0) {
       return `${hours}:${(minutes % 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
     }
     return `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`;
   };
 
-  const currentQuestion = questions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+  // Mock case context for demonstration
+  const mockCaseContext = caseContext || `You are working as a Data Scientist at Meta. You're analyzing one of the platform's core features - the **one-on-one video calling** system that connects billions of users worldwide through Facebook Messenger. The feature has been a cornerstone of Meta's communication tools for years, enabling friends and family to have face-to-face conversations regardless of physical distance. To help inform strategic decisions about the feature's evolution, you have access to two comprehensive datasets:
+
+### Table: \`video_calls\`
+
+| Column           | Description                         |
+|-----------------|-------------------------------------|
+| caller          | User ID initiating the call         |
+| recipient       | User ID receiving the call          |
+| ds              | Date of the call                    |
+| call_id         | Unique call identifier              |
+| duration_seconds| Length of the call in seconds       |
+
+Here is some example data:
+
+| caller | recipient | ds         | call_id | duration_seconds |
+|--------|-----------|------------|---------|------------------|
+| 458921 | 672104    | 2023-01-01 | v8k2p9  | 183             |
+| 458921 | 891345    | 2023-01-01 | m4n7v2  | 472             |
+| 672104 | 234567    | 2023-01-02 | x9h5j4  | 256             |
+| 891345 | 345678    | 2023-01-02 | q2w3e4  | 67              |
+| 345678 | 891345    | 2023-01-03 | t7y8u9  | 124             |
+| 234567 | 458921    | 2023-01-03 | p3l5k8  | 538             |
+
+### Table: \`daily_active_users\`
+
+| Column           | Description                               |
+|-----------------|-------------------------------------------|
+| user_id         | Unique identifier for the user            |
+| ds              | Date the user was active/logged in        |
+| country         | User's country                            |
+| daily_active_flag| Indicates if user was active that day (1) |
+
+Below you can see an example data:
+
+| user_id | ds         | country | daily_active_flag |
+|---------|-----------|---------|--------------------|
+| 458921  | 2023-01-01| France  | 1                 |
+| 672104  | 2023-01-01| France  | 1                 |
+| 891345  | 2023-01-01| Spain   | 1                 |
+| 234567  | 2023-01-02| France  | 1                 |
+| 345678  | 2023-01-02| France  | 1                 |
+| 458921  | 2023-01-03| France  | 1                 |
+
+The company is considering launching a **group video chat** feature. You'll be using these tables for analysis on user behavior, potential demand, and how to measure success.`;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto p-6">
-      {/* Header with session status */}
-      <Card>
+    <div className="min-h-screen bg-background p-6">
+      {/* Header with session status - Full width */}
+      <Card className="mb-6">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div>
@@ -325,39 +309,26 @@ export function LiveInterviewSession({
             </div>
           </div>
         </CardHeader>
-        
-        {/* Progress bar */}
-        {sessionStarted && (
-          <CardContent className="pt-0">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
-                <span>{Math.round(progress)}% Complete</span>
-              </div>
-              <Progress value={progress} className="h-2" />
-            </div>
-          </CardContent>
-        )}
       </Card>
 
       {/* Error handling */}
       {geminiLive.error && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="mb-6">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
             <span>{geminiLive.error}</span>
             <div className="flex space-x-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={geminiLive.clearError}
               >
                 Dismiss
               </Button>
               {geminiLive.connectionState === 'error' && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={handleReconnect}
                   disabled={['reconnecting', 'connecting'].includes(geminiLive.connectionState)}
                 >
@@ -372,13 +343,13 @@ export function LiveInterviewSession({
 
       {/* Permissions check */}
       {!permissions.hasMicrophoneAccess && (
-        <Alert>
+        <Alert className="mb-6">
           <Mic className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
             <span>Microphone access is required for voice interaction</span>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={permissions.requestMicrophonePermission}
             >
               Grant Access
@@ -389,25 +360,25 @@ export function LiveInterviewSession({
 
       {/* Session controls */}
       {!sessionStarted ? (
-        <Card>
+        <Card className="mb-6">
           <CardContent className="p-8 text-center space-y-6">
             <div className="space-y-4">
               <h2 className="text-2xl font-semibold">Ready to start your AI interview?</h2>
               <p className="text-muted-foreground max-w-lg mx-auto">
-                You&apos;ll be speaking with an AI interviewer who will ask questions about {interview.jobDescription.focusAreas.join(', ')}. 
+                You&apos;ll be speaking with an AI interviewer who will ask questions about {interview.jobDescription.focusAreas.join(', ')}.
                 The session will be recorded and you can interrupt the AI at any time.
               </p>
-              
+
               <div className="flex flex-wrap justify-center gap-2 mt-4">
                 {interview.jobDescription.focusAreas.map((area) => (
                   <Badge key={area} variant="secondary">{area}</Badge>
                 ))}
               </div>
             </div>
-            
-            <Button 
-              onClick={startSession} 
-              size="lg" 
+
+            <Button
+              onClick={startSession}
+              size="lg"
               className="w-48"
               disabled={!permissions.hasMicrophoneAccess || geminiLive.connectionState === 'connecting'}
             >
@@ -426,42 +397,29 @@ export function LiveInterviewSession({
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main interview area */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Current question */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Question {currentQuestionIndex + 1}</span>
-                  <Badge variant="outline">
-                    {currentQuestion?.difficulty ?? interview.jobDescription.difficulty}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-lg leading-relaxed">
-                  {currentQuestion?.questionText}
-                </p>
-                
-                {currentQuestion?.evaluationCriteria && (
-                  <div className="pt-4 border-t">
-                    <p className="text-sm font-medium mb-2">Evaluation Focus:</p>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      {currentQuestion.evaluationCriteria.map((criteria, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="mr-2">•</span>
-                          <span>{criteria}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Panel: Case Context */}
+          <div className="lg:col-span-1 h-[calc(100vh-12rem)]">
+            <CaseContextDisplay
+              caseContent={mockCaseContext}
+              title="Case Context"
+              isCollapsible={true}
+              className="h-full overflow-hidden"
+            />
+          </div>
+
+          {/* Right Panel: Interview notes and controls */}
+          <div className="lg:col-span-1 h-[calc(100vh-12rem)] flex flex-col">
+            {/* Interview Notepad - Now in center */}
+            <InterviewNotepad
+              initialNotes={interviewNotes}
+              onChange={setInterviewNotes}
+              placeholder="Take notes during the interview...\n\nKey points:\n• \n• \n• "
+              className="flex-1"
+            />
 
             {/* Interview controls */}
-            <Card>
+            <Card className="mt-4 flex-shrink-0">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
@@ -483,35 +441,8 @@ export function LiveInterviewSession({
                         </>
                       )}
                     </Button>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={moveToPreviousQuestion}
-                      disabled={currentQuestionIndex === 0}
-                    >
-                      Previous
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={moveToNextQuestion}
-                    >
-                      {currentQuestionIndex === questions.length - 1 ? (
-                        <>
-                          <CheckCircle className="w-4 h-4 mr-2" />
-                          Complete Interview
-                        </>
-                      ) : (
-                        <>
-                          <SkipForward className="w-4 h-4 mr-2" />
-                          Next Question
-                        </>
-                      )}
-                    </Button>
                   </div>
-                  
+
                   <Button
                     variant="destructive"
                     size="sm"
@@ -523,23 +454,6 @@ export function LiveInterviewSession({
                 </div>
               </CardContent>
             </Card>
-          </div>
-
-          {/* Sidebar with live indicators and conversation log */}
-          <div className="space-y-4">
-            {/* Live conversation indicator */}
-            <LiveConversationIndicator 
-              isAISpeaking={geminiLive.isAISpeaking}
-              isListening={geminiLive.isListening}
-              audioLevel={geminiLive.audioLevel}
-              isPaused={isSessionPaused}
-            />
-
-            {/* Conversation log */}
-            <ConversationLog 
-              messages={conversationLog}
-              maxHeight="400px"
-            />
           </div>
         </div>
       )}
@@ -580,141 +494,12 @@ function ConnectionStatus({ connectionState, isListening, isAISpeaking, audioLev
       <span className="text-sm font-medium">{getStatusText()}</span>
       {isListening && audioLevel > 0 && (
         <div className="w-8 h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div 
+          <div
             className="h-full bg-blue-500 transition-all duration-100"
             style={{ width: `${audioLevel * 100}%` }}
           />
         </div>
       )}
     </div>
-  );
-}
-
-// Live conversation indicator component
-interface LiveConversationIndicatorProps {
-  isAISpeaking: boolean;
-  isListening: boolean;
-  audioLevel: number;
-  isPaused: boolean;
-}
-
-function LiveConversationIndicator({ isAISpeaking, isListening, audioLevel, isPaused }: LiveConversationIndicatorProps) {
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm flex items-center">
-          <MessageSquare className="w-4 h-4 mr-2" />
-          Live Conversation
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* AI speaking indicator */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Volume2 className={cn("w-4 h-4", {
-              'text-blue-500': isAISpeaking,
-              'text-gray-400': !isAISpeaking
-            })} />
-            <span className="text-sm">AI Interviewer</span>
-          </div>
-          {isAISpeaking && (
-            <div className="flex space-x-1">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="w-1 h-4 bg-blue-500 rounded animate-pulse"
-                  style={{ animationDelay: `${i * 0.2}s` }}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* User listening indicator */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            {isListening && !isPaused ? (
-              <Mic className="w-4 h-4 text-teal-500" />
-            ) : (
-              <MicOff className="w-4 h-4 text-gray-400" />
-            )}
-            <span className="text-sm">You</span>
-          </div>
-          {isListening && !isPaused && (
-            <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-teal-500 transition-all duration-100"
-                style={{ width: `${audioLevel * 100}%` }}
-              />
-            </div>
-          )}
-        </div>
-
-        {isPaused && (
-          <div className="text-center py-2">
-            <Badge variant="secondary">
-              <Pause className="w-3 h-3 mr-1" />
-              Session Paused
-            </Badge>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-// Conversation log component
-interface ConversationLogProps {
-  messages: Array<{
-    id: string;
-    timestamp: Date;
-    type: 'user' | 'ai' | 'system';
-    content: string;
-  }>;
-  maxHeight?: string;
-}
-
-function ConversationLog({ messages, maxHeight = "300px" }: ConversationLogProps) {
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm">Conversation Log</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div 
-          className="space-y-2 overflow-y-auto pr-2"
-          style={{ maxHeight }}
-        >
-          {messages.length === 0 ? (
-            <p className="text-sm text-muted-foreground italic">
-              No conversation yet...
-            </p>
-          ) : (
-            messages.map((message) => (
-              <div key={message.id} className="text-xs space-y-1">
-                <div className="flex items-center justify-between">
-                  <Badge 
-                    variant={
-                      message.type === 'ai' ? 'default' : 
-                      message.type === 'user' ? 'secondary' : 'outline'
-                    }
-                    className="text-xs"
-                  >
-                    {message.type === 'ai' ? 'AI' : 
-                     message.type === 'user' ? 'You' : 'System'}
-                  </Badge>
-                  <span className="text-muted-foreground">
-                    {message.timestamp.toLocaleTimeString()}
-                  </span>
-                </div>
-                <p className="text-sm leading-relaxed pl-2 border-l-2 border-gray-200">
-                  {message.content}
-                </p>
-              </div>
-            ))
-          )}
-        </div>
-      </CardContent>
-    </Card>
   );
 }
