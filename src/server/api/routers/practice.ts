@@ -6,11 +6,9 @@ import {
 } from "~/server/api/trpc";
 
 import { createError } from "../types/errors";
-import {
-  analyzePracticeJobDescription,
-  createRoleSelectionSessionData,
-  generateCaseWithGemini
-} from "../utils/gemini";
+import { createRoleSelectionSessionData } from "../utils/gemini";
+import { analyzeJobDescription } from "../../ai/services/job-analysis.service";
+import { generateInterviewCase } from "../../ai/services/case-generation.service";
 
 // Input schemas
 const analyzeJobDescriptionSchema = z.object({
@@ -48,15 +46,24 @@ export const practiceRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { description } = input;
 
-      // Get available archetypes for matching
+      // Get available archetypes with roles for matching
       const archetypes = await ctx.db.roleArchetype.findMany({
         where: { deletedAt: null },
-        select: { name: true },
+        include: {
+          roles: {
+            select: { title: true },
+            where: { deletedAt: null },
+          },
+        },
       });
-      const archetypeNames = archetypes.map(a => a.name);
 
-      // Analyze with AI
-      const analysisResult = await analyzePracticeJobDescription(description, archetypeNames);
+      // Analyze with AI using new service
+      const analysisResult = await analyzeJobDescription(
+        description,
+        archetypes,
+        ctx.user.id,
+        undefined // sessionId will be created after analysis
+      );
 
       if (!analysisResult.success) {
         throw createError.internal(`Failed to analyze job description: ${analysisResult.error}`);
@@ -64,10 +71,13 @@ export const practiceRouter = createTRPCRouter({
 
       const data = analysisResult.data;
 
-      // Check for unsupported job types
-      if (data.archetypeMatch?.bestMatch === "Other" || 
-          (data.archetypeMatch?.confidence !== undefined && data.archetypeMatch.confidence < 0.6)) {
-        throw createError.unsupportedJobType(data.title);
+      if (!data) {
+        throw createError.internal("No data returned from job analysis");
+      }
+
+      // Check for unsupported job types using new confidence field
+      if (data.archetypeId === undefined || data.archetypeConfidence < 0.6) {
+        throw createError.unsupportedJobType(data.title || "Unknown");
       }
 
       // Validate and sanitize difficulty value
@@ -76,16 +86,21 @@ export const practiceRouter = createTRPCRouter({
         ? data.difficulty as "EASY" | "MEDIUM" | "HARD" | "JUNIOR" | "SENIOR"
         : "MEDIUM"; // Default to MEDIUM if invalid
 
-      // Find matching archetype ID if one was matched
+      // Find matching archetype by simpleId
       let matchedArchetypeId: string | undefined;
-      if (data.archetypeMatch?.bestMatch) {
+      if (data.archetypeId) {
         const matchedArchetype = await ctx.db.roleArchetype.findFirst({
-          where: { 
-            name: data.archetypeMatch.bestMatch,
-            deletedAt: null 
+          where: {
+            simpleId: data.archetypeId,
+            deletedAt: null
           },
         });
-        matchedArchetypeId = matchedArchetype?.id;
+        if (!matchedArchetype) {
+          console.warn(`[Practice] No archetype found for simpleId ${data.archetypeId}`);
+        } else {
+          matchedArchetypeId = matchedArchetype.id;
+          console.log(`[Practice] Matched archetype: ${matchedArchetype.name} (simpleId: ${data.archetypeId})`);
+        }
       }
 
       // Create practice session
@@ -136,10 +151,10 @@ export const practiceRouter = createTRPCRouter({
         sessionId: session.id,
         analysisResult: {
           ...data,
-          archetypeMatch: data.archetypeMatch ? {
-            ...data.archetypeMatch,
+          archetypeMatch: {
             archetype: session.archetype || null,
-          } : undefined,
+            confidence: data.archetypeConfidence,
+          },
         },
       };
     }),
@@ -525,8 +540,8 @@ export const practiceRouter = createTRPCRouter({
         console.log(`    * Observable Behaviors: ${allSkillLevels.length} levels (all levels for context)`);
       }
 
-      // 3. Generate case with Gemini
-      const generatedCase = await generateCaseWithGemini({
+      // 3. Generate case with new AI service
+      const caseResult = await generateInterviewCase({
         jobTitle: session.jobTitle || "Data Professional",
         company: session.company || undefined,
         experience: session.experience || undefined,
@@ -534,6 +549,12 @@ export const practiceRouter = createTRPCRouter({
         sessionId,
         skillRequirements,
       });
+
+      if (!caseResult.success || !caseResult.data) {
+        throw createError.internal(`Failed to generate interview case: ${caseResult.error}`);
+      }
+
+      const generatedCase = caseResult.data;
 
       // 4. Store the case and questions
       const interviewCase = await ctx.db.interviewCase.create({

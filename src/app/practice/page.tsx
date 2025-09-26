@@ -73,7 +73,10 @@ export default function PracticePage() {
 
     // Immediately navigate to results page with creating state
     if (hasMinimumWords && jobDescription.trim()) {
-      router.push(`/practice/results?creating=true&type=job&description=${encodeURIComponent(jobDescription.trim())}`);
+      // Store job description in sessionStorage to avoid URL encoding issues
+      const jobId = `job_${Date.now()}`;
+      sessionStorage.setItem(jobId, jobDescription.trim());
+      router.push(`/practice/results?creating=true&type=job&jobId=${jobId}`);
     } else if (selectedRole) {
       router.push(`/practice/results?creating=true&type=role&role=${encodeURIComponent(selectedRole)}`);
     }

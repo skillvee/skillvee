@@ -19,12 +19,12 @@ model User {
   updatedAt        DateTime              @updatedAt
   deletedAt        DateTime?
   role             UserRole              @default(INTERVIEWER)
+  geminiApiLogs    GeminiApiLog[]
   interviewNotes   InterviewNote[]
   interviews       Interview[]
   jobDescriptions  JobDescription[]
-  skillAssessments UserSkillAssessment[]
   practiceSessions PracticeSession[]
-  geminiApiLogs    GeminiApiLog[]
+  skillAssessments UserSkillAssessment[]
 
   @@index([clerkId])
   @@index([email])
@@ -63,8 +63,6 @@ model Interview {
   id                   String                @id @default(cuid())
   userId               String
   jobDescriptionId     String
-  practiceSessionId    String?
-  interviewCaseId      String?
   status               InterviewStatus       @default(SCHEDULED)
   scheduledAt          DateTime?
   startedAt            DateTime?
@@ -78,13 +76,14 @@ model Interview {
   endedAt              DateTime?
   geminiConfig         String?
   focusDomainId        String?
+  practiceSessionId    String?
+  interview_case_id    String?
   assessment           Assessment?
   interviewNotes       InterviewNote[]
   interviewSkills      InterviewSkill[]
   focusDomain          SkillDomain?          @relation(fields: [focusDomainId], references: [id])
   jobDescription       JobDescription        @relation(fields: [jobDescriptionId], references: [id])
   practiceSession      PracticeSession?      @relation(fields: [practiceSessionId], references: [id])
-  interviewCase        InterviewCase?        @relation(fields: [interviewCaseId], references: [id])
   user                 User                  @relation(fields: [userId], references: [id])
   mediaRecordings      MediaRecording[]
   questions            Question[]
@@ -93,11 +92,11 @@ model Interview {
   @@index([userId])
   @@index([jobDescriptionId])
   @@index([practiceSessionId])
-  @@index([interviewCaseId])
   @@index([focusDomainId])
   @@index([status])
   @@index([scheduledAt])
   @@index([deletedAt])
+  @@index([interview_case_id])
   @@map("interviews")
 }
 
@@ -191,10 +190,11 @@ model RoleArchetype {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   deletedAt         DateTime?
+  simpleId          Int?               @unique @map("simple_id")
   jobDescriptions   JobDescription[]
+  practiceSessions  PracticeSession[]
   roleSkillMappings RoleSkillMapping[]
   roles             Role[]
-  practiceSessions  PracticeSession[]
 
   @@index([name])
   @@index([deletedAt])
@@ -332,6 +332,94 @@ model UserSkillAssessment {
   @@map("user_skill_assessments")
 }
 
+model PracticeSession {
+  id                  String          @id @default(cuid())
+  userId              String
+  sessionType         String
+  jobTitle            String?
+  company             String?
+  team                String?
+  experience          String?
+  archetypeId         String?
+  requirements        String[]        @default([])
+  focusAreas          String[]        @default([])
+  difficulty          String?
+  extractedInfo       Json?
+  originalDescription String?
+  createdAt           DateTime        @default(now())
+  expiresAt           DateTime
+  geminiApiLogs       GeminiApiLog[]
+  interviewCases      InterviewCase[]
+  interviews          Interview[]
+  archetype           RoleArchetype?  @relation(fields: [archetypeId], references: [id])
+  user                User            @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([sessionType])
+  @@index([archetypeId])
+  @@index([expiresAt])
+  @@map("practice_sessions")
+}
+
+model InterviewCase {
+  id                String          @id @default(cuid())
+  practiceSessionId String
+  caseTitle         String
+  caseContext       String
+  caseData          Json
+  totalDuration     Int
+  createdAt         DateTime        @default(now())
+  caseQuestions     CaseQuestion[]
+  practiceSession   PracticeSession @relation(fields: [practiceSessionId], references: [id], map: "interview_cases_practicesessionid_fkey")
+
+  @@index([practiceSessionId], map: "interview_cases_practicesessionid_idx")
+  @@map("interview_cases")
+}
+
+model CaseQuestion {
+  id                String        @id @default(cuid())
+  interviewCaseId   String
+  questionText      String
+  questionContext   String?
+  skillsToEvaluate  String[]      @default([])
+  followUpQuestions Json
+  orderIndex        Int
+  interviewCase     InterviewCase @relation(fields: [interviewCaseId], references: [id], onDelete: Cascade, map: "case_questions_interviewcaseid_fkey")
+
+  @@index([interviewCaseId], map: "case_questions_interviewcaseid_idx")
+  @@index([orderIndex], map: "case_questions_orderindex_idx")
+  @@map("case_questions")
+}
+
+model GeminiApiLog {
+  id              String           @id @default(dbgenerated("(gen_random_uuid())::text"))
+  timestamp       DateTime         @default(now()) @db.Timestamptz(6)
+  userId          String?
+  sessionId       String?
+  endpoint        String
+  prompt          String
+  promptLength    Int
+  response        Json?
+  responseTime    Int?
+  jobTitle        String?
+  company         String?
+  skills          String[]
+  modelUsed       String
+  success         Boolean
+  errorMessage    String?
+  metadata        Json?
+  createdAt       DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime         @default(now()) @db.Timestamptz(6)
+  practiceSession PracticeSession? @relation(fields: [sessionId], references: [id], onUpdate: NoAction)
+  user            User?            @relation(fields: [userId], references: [id], onUpdate: NoAction)
+
+  @@index([endpoint], map: "idx_gemini_api_logs_endpoint")
+  @@index([sessionId], map: "idx_gemini_api_logs_sessionid")
+  @@index([timestamp], map: "idx_gemini_api_logs_timestamp")
+  @@index([userId], map: "idx_gemini_api_logs_userid")
+  @@map("gemini_api_logs")
+}
+
 enum InterviewStatus {
   SCHEDULED
   IN_PROGRESS
@@ -345,79 +433,6 @@ enum QuestionType {
   CASE_STUDY
   PROBLEM_SOLVING
   SYSTEM_DESIGN
-}
-
-model PracticeSession {
-  id          String      @id @default(cuid())
-  userId      String
-  sessionType SessionType
-
-  // Extracted/Selected Data
-  jobTitle    String?
-  company     String?
-  team        String?
-  experience  String?
-  archetypeId String?
-
-  // AI Analysis Results
-  requirements  String[]
-  focusAreas    String[]
-  difficulty    Difficulty?
-  extractedInfo Json? // Additional parsed data
-
-  // Original job description (for reference)
-  originalDescription String?
-
-  // Session Management
-  createdAt DateTime @default(now())
-  expiresAt DateTime // Auto-cleanup after 7 days
-
-  // Relations
-  user           User            @relation(fields: [userId], references: [id])
-  archetype      RoleArchetype?  @relation(fields: [archetypeId], references: [id])
-  interviews     Interview[]     // Multiple interviews can reference same session
-  interviewCases InterviewCase[] // Cases generated for this session
-  geminiApiLogs  GeminiApiLog[]  // API logs for this session
-
-  @@index([userId])
-  @@index([sessionType])
-  @@index([archetypeId])
-  @@index([expiresAt])
-  @@map("practice_sessions")
-}
-
-model InterviewCase {
-  id                String   @id @default(cuid())
-  practiceSessionId String
-  caseTitle         String
-  caseContext       String   // Business scenario
-  caseData          Json     // Full case structure from Gemini
-  totalDuration     Int      // Total minutes estimated
-  createdAt         DateTime @default(now())
-
-  // Relations
-  practiceSession   PracticeSession @relation(fields: [practiceSessionId], references: [id])
-  caseQuestions     CaseQuestion[]
-  interviews        Interview[]     // Multiple interviews can use same case
-
-  @@index([practiceSessionId])
-  @@map("interview_cases")
-}
-
-model CaseQuestion {
-  id                String   @id @default(cuid())
-  interviewCaseId   String
-  questionText      String
-  questionContext   String?  // Additional context if needed
-  skillsToEvaluate  String[] // Array of skill IDs this question evaluates
-  followUpQuestions Json     // Array of follow-up questions
-  orderIndex        Int
-
-  interviewCase InterviewCase @relation(fields: [interviewCaseId], references: [id])
-
-  @@index([interviewCaseId])
-  @@index([orderIndex])
-  @@map("case_questions")
 }
 
 enum SessionType {
@@ -461,39 +476,4 @@ enum SkillImportance {
   LOW
   MEDIUM
   HIGH
-}
-
-model GeminiApiLog {
-  id            String   @id @default(cuid())
-  timestamp     DateTime @default(now())
-  
-  // Core tracking fields
-  userId        String?
-  sessionId     String?
-  endpoint      String   // 'analyzeJobDescription' or 'generateCase'
-  
-  // Request/Response data
-  prompt        String   @db.Text
-  promptLength  Int
-  response      Json?
-  responseTime  Int?
-  
-  // Metadata
-  jobTitle      String?
-  company       String?
-  skills        String[]
-  modelUsed     String
-  success       Boolean
-  errorMessage  String?   @db.Text
-  metadata      Json?
-  
-  // Relations
-  user          User?           @relation(fields: [userId], references: [id])
-  practiceSession PracticeSession? @relation(fields: [sessionId], references: [id])
-  
-  @@index([userId])
-  @@index([sessionId])
-  @@index([timestamp])
-  @@index([endpoint])
-  @@map("gemini_api_logs")
 }

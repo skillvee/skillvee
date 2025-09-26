@@ -204,32 +204,25 @@ Guidelines:
 
   const handleStartInterview = async () => {
     try {
-      let jobDescriptionId: string;
-
-      // Check if we have any job descriptions
-      if (jobDescriptions && jobDescriptions.items.length > 0) {
-        jobDescriptionId = jobDescriptions.items[0]!.id;
-      } else {
-        // Create a demo job description for testing
-        const demoJobDescription = await createDemoJobDescriptionMutation.mutateAsync({
-          title: "Senior Data Scientist",
-          company: "TechCorp AI",
-          description: "Join our AI team as a Senior Data Scientist to build cutting-edge machine learning models and drive data-driven insights across the organization.",
-          requirements: [
-            "Masters/PhD in Computer Science, Statistics, or related field",
-            "5+ years of experience in data science and machine learning",
-            "Expert proficiency in Python, SQL, and ML frameworks",
-            "Experience with deep learning, NLP, and computer vision",
-            "Strong communication and leadership skills"
-          ],
-          focusAreas: ["Python Programming", "Machine Learning", "Deep Learning", "Statistics", "SQL", "Data Engineering"],
-          isTemplate: false,
-        });
-        jobDescriptionId = demoJobDescription.id;
-      }
+      // Always create a fresh demo job description for the live interview
+      // This ensures we don't have stale ID issues and provides a consistent experience
+      const demoJobDescription = await createDemoJobDescriptionMutation.mutateAsync({
+        title: "Senior Data Scientist",
+        company: "TechCorp AI",
+        description: "Join our AI team as a Senior Data Scientist to build cutting-edge machine learning models and drive data-driven insights across the organization.",
+        requirements: [
+          "Masters/PhD in Computer Science, Statistics, or related field",
+          "5+ years of experience in data science and machine learning",
+          "Expert proficiency in Python, SQL, and ML frameworks",
+          "Experience with deep learning, NLP, and computer vision",
+          "Strong communication and leadership skills"
+        ],
+        focusAreas: ["Python Programming", "Machine Learning", "Deep Learning", "Statistics", "SQL", "Data Engineering"],
+        isTemplate: false,
+      });
 
       await createInterviewMutation.mutateAsync({
-        jobDescriptionId,
+        jobDescriptionId: demoJobDescription.id,
         scheduledAt: new Date(),
       });
     } catch (error) {
