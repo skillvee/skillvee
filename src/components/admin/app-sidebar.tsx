@@ -19,7 +19,8 @@ import {
   Award,
   BookOpen,
   PlusCircle,
-  TrendingUp
+  TrendingUp,
+  Database
 } from "lucide-react";
 import Link from "next/link";
 
@@ -54,6 +55,11 @@ const navigationItems = [
     title: "Analytics",
     icon: TrendingUp,
     href: "/admin/analytics",
+  },
+  {
+    title: "API Logs",
+    icon: Database,
+    href: "/admin/logs",
   },
 ];
 

@@ -67,7 +67,7 @@ export default function PracticePage() {
   };
 
   const handleCreateInterview = async () => {
-    if (!isButtonActive || isProcessing) return;
+    if (!isButtonActive) return;
 
     setIsProcessing(true);
 

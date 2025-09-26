@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "~/components/ui/button";
@@ -23,6 +23,8 @@ function PracticeResultsContent() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedItems, setSelectedItems] = useState<{[key: string]: string[]}>({});
   const [createdSessionId, setCreatedSessionId] = useState<string | null>(null);
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const sessionCreationRef = useRef(false);
 
   // Get params from URL
   const sessionId = searchParams.get('sessionId');
@@ -34,6 +36,7 @@ function PracticeResultsContent() {
   // tRPC mutations for creating sessions
   const analyzeJobDescription = api.practice.analyzeJobDescription.useMutation();
   const selectRole = api.practice.selectRole.useMutation();
+  const createInterviewCase = api.practice.createInterviewCase.useMutation();
 
   // Load session data (either existing or newly created)
   const activeSessionId = createdSessionId || sessionId;
@@ -49,10 +52,14 @@ function PracticeResultsContent() {
     }
   }, [isLoaded, user, router]);
 
-  // Handle session creation when in creating mode
+  // Handle session creation when in creating mode (with debouncing)
   useEffect(() => {
     const createSession = async () => {
-      if (!isCreating || !user) return;
+      if (!isCreating || !user || sessionCreationRef.current || isCreatingSession || createdSessionId) return;
+
+      // Prevent multiple simultaneous calls
+      sessionCreationRef.current = true;
+      setIsCreatingSession(true);
 
       try {
         let result;
@@ -75,13 +82,23 @@ function PracticeResultsContent() {
         console.error('Failed to create session:', error);
         // Redirect back to practice page on error
         router.push('/practice');
+      } finally {
+        setIsCreatingSession(false);
       }
     };
 
-    if (isCreating && user) {
+    // Only run once when the component mounts in creating mode
+    if (isCreating && user && !sessionCreationRef.current && !createdSessionId) {
       createSession();
     }
-  }, [isCreating, creationType, description, role, user, analyzeJobDescription, selectRole, router]);
+  }, [isCreating, creationType, description, role, user, createdSessionId]);
+
+  // Reset ref when not in creating mode
+  useEffect(() => {
+    if (!isCreating) {
+      sessionCreationRef.current = false;
+    }
+  }, [isCreating]);
 
   // Redirect to practice page if no session ID and not creating
   useEffect(() => {
@@ -116,8 +133,8 @@ function PracticeResultsContent() {
     }
   }, [session?.archetype]);
 
-  // Show creating state when session is being created
-  if (isCreating) {
+  // Show creating state when session is being created (but only if no session created yet)
+  if (isCreating && !createdSessionId) {
     const isJob = creationType === 'job';
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -259,12 +276,43 @@ function PracticeResultsContent() {
   const calculateDuration = (categoryId: string) => {
     const category = interviewCategories.find(cat => cat.id === categoryId);
     if (!category) return 0;
-    
+
     if (category.items && category.items.length > 0) {
       const selectedItemsCount = selectedItems[categoryId]?.length || 1;
       return selectedItemsCount * 15; // 15 minutes per selected item
     } else {
       return 38; // Average of 26-50
+    }
+  };
+
+  const handleStartInterview = async (categoryId: string) => {
+    if (!activeSessionId) return;
+
+    const category = interviewCategories.find(cat => cat.id === categoryId);
+    if (!category) return;
+
+    // Get selected skills for this category
+    const skills = selectedItems[categoryId] || category.items || [];
+
+    if (skills.length === 0) {
+      console.error('No skills selected');
+      return;
+    }
+
+    try {
+      // Create interview case with selected skills
+      const result = await createInterviewCase.mutateAsync({
+        sessionId: activeSessionId,
+        domainId: categoryId,
+        selectedSkills: skills
+      });
+
+      // Navigate to interview page with the case ID
+      if (result.caseId) {
+        router.push(`/interview/case/${result.caseId}`);
+      }
+    } catch (error) {
+      console.error('Failed to create interview case:', error);
     }
   };
 
@@ -365,10 +413,12 @@ function PracticeResultsContent() {
                         {/* Action Buttons */}
                         <div className="space-y-2">
                           <Button
-                            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                            onClick={() => handleStartInterview(category.id)}
+                            disabled={createInterviewCase.isPending}
+                            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
                           >
                             <Play className="w-4 h-4" />
-                            Start Interview
+                            {createInterviewCase.isPending ? 'Creating Case...' : 'Start Interview'}
                           </Button>
                         </div>
                       </>
