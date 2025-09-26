@@ -30,8 +30,11 @@ function PracticeResultsContent() {
   const sessionId = searchParams.get('sessionId');
   const isCreating = searchParams.get('creating') === 'true';
   const creationType = searchParams.get('type'); // 'job' or 'role'
-  const description = searchParams.get('description');
+  const jobId = searchParams.get('jobId');
   const role = searchParams.get('role');
+
+  // For job descriptions, retrieve from sessionStorage to avoid URL encoding issues
+  const description = jobId ? sessionStorage.getItem(jobId) : searchParams.get('description');
 
   // tRPC mutations for creating sessions
   const analyzeJobDescription = api.practice.analyzeJobDescription.useMutation();
@@ -64,12 +67,39 @@ function PracticeResultsContent() {
       try {
         let result;
         if (creationType === 'job' && description) {
+          // Description is already decoded from sessionStorage or needs decoding from URL
+          let decodedDescription: string = description;
+
+          // Only decode if it came from URL (not sessionStorage)
+          if (!jobId && description.includes('%')) {
+            try {
+              decodedDescription = decodeURIComponent(description);
+            } catch (e) {
+              console.warn('Failed to decode description, using raw value:', e);
+              decodedDescription = description.replace(/\+/g, ' ');
+            }
+          }
+
+          // Clean up sessionStorage after use
+          if (jobId) {
+            sessionStorage.removeItem(jobId);
+          }
+
           result = await analyzeJobDescription.mutateAsync({
-            description: decodeURIComponent(description),
+            description: decodedDescription,
           });
         } else if (creationType === 'role' && role) {
+          // Safely decode the role
+          let decodedRole: string;
+          try {
+            decodedRole = decodeURIComponent(role);
+          } catch (e) {
+            console.warn('Failed to decode role, using raw value:', e);
+            decodedRole = role.replace(/\+/g, ' ');
+          }
+
           result = await selectRole.mutateAsync({
-            role: decodeURIComponent(role),
+            role: decodedRole,
           });
         }
 
@@ -112,22 +142,32 @@ function PracticeResultsContent() {
     session?.archetype as ArchetypeWithSkills | null
   );
 
-  // Auto-select first category when categories are loaded
+  // Auto-select first category and appropriate skills when categories are loaded
   useEffect(() => {
     if (session?.archetype && interviewCategories.length > 0) {
       const firstCategory = interviewCategories[0];
       if (firstCategory) {
         setSelectedCategory(firstCategory.id);
-        
-        // Initialize selectedItems for first category if it has items
+
+        // Initialize selectedItems based on category priority
         if (firstCategory.items && firstCategory.items.length > 0) {
-          const firstItem = firstCategory.items[0];
-          if (firstItem) {
-            setSelectedItems(prev => ({
-              ...prev,
-              [firstCategory.id]: [firstItem] // Select first item by default
-            }));
+          let itemsToSelect: string[] = [];
+
+          if (firstCategory.priority === 'CRITICAL') {
+            // For CRITICAL categories, select all items (these are HIGH importance skills)
+            itemsToSelect = firstCategory.items;
+          } else if (firstCategory.priority === 'RECOMMENDED') {
+            // For RECOMMENDED, select up to 3 items
+            itemsToSelect = firstCategory.items.slice(0, 3);
+          } else {
+            // For OPTIONAL, select just the first item
+            itemsToSelect = [firstCategory.items[0]];
           }
+
+          setSelectedItems(prev => ({
+            ...prev,
+            [firstCategory.id]: itemsToSelect
+          }));
         }
       }
     }
@@ -239,17 +279,27 @@ function PracticeResultsContent() {
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
-    // Initialize with at least one item selected if category has items
+    // Initialize skills based on category priority if not already selected
     if (!selectedItems[categoryId]) {
       const category = interviewCategories.find(cat => cat.id === categoryId);
       if (category?.items && category.items.length > 0) {
-        const firstItem = category.items[0];
-        if (firstItem) {
-          setSelectedItems((prev: {[key: string]: string[]}) => ({
-            ...prev,
-            [categoryId]: [firstItem] // Select first item by default
-          }));
+        let itemsToSelect: string[] = [];
+
+        if (category.priority === 'CRITICAL') {
+          // For CRITICAL categories, select all items (these are HIGH importance skills)
+          itemsToSelect = category.items;
+        } else if (category.priority === 'RECOMMENDED') {
+          // For RECOMMENDED, select up to 3 items
+          itemsToSelect = category.items.slice(0, 3);
+        } else {
+          // For OPTIONAL, select just the first item
+          itemsToSelect = [category.items[0]];
         }
+
+        setSelectedItems((prev: {[key: string]: string[]}) => ({
+          ...prev,
+          [categoryId]: itemsToSelect
+        }));
       }
     }
   };
