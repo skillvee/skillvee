@@ -274,6 +274,66 @@ supabase gen types typescript       # Generate TypeScript types
 supabase migration new <name>       # Create new migration
 ```
 
+## AI Integration Architecture
+
+### Folder Structure
+```
+src/server/ai/
+├── providers/          # LLM provider clients (Gemini, OpenAI, etc.)
+│   └── gemini/
+│       ├── client.ts   # Provider initialization & config
+│       ├── types.ts    # Response schemas & interfaces
+│       └── index.ts    # Public exports
+├── prompts/           # Organized prompt templates
+│   ├── practice/      # Feature-specific prompts
+│   │   ├── job-analysis.ts
+│   │   └── case-generation.ts
+│   ├── schemas/       # JSON schemas for structured outputs
+│   └── templates/     # Reusable prompt components
+├── services/          # Business logic & orchestration
+│   └── job-analysis.service.ts
+└── index.ts           # Module exports
+```
+
+### Best Practices for AI Features
+
+1. **Prompt Organization**
+   - Each feature gets its own prompts subfolder
+   - Keep prompts as pure functions that return strings
+   - Include example responses in prompts for better formatting
+   - Use clear section headers and formatting in prompts
+
+2. **Schema Definition**
+   - Define response schemas in provider types.ts
+   - Use TypeScript interfaces matching the schemas
+   - Include validation and fallback handling
+
+3. **Service Layer**
+   - Handle all AI API calls through service functions
+   - Include logging and error handling
+   - Pass context (userId, sessionId) for tracking
+   - Return consistent success/error response format
+
+4. **Adding New AI Features**
+   ```typescript
+   // 1. Create prompt template
+   src/server/ai/prompts/[feature]/[action].ts
+
+   // 2. Define response schema
+   src/server/ai/providers/gemini/types.ts
+
+   // 3. Create service function
+   src/server/ai/services/[feature].service.ts
+
+   // 4. Use in router/API
+   import { analyzeFeature } from "~/server/ai/services/feature.service";
+   ```
+
+5. **Model Configuration**
+   - Use constants for model names (GEMINI_MODELS)
+   - Centralize temperature and token settings
+   - Allow override per feature if needed
+
 ## Production Deployment
 
 - **Vercel Integration**: Automatic deployments on main branch push
