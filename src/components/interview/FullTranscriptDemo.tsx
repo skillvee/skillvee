@@ -31,6 +31,10 @@ export function FullTranscriptDemo() {
   // Get API key from server
   const startConversationMutation = api.ai.startConversation.useMutation();
 
+  // Create demo interview and job description
+  const createDemoJobDescriptionMutation = api.jobDescription.create.useMutation();
+  const createInterviewMutation = api.interview.create.useMutation();
+
   // Listen for transcript events
   useEffect(() => {
     if (!geminiLive.client) return;
@@ -70,21 +74,42 @@ export function FullTranscriptDemo() {
 
   const handleStartSession = async () => {
     try {
-      // Get API key from server (secure)
-      const conversationResponse = await startConversationMutation.mutateAsync({
-        interviewId: 'demo-' + Date.now()
+      // Step 1: Create demo job description
+      const demoJobDescription = await createDemoJobDescriptionMutation.mutateAsync({
+        title: "Senior Data Scientist",
+        company: "TechCorp AI",
+        description: "Join our AI team as a Senior Data Scientist to build cutting-edge machine learning models.",
+        requirements: [
+          "Masters/PhD in Computer Science or related field",
+          "5+ years of experience in data science",
+          "Expert in Python, SQL, and ML frameworks"
+        ],
+        focusAreas: ["Python Programming", "Machine Learning", "Deep Learning", "Statistics", "SQL"],
+        isTemplate: false,
       });
 
+      // Step 2: Create interview
+      const interview = await createInterviewMutation.mutateAsync({
+        jobDescriptionId: demoJobDescription.id,
+        scheduledAt: new Date(),
+      });
+
+      // Step 3: Get API key from server (secure)
+      const conversationResponse = await startConversationMutation.mutateAsync({
+        interviewId: interview.id
+      });
+
+      // Step 4: Setup context
       const context = {
-        interviewId: 'demo-' + Date.now(),
+        interviewId: interview.id,
         jobTitle: 'Senior Data Scientist',
-        companyName: 'Tech Company',
-        focusAreas: ['Python', 'Machine Learning', 'SQL'],
+        companyName: 'TechCorp AI',
+        focusAreas: ['Python', 'Machine Learning', 'SQL', 'Deep Learning'],
         difficulty: 'SENIOR' as const,
         questions: [
           {
             id: '1',
-            questionText: 'Tell me about your experience with machine learning',
+            questionText: 'Tell me about your experience with machine learning and data science',
             questionType: 'experience',
             difficulty: 'medium'
           }
@@ -92,22 +117,22 @@ export function FullTranscriptDemo() {
         currentQuestionIndex: 0
       };
 
-      // Connect with API key from server
+      // Step 5: Connect with API key from server
       await geminiLive.connect(context, conversationResponse.config.apiKey);
 
       console.log('Session connected! Now starting listening and screen recording...');
 
-      // Auto-start listening
+      // Step 6: Auto-start listening
       await geminiLive.startListening();
 
-      // Start screen recording
+      // Step 7: Start screen recording
       try {
         await geminiLive.startScreenRecording();
       } catch (error) {
         console.log('Screen recording not started (user may have declined):', error);
       }
 
-      console.log('Session fully started with transcription and screen recording!');
+      console.log('✅ Session fully started with transcription and screen recording!');
     } catch (error) {
       console.error('Failed to start session:', error);
     }
@@ -167,9 +192,18 @@ export function FullTranscriptDemo() {
           <div className="flex gap-2 flex-wrap">
             <Button
               onClick={handleStartSession}
-              disabled={geminiLive.isConnected || startConversationMutation.isPending}
+              disabled={
+                geminiLive.isConnected ||
+                createDemoJobDescriptionMutation.isPending ||
+                createInterviewMutation.isPending ||
+                startConversationMutation.isPending
+              }
             >
-              {startConversationMutation.isPending ? 'Starting...' : 'Start Session & Connect'}
+              {(createDemoJobDescriptionMutation.isPending ||
+                createInterviewMutation.isPending ||
+                startConversationMutation.isPending)
+                ? 'Setting up...'
+                : 'Start Session & Connect'}
             </Button>
             <Button
               onClick={handleEndSession}
