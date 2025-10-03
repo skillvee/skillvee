@@ -7,7 +7,7 @@ import { env } from "~/env";
 
 export interface GeminiLiveConfig {
   apiKey: string;
-  model: 'models/gemini-2.0-flash-exp' | 'models/gemini-2.5-flash-preview-native-audio-dialog';
+  model: 'models/gemini-2.0-flash-exp' | 'models/gemini-2.5-flash-preview-native-audio-dialog' | 'models/gemini-2.5-flash-native-audio-preview-09-2025';
   responseModalities: ('AUDIO' | 'TEXT')[];
   systemInstruction?: string;
   voice?: 'Puck' | 'Charon' | 'Kore' | 'Fenrir' | 'Aoede';

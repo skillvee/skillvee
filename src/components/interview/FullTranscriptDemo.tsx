@@ -21,8 +21,8 @@ export function FullTranscriptDemo() {
 
   const geminiLive = useGeminiLive({
     config: {
-      model: 'models/gemini-2.0-flash-exp',
-      responseModalities: ['AUDIO'],  // AUDIO-only - TEXT breaks audio streaming
+      model: 'models/gemini-2.5-flash-native-audio-preview-09-2025',  // Native audio model with transcription support
+      responseModalities: ['AUDIO', 'TEXT'],  // Enable both for transcription
       voice: 'Puck',
       systemInstruction: `You are a professional AI interviewer conducting a technical interview.
 
@@ -33,8 +33,8 @@ Guidelines:
 - Keep responses concise (10-30 seconds)
 - Focus on technical accuracy and problem-solving approach
 - Provide constructive feedback when appropriate`,
-      enableInputTranscription: false,  // These flags break audio - need alternative approach
-      enableOutputTranscription: false,
+      enableInputTranscription: true,   // Native audio model supports transcription
+      enableOutputTranscription: true,  // Enable AI speech-to-text
       enableScreenCapture: true,
     },
     onTextReceived: (data) => {
@@ -213,9 +213,9 @@ Guidelines:
     <div className="space-y-6 p-6">
       <Card>
         <CardHeader>
-          <CardTitle>Gemini Live Audio + Screen Recording Demo</CardTitle>
+          <CardTitle>Gemini Live Full Conversation Demo (Native Audio)</CardTitle>
           <CardDescription>
-            Real-time AI interview with audio conversation and screen recording. Note: Gemini Live API transcription flags currently break audio streaming on this model/configuration.
+            Using Gemini 2.5 Flash Native Audio model for real-time conversation with bidirectional transcription + screen recording
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
