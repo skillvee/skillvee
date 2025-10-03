@@ -1,5 +1,4 @@
 import { FullTranscriptDemo } from '~/components/interview/FullTranscriptDemo';
-import { env } from '~/env';
 
 export default function FullTranscriptDemoPage() {
   return (
@@ -11,7 +10,7 @@ export default function FullTranscriptDemoPage() {
         </p>
       </div>
 
-      <FullTranscriptDemo apiKey={env.GOOGLE_GENERATIVE_AI_API_KEY} />
+      <FullTranscriptDemo />
     </div>
   );
 }

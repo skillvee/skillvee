@@ -1,18 +1,15 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGeminiLive } from '~/hooks/useGeminiLive';
 import { ConversationExportService } from '~/server/services/conversation-export.service';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
 import { Separator } from '~/components/ui/separator';
+import { api } from '~/trpc/react';
 
-interface FullTranscriptDemoProps {
-  apiKey: string;
-}
-
-export function FullTranscriptDemo({ apiKey }: FullTranscriptDemoProps) {
+export function FullTranscriptDemo() {
   const [transcripts, setTranscripts] = useState<Array<{
     speaker: 'user' | 'ai';
     text: string;
@@ -31,29 +28,53 @@ export function FullTranscriptDemo({ apiKey }: FullTranscriptDemoProps) {
     }
   });
 
+  // Get API key from server
+  const startConversationMutation = api.ai.startConversation.useMutation();
+
   // Listen for transcript events
-  geminiLive.client?.on('user-transcript', (data: any) => {
-    setTranscripts(prev => [...prev, {
-      speaker: 'user',
-      text: data.transcript,
-      timestamp: data.timestamp
-    }]);
-  });
+  useEffect(() => {
+    if (!geminiLive.client) return;
 
-  geminiLive.client?.on('ai-transcript', (data: any) => {
-    setTranscripts(prev => [...prev, {
-      speaker: 'ai',
-      text: data.transcript,
-      timestamp: data.timestamp
-    }]);
-  });
+    const handleUserTranscript = (data: any) => {
+      console.log('User transcript:', data);
+      setTranscripts(prev => [...prev, {
+        speaker: 'user',
+        text: data.transcript,
+        timestamp: data.timestamp
+      }]);
+    };
 
-  geminiLive.client?.on('screen-capture', () => {
-    setScreenshots(prev => prev + 1);
-  });
+    const handleAITranscript = (data: any) => {
+      console.log('AI transcript:', data);
+      setTranscripts(prev => [...prev, {
+        speaker: 'ai',
+        text: data.transcript,
+        timestamp: data.timestamp
+      }]);
+    };
+
+    const handleScreenCapture = () => {
+      setScreenshots(prev => prev + 1);
+    };
+
+    geminiLive.client.on('user-transcript', handleUserTranscript);
+    geminiLive.client.on('ai-transcript', handleAITranscript);
+    geminiLive.client.on('screen-capture', handleScreenCapture);
+
+    return () => {
+      geminiLive.client?.off?.('user-transcript', handleUserTranscript);
+      geminiLive.client?.off?.('ai-transcript', handleAITranscript);
+      geminiLive.client?.off?.('screen-capture', handleScreenCapture);
+    };
+  }, [geminiLive.client]);
 
   const handleStartSession = async () => {
     try {
+      // Get API key from server (secure)
+      const conversationResponse = await startConversationMutation.mutateAsync({
+        interviewId: 'demo-' + Date.now()
+      });
+
       const context = {
         interviewId: 'demo-' + Date.now(),
         jobTitle: 'Senior Data Scientist',
@@ -71,22 +92,24 @@ export function FullTranscriptDemo({ apiKey }: FullTranscriptDemoProps) {
         currentQuestionIndex: 0
       };
 
-      await geminiLive.connect(context, apiKey);
+      // Connect with API key from server
+      await geminiLive.connect(context, conversationResponse.config.apiKey);
 
-      // Start screen recording automatically
-      await geminiLive.startScreenRecording();
+      console.log('Session connected! Now starting listening and screen recording...');
 
-      console.log('Session started with full transcription and screen recording!');
+      // Auto-start listening
+      await geminiLive.startListening();
+
+      // Start screen recording
+      try {
+        await geminiLive.startScreenRecording();
+      } catch (error) {
+        console.log('Screen recording not started (user may have declined):', error);
+      }
+
+      console.log('Session fully started with transcription and screen recording!');
     } catch (error) {
       console.error('Failed to start session:', error);
-    }
-  };
-
-  const handleStartListening = async () => {
-    try {
-      await geminiLive.startListening();
-    } catch (error) {
-      console.error('Failed to start listening:', error);
     }
   };
 
@@ -144,22 +167,9 @@ export function FullTranscriptDemo({ apiKey }: FullTranscriptDemoProps) {
           <div className="flex gap-2 flex-wrap">
             <Button
               onClick={handleStartSession}
-              disabled={geminiLive.isConnected}
+              disabled={geminiLive.isConnected || startConversationMutation.isPending}
             >
-              Start Session
-            </Button>
-            <Button
-              onClick={handleStartListening}
-              disabled={!geminiLive.isConnected || geminiLive.isListening}
-            >
-              Start Listening
-            </Button>
-            <Button
-              onClick={geminiLive.stopListening}
-              disabled={!geminiLive.isListening}
-              variant="outline"
-            >
-              Stop Listening
+              {startConversationMutation.isPending ? 'Starting...' : 'Start Session & Connect'}
             </Button>
             <Button
               onClick={handleEndSession}
