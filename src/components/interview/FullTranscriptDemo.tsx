@@ -139,6 +139,12 @@ export function FullTranscriptDemo() {
       }
 
       console.log('✅ Session fully started with transcription and screen recording!');
+
+      // Step 8: Send initial greeting to trigger AI response (crucial!)
+      setTimeout(() => {
+        geminiLive.sendInitialGreeting();
+        console.log('🎬 Initial greeting sent - AI should respond now!');
+      }, 500);
     } catch (error) {
       console.error('Failed to start session:', error);
     }
