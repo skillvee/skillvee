@@ -44,8 +44,11 @@ function PracticeResultsContent() {
   // Load session data (either existing or newly created)
   const activeSessionId = createdSessionId || sessionId;
   const { data: session, isLoading: sessionLoading, error: sessionError } = api.practice.getSession.useQuery(
-    { sessionId: activeSessionId! },
-    { enabled: !!activeSessionId }
+    { sessionId: activeSessionId || '' },
+    {
+      enabled: !!activeSessionId,
+      retry: false
+    }
   );
 
   // Redirect to sign-in if not authenticated

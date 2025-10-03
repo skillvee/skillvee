@@ -9,24 +9,24 @@ import { Button } from '~/components/ui/button';
 import { Badge } from '~/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible';
-import {
-  Trophy,
-  Target,
-  TrendingUp,
-  CheckCircle,
-  Lightbulb,
-  MessageSquare,
-  Brain,
-  BarChart3,
-  Users,
-  Star,
-  Rocket,
-  FileText,
-  Zap,
-  ChevronRight,
-  X,
+import { 
+  Trophy, 
+  Target, 
+  TrendingUp, 
+  CheckCircle, 
+  Lightbulb, 
+  MessageSquare, 
+  Brain, 
+  BarChart3, 
+  Users, 
+  Star, 
+  Rocket, 
+  FileText, 
+  Zap, 
+  ChevronRight, 
+  X, 
   Sparkles,
-  Play
+  Play 
 } from 'lucide-react';
 
 function PracticeFeedbackContent() {
@@ -158,21 +158,21 @@ function PracticeFeedbackContent() {
         {showCelebrationAlert && (
           <div className="animate-fade-in">
             <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20 rounded-lg p-3 md:p-4">
-              <button
-                onClick={() => setShowCelebrationAlert(false)}
-                className="absolute right-2 top-2 p-1 rounded-md hover:bg-muted/50 transition-colors"
+              <button 
+                onClick={() => setShowCelebrationAlert(false)} 
+                className="absolute right-2 top-2 p-1 rounded-md hover:bg-muted/50 transition-colors" 
                 aria-label="Dismiss alert"
               >
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
-
+              
               <div className="flex items-start gap-3 md:gap-4">
                 <div className="flex-shrink-0">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                     <Sparkles className="w-5 h-5 text-primary" />
                   </div>
                 </div>
-
+                
                 <div className="flex-1 space-y-2">
                   <div>
                     <h3 className="text-sm md:text-base font-semibold">
@@ -182,7 +182,7 @@ function PracticeFeedbackContent() {
                       While you were focused on performing, we were busy certifying your skills. Now, if you'd like, we can put those skills to work—by applying you to high-fit job opportunities while you sleep. And yes, it's completely free.
                     </p>
                   </div>
-
+                  
                   <div className="flex flex-wrap gap-2 pt-1">
                     <Button size="sm" className="bg-primary hover:bg-primary/90">
                       Complete Profile & Get Matched
@@ -238,7 +238,7 @@ function PracticeFeedbackContent() {
                       <span className="text-lg font-semibold text-gray-400">{currentAssessment.performanceLabel}</span>
                     </div>
                   </div>
-
+                  
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <h5 className="text-base font-bold text-gray-900 mb-2 flex items-center gap-1">
@@ -413,6 +413,165 @@ function PracticeFeedbackContent() {
                 </div>
 
                 {/* Legend */}
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                          {[4, 5].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl">
+                        <span className="text-sm flex-1">Hypothesis Testing</span>
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                          {[4, 5].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl">
+                        <span className="text-sm flex-1">A/B Testing</span>
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                          {[4, 5].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl">
+                        <span className="text-sm flex-1">Experimental Design</span>
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                          {[4, 5].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                        </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="w-4 h-4 text-gray-600" />
+                      <span className="font-medium text-sm">Product & Business Sense</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl">
+                        <span className="text-sm flex-1">User Analysis</span>
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                          {[4, 5].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl">
+                        <span className="text-sm flex-1">Product Analysis</span>
+                        <div className="flex gap-0.5">
+                          {[1, 2].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                          {[3, 4, 5].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl">
+                        <div className="flex items-center gap-2 flex-1">
+                          <span className="text-sm">User Experience</span>
+                          <span className="text-xs text-orange-600 font-medium">↑ Focus</span>
+                        </div>
+                        <div className="flex gap-0.5">
+                          {[1, 2].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                          {[3, 4, 5].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl">
+                        <div className="flex items-center gap-2 flex-1">
+                          <span className="text-sm">Business Strategy</span>
+                          <span className="text-xs text-orange-600 font-medium">↑ Focus</span>
+                        </div>
+                        <div className="flex gap-0.5">
+                          {[1, 2].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                          {[3, 4, 5].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* System Design & Architecture */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Brain className="w-4 h-4 text-gray-600" />
+                      <span className="font-medium text-sm">System Design & Architecture</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl">
+                        <span className="text-sm flex-1">Data Pipeline Design</span>
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                          {[4, 5].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl">
+                        <span className="text-sm flex-1">Data Architecture</span>
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                          {[4, 5].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl">
+                        <span className="text-sm flex-1">Scalability Design</span>
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                          {[4, 5].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl">
+                        <div className="flex items-center gap-2 flex-1">
+                          <span className="text-sm">Real-time Processing</span>
+                          <span className="text-xs text-orange-600 font-medium">↑ Focus</span>
+                        </div>
+                        <div className="flex gap-0.5">
+                          {[1, 2].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                          {[3, 4, 5].map(star => (
+                            <Star key={star} className="w-3 h-3 fill-blue-500 text-blue-500" />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Legend */}
                 <div className="mt-6 flex gap-6 justify-center text-xs pt-4">
                   <div className="flex items-center gap-2">
                     <div className="flex gap-0.5">
@@ -435,30 +594,26 @@ function PracticeFeedbackContent() {
                   Interview Recording
                 </CardTitle>
                 <CardDescription>
-                  Duration: {Math.floor((currentAssessment.videoDurationSeconds || 0) / 60)}:{((currentAssessment.videoDurationSeconds || 0) % 60).toString().padStart(2, '0')}
+                  Your 23-minute Product Manager interview session
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-                  {currentAssessment.videoUrl ? (
-                    <video
-                      src={currentAssessment.videoUrl}
-                      controls
-                      className="w-full h-full rounded-lg"
-                    />
-                  ) : (
-                    <div className="text-center space-y-4">
-                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                        <MessageSquare className="w-8 h-8 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-lg mb-2">Interview Video Player</p>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          No recording available for this interview
-                        </p>
-                      </div>
+                  <div className="text-center space-y-4">
+                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                      <MessageSquare className="w-8 h-8 text-primary" />
                     </div>
-                  )}
+                    <div>
+                      <p className="font-medium text-lg mb-2">Interview Video Player</p>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Duration: 23:42 | Case: Meta Commons PM Interview
+                      </p>
+                      <button className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-gray-100 text-gray-900 border border-gray-300 rounded-md shadow-sm transition-colors">
+                        <Play className="w-4 h-4" />
+                        Play Recording
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -477,23 +632,126 @@ function PracticeFeedbackContent() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border border-gray-200">
-                  <h3 className="text-xl font-bold text-primary mb-4">{currentAssessment.case?.caseTitle || "Interview Case"}</h3>
+                  <h3 className="text-xl font-bold text-primary mb-4">Product Manager</h3>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Review and understand the assessment case and questions.
+                  </p>
+                  
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-semibold mb-2">Case Context</h4>
+                      <h4 className="font-semibold mb-2">Role & Context</h4>
                       <p className="text-sm leading-relaxed">
-                        {currentAssessment.case?.caseContext || "No context available"}
+                        You are a Senior Product Manager at Meta, focused on evolving the social interaction features within 
+                        the core Facebook app, specifically enhancing the "Rooms" product to incorporate elements of persistent 
+                        community spaces leveraging emerging technologies like AI and enhanced spatial audio. Your goal 
+                        is to increase sustained user engagement and build thriving communities within these spaces.
                       </p>
                     </div>
+                    
+                    <div>
+                      <h4 className="font-semibold mb-2">Product Overview</h4>
+                      <p className="text-sm leading-relaxed">
+                        The "Rooms" product currently allows users to create temporary video chat rooms. The new initiative, 
+                        codenamed "Commons," aims to enable users to create personalized, persistent digital spaces where 
+                        communities can gather asynchronously and synchronously, utilizing new interactive features powered by AI 
+                        (e.g., AI companions, generative content) and spatial audio for a more immersive experience.
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold mb-2">Challenge</h4>
+                      <p className="text-sm leading-relaxed text-orange-600">
+                        Despite initial excitement about the new features, user retention within these persistent spaces after the first 
+                        week is lower than anticipated. You have access to various data sources to understand user behavior.
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-                    {currentAssessment.case?.caseData && (
-                      <div>
-                        <h4 className="font-semibold mb-2">Additional Information</h4>
-                        <pre className="text-sm bg-gray-50 p-3 rounded overflow-x-auto">
-                          {JSON.stringify(currentAssessment.case.caseData, null, 2)}
-                        </pre>
-                      </div>
-                    )}
+                {/* Database Schema */}
+                <div className="space-y-4">
+                  <h4 className="font-semibold">Available Data Sources</h4>
+                  
+                  {/* Commons Spaces Table */}
+                  <div className="border border-gray-200 rounded-lg p-4 bg-card">
+                    <h5 className="font-medium mb-3 text-primary">Table: commons_spaces</h5>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left py-2 px-3 font-medium">Column</th>
+                            <th className="text-left py-2 px-3 font-medium">Description</th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-muted-foreground">
+                          <tr className="border-b">
+                            <td className="py-2 px-3 font-mono text-xs">space_id</td>
+                            <td className="py-2 px-3">Unique identifier for the space</td>
+                          </tr>
+                          <tr className="border-b">
+                            <td className="py-2 px-3 font-mono text-xs">creator_user_id</td>
+                            <td className="py-2 px-3">User ID who created the space</td>
+                          </tr>
+                          <tr className="border-b">
+                            <td className="py-2 px-3 font-mono text-xs">creation_date</td>
+                            <td className="py-2 px-3">Date the space was created</td>
+                          </tr>
+                          <tr className="border-b">
+                            <td className="py-2 px-3 font-mono text-xs">space_type</td>
+                            <td className="py-2 px-3">Type of space (e.g., 'private', 'public', 'group')</td>
+                          </tr>
+                          <tr className="border-b">
+                            <td className="py-2 px-3 font-mono text-xs">theme</td>
+                            <td className="py-2 px-3">Custom theme/template applied</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 px-3 font-mono text-xs">capacity</td>
+                            <td className="py-2 px-3">Maximum number of concurrent users</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Space Sessions Table */}
+                  <div className="border border-gray-200 rounded-lg p-4 bg-card">
+                    <h5 className="font-medium mb-3 text-primary">Table: space_sessions</h5>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left py-2 px-3 font-medium">Column</th>
+                            <th className="text-left py-2 px-3 font-medium">Description</th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-muted-foreground">
+                          <tr className="border-b">
+                            <td className="py-2 px-3 font-mono text-xs">session_id</td>
+                            <td className="py-2 px-3">Unique identifier for the user session in a space</td>
+                          </tr>
+                          <tr className="border-b">
+                            <td className="py-2 px-3 font-mono text-xs">space_id</td>
+                            <td className="py-2 px-3">Identifier of the space visited</td>
+                          </tr>
+                          <tr className="border-b">
+                            <td className="py-2 px-3 font-mono text-xs">user_id</td>
+                            <td className="py-2 px-3">User ID who visited</td>
+                          </tr>
+                          <tr className="border-b">
+                            <td className="py-2 px-3 font-mono text-xs">start_time</td>
+                            <td className="py-2 px-3">Timestamp when the session started</td>
+                          </tr>
+                          <tr className="border-b">
+                            <td className="py-2 px-3 font-mono text-xs">end_time</td>
+                            <td className="py-2 px-3">Timestamp when the session ended (NULL if ongoing)</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 px-3 font-mono text-xs">duration_seconds</td>
+                            <td className="py-2 px-3">Length of the session in seconds (calculated)</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -502,20 +760,5 @@ function PracticeFeedbackContent() {
         </Tabs>
       </div>
     </div>
-  );
-}
-
-export default function PracticeFeedbackPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    }>
-      <PracticeFeedbackContent />
-    </Suspense>
   );
 }

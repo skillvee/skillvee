@@ -9,22 +9,26 @@ datasource db {
 }
 
 model User {
-  id               String                @id @default(cuid())
-  clerkId          String                @unique
-  email            String                @unique
-  firstName        String?
-  lastName         String?
-  profileImage     String?
-  createdAt        DateTime              @default(now())
-  updatedAt        DateTime              @updatedAt
-  deletedAt        DateTime?
-  role             UserRole              @default(INTERVIEWER)
-  geminiApiLogs    GeminiApiLog[]
-  interviewNotes   InterviewNote[]
-  interviews       Interview[]
-  jobDescriptions  JobDescription[]
-  practiceSessions PracticeSession[]
-  skillAssessments UserSkillAssessment[]
+  id                 String              @id @default(cuid())
+  clerkId            String              @unique
+  email              String              @unique
+  firstName          String?
+  lastName           String?
+  profileImage       String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  deletedAt          DateTime?
+  role               UserRole            @default(INTERVIEWER)
+  educations         Education[]
+  geminiApiLogs      GeminiApiLog[]
+  interviewNotes     InterviewNote[]
+  interviews         Interview[]
+  jobDescriptions    JobDescription[]
+  practiceSessions   PracticeSession[]
+  profileSkillScores ProfileSkillScore[]
+  userProfile        UserProfile?
+  userRoleFits       UserRoleFit[]
+  workExperiences    WorkExperience[]
 
   @@index([clerkId])
   @@index([email])
@@ -60,34 +64,32 @@ model JobDescription {
 }
 
 model Interview {
-  id                   String                @id @default(cuid())
-  userId               String
-  jobDescriptionId     String
-  status               InterviewStatus       @default(SCHEDULED)
-  scheduledAt          DateTime?
-  startedAt            DateTime?
-  completedAt          DateTime?
-  duration             Int?
-  geminiSessionId      String?
-  notes                String?
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  deletedAt            DateTime?
-  endedAt              DateTime?
-  geminiConfig         String?
-  focusDomainId        String?
-  practiceSessionId    String?
-  interview_case_id    String?
-  assessment           Assessment?
-  interviewNotes       InterviewNote[]
-  interviewSkills      InterviewSkill[]
-  focusDomain          SkillDomain?          @relation(fields: [focusDomainId], references: [id])
-  jobDescription       JobDescription        @relation(fields: [jobDescriptionId], references: [id])
-  practiceSession      PracticeSession?      @relation(fields: [practiceSessionId], references: [id])
-  user                 User                  @relation(fields: [userId], references: [id])
-  mediaRecordings      MediaRecording[]
-  questions            Question[]
-  userSkillAssessments UserSkillAssessment[]
+  id                String           @id @default(cuid())
+  userId            String
+  jobDescriptionId  String
+  status            InterviewStatus  @default(SCHEDULED)
+  scheduledAt       DateTime?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  duration          Int?
+  geminiSessionId   String?
+  notes             String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+  endedAt           DateTime?
+  geminiConfig      String?
+  focusDomainId     String?
+  practiceSessionId String?
+  interview_case_id String?
+  interviewNotes    InterviewNote[]
+  interviewSkills   InterviewSkill[]
+  focusDomain       SkillDomain?     @relation(fields: [focusDomainId], references: [id])
+  jobDescription    JobDescription   @relation(fields: [jobDescriptionId], references: [id])
+  practiceSession   PracticeSession? @relation(fields: [practiceSessionId], references: [id])
+  user              User             @relation(fields: [userId], references: [id])
+  mediaRecordings   MediaRecording[]
+  questions         Question[]
 
   @@index([userId])
   @@index([jobDescriptionId])
@@ -124,24 +126,65 @@ model Question {
   @@map("questions")
 }
 
-model Assessment {
-  id                   String    @id @default(cuid())
-  interviewId          String    @unique
-  overallScore         Int
-  technicalScore       Int
-  communicationScore   Int
-  problemSolvingScore  Int
-  strengthsAnalysis    String
-  improvementAreas     String
-  detailedFeedback     String
-  recommendedNextSteps String
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
-  interview            Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+model InterviewAssessment {
+  id                        String                 @id @default(cuid())
+  userId                    String
+  interviewId               String                 @unique
+  caseId                    String
+  overallScore              Int
+  performanceLabel          String
+  whatYouDidBest            String
+  topOpportunitiesForGrowth String
+  videoUrl                  String?
+  videoDurationSeconds      Int?
+  videoThumbnailUrl         String?
+  startedAt                 DateTime
+  completedAt               DateTime
+  interviewDurationSeconds  Int
+  createdAt                 DateTime?              @default(now())
+  updatedAt                 DateTime?              @default(now()) @updatedAt
+  feedbackItems             AssessmentFeedback[]
+  skillScores               AssessmentSkillScore[]
 
-  @@index([interviewId])
-  @@index([overallScore])
-  @@map("assessments")
+  @@index([userId])
+  @@map("InterviewAssessment")
+}
+
+model AssessmentFeedback {
+  id                 String              @id @default(cuid())
+  assessmentId       String
+  feedbackType       String
+  timestampDisplay   String
+  timestampSeconds   Int
+  behaviorTitle      String
+  whatYouDid         String
+  whyItWorked        String?
+  whatWasMissing     String?
+  actionableNextStep String?
+  impactStatement    String
+  displayOrder       Int
+  createdAt          DateTime?           @default(now())
+  assessment         InterviewAssessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@index([assessmentId])
+  @@map("AssessmentFeedback")
+}
+
+model AssessmentSkillScore {
+  id            String              @id @default(cuid())
+  assessmentId  String
+  skillId       String
+  skillScore    Int
+  categoryOrder Int
+  skillOrder    Int
+  createdAt     DateTime?           @default(now())
+  assessment    InterviewAssessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  skill         Skill               @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([assessmentId, skillId])
+  @@index([assessmentId])
+  @@index([skillId])
+  @@map("AssessmentSkillScore")
 }
 
 model MediaRecording {
@@ -233,17 +276,18 @@ model SkillDomain {
 }
 
 model Skill {
-  id                   String                @id @default(cuid())
+  id                   String                 @id @default(cuid())
   name                 String
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
   deletedAt            DateTime?
   domainId             String
-  interviewSkills      InterviewSkill[]
-  roleSkillMappings    RoleSkillMapping[]
-  skillLevels          SkillLevel[]
-  domain               SkillDomain           @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  userSkillAssessments UserSkillAssessment[]
+  assessmentSkillScores AssessmentSkillScore[]
+  interviewSkills       InterviewSkill[]
+  profileSkillScores    ProfileSkillScore[]
+  roleSkillMappings     RoleSkillMapping[]
+  skillLevels           SkillLevel[]
+  domain                SkillDomain            @relation(fields: [domainId], references: [id], onDelete: Cascade)
 
   @@unique([domainId, name])
   @@index([domainId])
@@ -307,29 +351,6 @@ model InterviewSkill {
   @@index([skillId])
   @@index([deletedAt])
   @@map("interview_skills")
-}
-
-model UserSkillAssessment {
-  id             String     @id @default(cuid())
-  userId         String
-  skillId        String
-  currentLevel   Int?
-  assessmentDate DateTime   @default(now())
-  interviewId    String?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  deletedAt      DateTime?
-  interview      Interview? @relation(fields: [interviewId], references: [id])
-  skill          Skill      @relation(fields: [skillId], references: [id], onDelete: Cascade)
-  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, skillId, interviewId])
-  @@index([userId])
-  @@index([skillId])
-  @@index([interviewId])
-  @@index([currentLevel])
-  @@index([deletedAt])
-  @@map("user_skill_assessments")
 }
 
 model PracticeSession {
@@ -420,6 +441,122 @@ model GeminiApiLog {
   @@map("gemini_api_logs")
 }
 
+model Company {
+  id              String           @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name            String           @unique
+  logo            String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now()) @updatedAt
+  workExperiences WorkExperience[]
+
+  @@index([name])
+  @@map("companies")
+}
+
+model Institution {
+  id         String      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  name       String      @unique
+  logo       String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @default(now()) @updatedAt
+  educations Education[]
+
+  @@index([name])
+  @@map("institutions")
+}
+
+model UserProfile {
+  id           String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId       String   @unique
+  currentTitle String?
+  location     String?
+  summary      String?
+  linkedinUrl  String?
+  githubUrl    String?
+  portfolioUrl String?
+  isPublic     Boolean  @default(false)
+  profileSlug  String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([profileSlug], map: "user_profiles_profileslug_idx")
+  @@map("user_profiles")
+}
+
+model UserRoleFit {
+  id           String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId       String
+  roleTitle    String
+  fitLevel     FitLevel
+  displayOrder Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([userId, displayOrder], map: "user_role_fits_userid_displayorder_idx")
+  @@map("user_role_fits")
+}
+
+model ProfileSkillScore {
+  id        String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId    String
+  skillId   String
+  score     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([userId, skillId])
+  @@index([userId], map: "profile_skill_scores_userid_idx")
+  @@map("profile_skill_scores")
+}
+
+model WorkExperience {
+  id           String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId       String
+  companyId    String
+  title        String
+  startDate    DateTime
+  endDate      DateTime?
+  description  String
+  tags         String[]  @default([])
+  location     String?
+  displayOrder Int
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user         User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([userId, displayOrder], map: "work_experiences_userid_displayorder_idx")
+  @@map("work_experiences")
+}
+
+model Education {
+  id            String      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId        String
+  institutionId String
+  degree        String
+  fieldOfStudy  String
+  startYear     Int
+  endYear       Int?
+  description   String?
+  displayOrder  Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @default(now()) @updatedAt
+  institution   Institution @relation(fields: [institutionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user          User        @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([userId, displayOrder], map: "educations_userid_displayorder_idx")
+  @@map("educations")
+}
+
+enum FeedbackType {
+  STRENGTH
+  GROWTH_AREA
+}
+
 enum InterviewStatus {
   SCHEDULED
   IN_PROGRESS
@@ -476,4 +613,11 @@ enum SkillImportance {
   LOW
   MEDIUM
   HIGH
+}
+
+enum FitLevel {
+  VERY_HIGH
+  HIGH
+  MEDIUM
+  LOW
 }

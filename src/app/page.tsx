@@ -6,7 +6,7 @@ import { HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import { CheckCircle, MessageSquare, Users, Target, TrendingUp, BarChart, Brain, Database, Award, Star, ArrowRight, Sparkles } from "lucide-react";
+import { CheckCircle, MessageSquare, Users, Target, TrendingUp, BarChart, Brain, Database, Award, Star, ArrowRight, Sparkles, FileText, Bot, UserX, Zap } from "lucide-react";
 import HeroLottie from "~/components/hero-lottie";
 import Navigation from "~/components/navigation";
 
@@ -62,13 +62,6 @@ export default async function Home() {
                     Practice with realistic, AI-powered interviews tailored to your target company and role — and unlock new job opportunities along the way.
                   </p>
 
-                  {/* Live Stats */}
-                  <div className="flex flex-wrap gap-6 justify-center lg:justify-start animate-fade-in-delay-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-sm font-medium text-gray-700">2,847 practice sessions this week</span>
-                    </div>
-                  </div>
 
                   <div className="space-y-2 animate-fade-in-delay-2">
                     <div className="flex items-start space-x-3 group hover:translate-x-2 transition-transform duration-300 justify-center lg:justify-start">
@@ -131,6 +124,19 @@ export default async function Home() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Social Proof Banner */}
+        <section className="py-6 bg-gradient-to-r from-blue-50 to-blue-100 border-y border-blue-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="text-center">
+              <p className="text-sm sm:text-base font-medium text-gray-700">
+                Join <span className="font-bold text-blue-600">500+ professionals</span> on early access
+                <span className="mx-2 text-gray-400">•</span>
+                Backed by <a href="https://web.startx.com/" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:text-blue-700 hover:underline">Stanford StartX</a>
+              </p>
             </div>
           </div>
         </section>
@@ -248,114 +254,127 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* The Broken Hiring Game */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-white">
+        {/* The Broken Hiring Game - Visual Flow */}
+        <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-white to-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-16 sm:mb-20">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
                 The Broken Hiring Game
               </h2>
               <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-                Everyone's using AI, but nobody's getting hired. Here's why the current system doesn't work.
+                Everyone's using AI, but nobody's getting hired. See the vicious cycle.
               </p>
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              {/* Problem Side */}
-              <div className="space-y-8">
-                <div className="text-center lg:text-left">
-                  <h3 className="text-2xl font-bold text-red-600 mb-6">The Problem</h3>
-                </div>
-                
-                <div className="space-y-6">
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <span className="text-white font-bold text-sm">1</span>
+            {/* Visual Flow Diagram */}
+            <div className="relative max-w-5xl mx-auto">
+              {/* The Broken Cycle */}
+              <div className="mb-20">
+                <h3 className="text-2xl font-bold text-center mb-12 text-gray-900">The Current Reality</h3>
+                <div className="relative">
+                  {/* Cycle container */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                    {/* Step 1: AI Resumes */}
+                    <div className="relative group">
+                      <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 h-full hover:shadow-lg transition-all duration-300">
+                        <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mb-4 mx-auto">
+                          <FileText className="w-8 h-8 text-white" />
+                        </div>
+                        <h4 className="font-bold text-lg text-gray-900 text-center mb-2">AI Resumes</h4>
+                        <p className="text-sm text-gray-600 text-center">
+                          Everyone uses ChatGPT to create "perfect" resumes
+                        </p>
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-red-900 mb-2">AI Resume War</h4>
-                        <p className="text-red-800 text-sm">
-                          Everyone creates AI-generated resumes with perfect keywords and inflated experiences
+                      {/* Arrow to next */}
+                      <div className="hidden md:block absolute top-1/2 -right-7 transform -translate-y-1/2 z-10">
+                        <ArrowRight className="w-8 h-8 text-red-500 animate-pulse" />
+                      </div>
+                    </div>
+
+                    {/* Step 2: AI Screening */}
+                    <div className="relative group">
+                      <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 h-full hover:shadow-lg transition-all duration-300">
+                        <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mb-4 mx-auto">
+                          <Bot className="w-8 h-8 text-white" />
+                        </div>
+                        <h4 className="font-bold text-lg text-gray-900 text-center mb-2">AI vs AI Battle</h4>
+                        <p className="text-sm text-gray-600 text-center">
+                          Companies use AI to filter out AI-generated resumes
+                        </p>
+                      </div>
+                      {/* Arrow to next */}
+                      <div className="hidden md:block absolute top-1/2 -right-7 transform -translate-y-1/2 z-10">
+                        <ArrowRight className="w-8 h-8 text-red-500 animate-pulse" />
+                      </div>
+                    </div>
+
+                    {/* Step 3: Nobody Wins */}
+                    <div className="relative group">
+                      <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 h-full hover:shadow-lg transition-all duration-300">
+                        <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mb-4 mx-auto">
+                          <UserX className="w-8 h-8 text-white" />
+                        </div>
+                        <h4 className="font-bold text-lg text-gray-900 text-center mb-2">Real Talent Lost</h4>
+                        <p className="text-sm text-gray-600 text-center">
+                          Companies struggle to find the best talent. Great candidates don't get seen
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <span className="text-white font-bold text-sm">2</span>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-red-900 mb-2">AI Resume Screeners</h4>
-                        <p className="text-red-800 text-sm">
-                          Companies use AI to filter resumes, creating an endless AI vs AI battle
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <span className="text-white font-bold text-sm">3</span>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-red-900 mb-2">Nobody Gets Hired</h4>
-                        <p className="text-red-800 text-sm">
-                          Real talent gets lost in the noise. The best candidates never get noticed.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
 
-              {/* Solution Side */}
-              <div className="space-y-8">
-                <div className="text-center lg:text-left">
-                  <h3 className="text-2xl font-bold text-green-600 mb-6">SkillVee's Solution</h3>
-                </div>
-                
-                <div className="space-y-6">
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <CheckCircle className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-green-900 mb-2">Skill Validation Over Resumes</h4>
-                        <p className="text-green-800 text-sm">
-                          Prove your abilities through real interviews, not keyword-stuffed documents
+              {/* The Solution */}
+              <div>
+                <h3 className="text-2xl font-bold text-center mb-12 text-gray-900">
+                  SkillVee Breaks the Cycle
+                </h3>
+                <div className="relative">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {/* Step 1: Practice */}
+                    <div className="relative group">
+                      <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 h-full hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                        <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-4 mx-auto">
+                          <Brain className="w-8 h-8 text-white" />
+                        </div>
+                        <h4 className="font-bold text-lg text-gray-900 text-center mb-2">Prep Interviews</h4>
+                        <p className="text-sm text-gray-600 text-center">
+                          Become your best through realistic interview simulations
                         </p>
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <CheckCircle className="w-5 h-5 text-white" />
+                      {/* Arrow to next */}
+                      <div className="hidden md:block absolute top-1/2 -right-7 transform -translate-y-1/2 z-10">
+                        <ArrowRight className="w-8 h-8 text-blue-500" />
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-green-900 mb-2">Direct Company Access</h4>
-                        <p className="text-green-800 text-sm">
-                          Companies request top performers directly, bypassing the broken application process
+                    </div>
+
+                    {/* Step 2: Validate */}
+                    <div className="relative group">
+                      <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 h-full hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                        <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-4 mx-auto">
+                          <Award className="w-8 h-8 text-white" />
+                        </div>
+                        <h4 className="font-bold text-lg text-gray-900 text-center mb-2">Get Verified</h4>
+                        <p className="text-sm text-gray-600 text-center">
+                          Effortlessly build a profile companies trust
                         </p>
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <CheckCircle className="w-5 h-5 text-white" />
+                      {/* Arrow to next */}
+                      <div className="hidden md:block absolute top-1/2 -right-7 transform -translate-y-1/2 z-10">
+                        <ArrowRight className="w-8 h-8 text-blue-500" />
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-green-900 mb-2">Merit-Based Matching</h4>
-                        <p className="text-green-800 text-sm">
-                          Your proven skills speak louder than any resume. Companies find you, not the other way around.
+                    </div>
+
+                    {/* Step 3: Get Hired */}
+                    <div className="relative group">
+                      <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 h-full hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                        <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-4 mx-auto">
+                          <Zap className="w-8 h-8 text-white" />
+                        </div>
+                        <h4 className="font-bold text-lg text-gray-900 text-center mb-2">Companies Find You</h4>
+                        <p className="text-sm text-gray-600 text-center">
+                          Skip the resume pile entirely
                         </p>
                       </div>
                     </div>
@@ -365,21 +384,21 @@ export default async function Home() {
             </div>
 
             <div className="mt-16 text-center">
-              <div className="bg-blue-600 rounded-2xl p-8 text-white">
-                <h4 className="text-xl font-bold mb-4">Ready to break free from the broken system?</h4>
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white max-w-3xl mx-auto">
+                <h4 className="text-xl sm:text-2xl font-bold mb-4">Ready to escape the AI resume wars?</h4>
                 <p className="text-blue-100 mb-6">
-                  Join thousands of data scientists who've escaped the resume game and landed their dream jobs
+                  Join data scientists who are getting hired based on real skills, not keyword games
                 </p>
                 {user ? (
                   <Link href="/practice">
-                    <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-50 font-semibold">
-                      Start Validating Your Skills
+                    <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-50 font-semibold shadow-lg">
+                      Start Practicing Now
                     </Button>
                   </Link>
                 ) : (
                   <SignUpButton>
-                    <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-50 font-semibold">
-                      Start Validating Your Skills
+                    <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-50 font-semibold shadow-lg">
+                      Start Practicing Now
                     </Button>
                   </SignUpButton>
                 )}
@@ -388,158 +407,224 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* How It Works section - Zigzag Layout */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-white overflow-hidden">
+        {/* How It Works section - Video Featured */}
+        <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-white to-gray-50 overflow-visible">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-16 sm:mb-20">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
                 How It Works
               </h2>
               <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
                 Land your dream data science role in 3 proven steps
               </p>
             </div>
-            
-            {/* Step 1 - Left content, Right visual */}
-            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 mb-20">
-              <div className="lg:w-1/2 space-y-6">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
-                    1
+          </div>
+
+          {/* Step 1 - Practice Like It's Real */}
+          <div className="mb-24 lg:mb-32">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 lg:pl-6">
+              <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+                <div className="w-full lg:w-[40%] space-y-6 px-4 lg:px-6">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg">
+                      1
+                    </div>
+                    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900">Practice Like It's Real</h3>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Practice Like It's Real</h3>
-                </div>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Face actual interview questions from Google, Meta, and more. Get instant AI feedback that actually helps.
-                </p>
-              </div>
-              <div className="lg:w-1/2">
-                <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <Brain className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="text-center mb-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      Practice Like It's Real
-                    </h3>
-                    <Badge className="bg-blue-50 text-blue-700 border-blue-200">
-                      Always Free
-                    </Badge>
-                  </div>
-                  
-                  <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                    Face actual interview questions from Google, Meta, and more. Get instant AI feedback that actually helps.
+                  <p className="text-lg sm:text-xl text-gray-600 leading-relaxed">
+                    Experience actual interview scenarios from top tech companies. Our AI interviewer adapts to your responses in real-time, providing instant feedback that helps you improve.
                   </p>
-                  
-                  {/* Interactive Demo */}
-                  <div className="bg-gray-900 rounded-lg p-4 mb-4 font-mono text-sm">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <span className="text-gray-400 text-xs ml-2">SkillVee AI Interview</span>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-6 h-6 text-blue-500 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="font-semibold text-gray-900">Company-specific questions</p>
+                        <p className="text-sm text-gray-600">Real questions from Google, Meta, Netflix & more</p>
+                      </div>
                     </div>
-                    <div className="text-green-400 mb-2">AI: "How would you handle missing data?"</div>
-                    <div className="text-blue-400 mb-2">You: "I'd use mean imputation..."</div>
-                    <div className="text-green-400 mb-2">AI: "Interesting choice. Why mean over median?"</div>
-                    <div className="text-blue-400 mb-2">You: "Well, the data looks normal..."</div>
-                    <div className="text-green-400 animate-pulse">● AI: "What if there were outliers?"</div>
-                  </div>
-                  
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div className="text-blue-800 text-sm font-semibold mb-1">REAL-TIME PROBING:</div>
-                    <div className="text-blue-700 text-xs">AI challenges your assumptions and explores edge cases as you speak</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 2 - Right content, Left visual */}
-            <div className="flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-16 mb-20">
-              <div className="lg:w-1/2 space-y-6">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
-                    2
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Stand Out Instantly</h3>
-                </div>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Turn practice into verified credentials. Build a profile that makes recruiters stop scrolling.
-                </p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                    <div className="text-green-600 font-semibold text-sm">Python</div>
-                    <div className="text-green-800 font-bold">Expert</div>
-                  </div>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
-                    <div className="text-blue-600 font-semibold text-sm">SQL</div>
-                    <div className="text-blue-800 font-bold">Advanced</div>
-                  </div>
-                </div>
-              </div>
-              <div className="lg:w-1/2">
-                <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-                  <div className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Award className="w-7 h-7 text-white" />
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xs text-gray-500 font-semibold mb-3 uppercase tracking-wide">Skill Validated</div>
-                    <div className="">
-                      <div className="text-lg font-bold text-gray-900">Machine Learning</div>
-                      <div className="text-sm text-gray-600">Based on 12 practice sessions</div>
-                      <div className="mt-3 text-green-700 text-xs font-semibold">
-                        ✓ Verified by SkillVee AI
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-6 h-6 text-blue-500 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="font-semibold text-gray-900">Adaptive AI interviewer</p>
+                        <p className="text-sm text-gray-600">Probes deeper based on your answers</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-6 h-6 text-blue-500 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="font-semibold text-gray-900">Instant actionable feedback</p>
+                        <p className="text-sm text-gray-600">Know exactly what to improve</p>
                       </div>
                     </div>
                   </div>
                 </div>
+
+                <div className="w-full lg:w-[60%] lg:ml-auto">
+                  <div className="relative rounded-l-2xl overflow-hidden shadow-2xl border border-gray-200 bg-gray-900">
+                    <video
+                      className="w-full h-auto"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      controls={false}
+                    >
+                      <source src="/practice-like-its-real.mp4" type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
 
-            {/* Step 3 - Left content, Right visual */}
-            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-              <div className="lg:w-1/2 space-y-6">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
-                    3
+          {/* Step 2 - Stand Out Instantly */}
+          <div className="mb-24 lg:mb-32">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 lg:pr-6">
+              <div className="flex flex-col lg:flex-row-reverse items-center gap-8 lg:gap-12">
+                <div className="w-full lg:w-[40%] space-y-6 px-4 lg:px-6">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg">
+                      2
+                    </div>
+                    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900">Stand Out Instantly</h3>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Jobs Find You</h3>
+                  <p className="text-lg sm:text-xl text-gray-600 leading-relaxed">
+                    Transform your practice sessions into verified credentials. Build a dynamic profile that showcases your actual skills, making recruiters stop scrolling.
+                  </p>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <Award className="w-6 h-6 text-blue-500 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="font-semibold text-gray-900">Skill validation badges</p>
+                        <p className="text-sm text-gray-600">Earn certifications as you practice</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <TrendingUp className="w-6 h-6 text-blue-500 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="font-semibold text-gray-900">Performance metrics</p>
+                        <p className="text-sm text-gray-600">Track your improvement over time</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Star className="w-6 h-6 text-blue-500 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="font-semibold text-gray-900">Recruiter-visible profile</p>
+                        <p className="text-sm text-gray-600">Companies can see your verified skills</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Stop applying everywhere. We match you with companies that need your exact skills.
-                </p>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-gray-700">Auto-applied to 23 matching roles this week</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-gray-700">3 companies requested interviews</span>
+
+                <div className="w-full lg:w-[60%] lg:mr-auto">
+                  <div className="relative rounded-r-2xl overflow-hidden shadow-2xl border border-gray-200 bg-gray-900">
+                    <video
+                      className="w-full h-auto"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      controls={false}
+                    >
+                      <source src="/Profile.mp4" type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
                   </div>
                 </div>
               </div>
-              <div className="lg:w-1/2">
-                <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-                  <div className="w-14 h-14 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Target className="w-7 h-7 text-white" />
+            </div>
+          </div>
+
+          {/* Step 3 - Jobs Find You */}
+          <div className="mb-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 lg:pl-6">
+              <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+                <div className="w-full lg:w-[40%] space-y-6 px-4 lg:px-6">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg">
+                      3
+                    </div>
+                    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900">Jobs Find You</h3>
                   </div>
-                  <div className="">
-                    <div className="text-xs text-gray-500 font-semibold mb-3 text-center uppercase tracking-wide">Job Matches</div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3 text-sm">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <div className="flex-1">
-                          <div className="font-medium text-gray-900">Google requested your profile</div>
-                          <div className="text-xs text-gray-500">Senior Data Scientist • 95% match</div>
+                  <p className="text-lg sm:text-xl text-gray-600 leading-relaxed">
+                    Stop the endless application cycle. Our AI matches you with perfect-fit roles and companies actively request interviews with top performers.
+                  </p>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <Target className="w-6 h-6 text-blue-500 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="font-semibold text-gray-900">Smart job matching</p>
+                        <p className="text-sm text-gray-600">AI finds roles that fit your verified skills</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Users className="w-6 h-6 text-blue-500 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="font-semibold text-gray-900">Direct company requests</p>
+                        <p className="text-sm text-gray-600">Top companies reach out to you directly</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <MessageSquare className="w-6 h-6 text-blue-500 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="font-semibold text-gray-900">Skip the resume pile</p>
+                        <p className="text-sm text-gray-600">Your skills speak louder than keywords</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="w-full lg:w-[60%] lg:ml-auto">
+                  {/* Interactive Job Matching Visual */}
+                  <div className="relative rounded-l-2xl overflow-hidden shadow-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100 p-8 lg:p-12">
+                    <div className="space-y-4">
+                      {/* Company request notifications matching the image style */}
+                      <div className="bg-green-50 rounded-xl p-5 border border-green-200 transform transition-all duration-500 hover:scale-[1.02]">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-3 h-3 bg-green-500 rounded-full mt-1.5 animate-pulse"></div>
+                            <div className="flex-1">
+                              <p className="font-bold text-gray-900 text-lg">Google requested your profile</p>
+                              <p className="text-gray-600 text-sm">Senior Data Scientist • 2 hours ago</p>
+                            </div>
+                          </div>
+                          <span className="text-green-600 font-bold text-sm whitespace-nowrap">Top 5%</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 text-sm">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <div className="flex-1">
-                          <div className="font-medium text-gray-900">Meta fast-tracked you</div>
-                          <div className="text-xs text-gray-500">ML Engineer • 92% match</div>
+
+                      <div className="bg-blue-50 rounded-xl p-5 border border-blue-200 transform transition-all duration-500 hover:scale-[1.02]">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-3 h-3 bg-blue-500 rounded-full mt-1.5 animate-pulse"></div>
+                            <div className="flex-1">
+                              <p className="font-bold text-gray-900 text-lg">Meta invited you to apply</p>
+                              <p className="text-gray-600 text-sm">ML Engineer • 5 hours ago</p>
+                            </div>
+                          </div>
+                          <span className="text-blue-600 font-bold text-sm whitespace-nowrap">Fast-track</span>
                         </div>
+                      </div>
+
+                      <div className="bg-yellow-50 rounded-xl p-5 border border-yellow-300 transform transition-all duration-500 hover:scale-[1.02]">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-3 h-3 bg-yellow-500 rounded-full mt-1.5 animate-pulse"></div>
+                            <div className="flex-1">
+                              <p className="font-bold text-gray-900 text-lg">Direct interview offer</p>
+                              <p className="text-gray-600 text-sm">Netflix • Data Analyst</p>
+                            </div>
+                          </div>
+                          <span className="text-orange-600 font-bold text-sm whitespace-nowrap">Skip resume</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Stats banner */}
+                    <div className="mt-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-6 text-white">
+                      <div className="text-center">
+                        <p className="text-2xl font-bold mb-2">Coming Soon</p>
+                        <p className="text-sm opacity-90">Live job matching launches after beta</p>
                       </div>
                     </div>
                   </div>
@@ -583,177 +668,6 @@ export default async function Home() {
             </div>
           </div>
         </section>
-
-        {/* Unique Value Props - 3 Pillars */}
-        <section className="py-16 sm:py-20 lg:py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-12 sm:mb-16">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                Why SkillVee is Different
-              </h2>
-              <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-                The only platform that combines free AI interview practice with automatic job applications
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* AI Interview Coach - Interactive Demo */}
-              <Card className="bg-white hover:shadow-xl transition-all duration-500 border-2 border-transparent hover:border-blue-200 group overflow-hidden">
-                <CardContent className="p-8">
-                  <div className="text-center mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                      <Brain className="w-8 h-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      Practice Like It's Real
-                    </h3>
-                    <Badge className="bg-blue-50 text-blue-700 border-blue-200">
-                      Always Free
-                    </Badge>
-                  </div>
-                  
-                  <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                    Face actual interview questions from Google, Meta, and more. Get instant AI feedback that actually helps.
-                  </p>
-                  
-                  {/* Interactive Demo */}
-                  <div className="bg-gray-900 rounded-lg p-4 mb-4 font-mono text-sm">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <span className="text-gray-400 text-xs ml-2">SkillVee AI Interview</span>
-                    </div>
-                    <div className="text-green-400 mb-2">AI: "How would you handle missing data?"</div>
-                    <div className="text-blue-400 mb-2">You: "I'd use mean imputation..."</div>
-                    <div className="text-green-400 mb-2">AI: "Interesting choice. Why mean over median?"</div>
-                    <div className="text-blue-400 mb-2">You: "Well, the data looks normal..."</div>
-                    <div className="text-green-400 animate-pulse">● AI: "What if there were outliers?"</div>
-                  </div>
-                  
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div className="text-blue-800 text-sm font-semibold mb-1">REAL-TIME PROBING:</div>
-                    <div className="text-blue-700 text-xs">AI challenges your assumptions and explores edge cases as you speak</div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Skill Validation - Progress Demo */}
-              <Card className="bg-white hover:shadow-xl transition-all duration-500 border-2 border-transparent hover:border-green-200 group overflow-hidden">
-                <CardContent className="p-8">
-                  <div className="text-center mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                      <Award className="w-8 h-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      Stand Out Instantly
-                    </h3>
-                    <Badge className="bg-green-50 text-green-700 border-green-200">
-                      Employer Trusted
-                    </Badge>
-                  </div>
-                  
-                  <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                    Turn practice into verified credentials. Build a profile that makes recruiters stop scrolling.
-                  </p>
-                  
-                  {/* Skills Progress */}
-                  <div className="space-y-4 mb-4">
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="font-medium text-gray-700">Python</span>
-                        <span className="text-green-600 font-bold">Expert</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-green-500 h-2 rounded-full w-5/6 transition-all duration-1000 group-hover:w-full"></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="font-medium text-gray-700">SQL</span>
-                        <span className="text-blue-600 font-bold">Advanced</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-blue-500 h-2 rounded-full w-3/4 transition-all duration-1000 group-hover:w-5/6"></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="font-medium text-gray-700">Machine Learning</span>
-                        <span className="text-purple-600 font-bold">Intermediate</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-purple-500 h-2 rounded-full w-1/2 transition-all duration-1000 group-hover:w-2/3"></div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div className="text-blue-800 text-xs font-semibold mb-1">CERTIFICATION EARNED</div>
-                    <div className="text-blue-700 text-sm font-bold">Data Science Fundamentals</div>
-                    <div className="text-blue-600 text-xs">Based on 8 practice sessions</div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Autopilot Applications - Live Activity */}
-              <Card className="bg-white hover:shadow-xl transition-all duration-500 border-2 border-transparent hover:border-purple-200 group overflow-hidden">
-                <CardContent className="p-8">
-                  <div className="text-center mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                      <Target className="w-8 h-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      🎯 Companies Find You
-                    </h3>
-                    <Badge className="bg-blue-500 text-blue-900 border-blue-200">
-                      Top Performers Only
-                    </Badge>
-                  </div>
-                  
-                  {/* Company Recruitment */}
-                  <div className="space-y-3 mb-4">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-3">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <div className="flex-1">
-                        <div className="text-sm font-semibold text-gray-900">Google requested your profile</div>
-                        <div className="text-xs text-gray-600">Senior Data Scientist • 2 hours ago</div>
-                      </div>
-                      <div className="text-green-600 text-xs font-bold">Top 5%</div>
-                    </div>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                      <div className="flex-1">
-                        <div className="text-sm font-semibold text-gray-900">Meta invited you to apply</div>
-                        <div className="text-xs text-gray-600">ML Engineer • 5 hours ago</div>
-                      </div>
-                      <div className="text-blue-600 text-xs font-bold">Fast-track</div>
-                    </div>
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-center gap-3">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                      <div className="flex-1">
-                        <div className="text-sm font-semibold text-gray-900">Direct interview offer</div>
-                        <div className="text-xs text-gray-600">Netflix • Data Analyst</div>
-                      </div>
-                      <div className="text-yellow-600 text-xs font-bold">Skip resume</div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
-                    <div className="text-purple-800 text-xs font-semibold mb-1">THIS WEEK</div>
-                    <div className="text-purple-700 text-sm font-bold">8 companies reached out</div>
-                    <div className="text-purple-600 text-xs">3 direct interview offers</div>
-                  </div>
-                  
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Top-performing candidates get discovered by companies actively seeking their skills.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
 
         {/* FAQ Section */}
         <section className="py-12 sm:py-16 lg:py-20 bg-gray-50 relative">
@@ -859,15 +773,9 @@ export default async function Home() {
                     <tr>
                       <th className="text-left p-3 sm:p-6 font-semibold text-sm sm:text-base">Features</th>
                       <th className="text-center p-3 sm:p-6 font-semibold bg-blue-700">
-                        <div className="flex flex-col items-center">
-                          <span className="text-lg sm:text-xl font-bold">SkillVee</span>
-                          <Badge className="bg-yellow-400 text-yellow-900 mt-1 text-xs font-semibold">
-                            RECOMMENDED
-                          </Badge>
-                        </div>
+                        <span className="text-lg sm:text-xl font-bold">SkillVee</span>
                       </th>
                       <th className="text-center p-3 sm:p-6 font-semibold text-xs sm:text-base">InterviewQuery</th>
-                      <th className="text-center p-3 sm:p-6 font-semibold text-xs sm:text-base">Pramp</th>
                       <th className="text-center p-3 sm:p-6 font-semibold text-xs sm:text-base">LeetCode</th>
                     </tr>
                   </thead>
@@ -884,10 +792,6 @@ export default async function Home() {
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
-                        <div className="text-xs text-gray-500 mt-1">Human-only</div>
-                      </td>
-                      <td className="p-3 sm:p-6 text-center">
-                        <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
                         <div className="text-xs text-gray-500 mt-1">Code-only</div>
                       </td>
                     </tr>
@@ -901,10 +805,6 @@ export default async function Home() {
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
                         <div className="text-xs text-red-600 mt-1">$39/month</div>
-                      </td>
-                      <td className="p-3 sm:p-6 text-center">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                        <div className="text-xs text-blue-700 mt-1">Limited free</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
@@ -926,10 +826,6 @@ export default async function Home() {
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
                         <div className="text-xs text-gray-500 mt-1">No job board</div>
                       </td>
-                      <td className="p-3 sm:p-6 text-center">
-                        <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
-                        <div className="text-xs text-gray-500 mt-1">No job board</div>
-                      </td>
                     </tr>
 
                     <tr className="border-b border-gray-100">
@@ -941,10 +837,6 @@ export default async function Home() {
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
                         <div className="text-xs text-gray-500 mt-1">Self-assessment</div>
-                      </td>
-                      <td className="p-3 sm:p-6 text-center">
-                        <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
-                        <div className="text-xs text-gray-500 mt-1">Peer feedback</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
@@ -964,10 +856,6 @@ export default async function Home() {
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
-                        <div className="text-xs text-gray-500 mt-1">General tech</div>
-                      </td>
-                      <td className="p-3 sm:p-6 text-center">
-                        <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
                         <div className="text-xs text-gray-500 mt-1">General coding</div>
                       </td>
                     </tr>
@@ -981,10 +869,6 @@ export default async function Home() {
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
                         <div className="text-xs text-gray-500 mt-1">Solutions only</div>
-                      </td>
-                      <td className="p-3 sm:p-6 text-center">
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
-                        <div className="text-xs text-blue-700 mt-1">From peers</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
@@ -1001,10 +885,6 @@ export default async function Home() {
                       <td className="p-3 sm:p-6 text-center">
                         <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
                         <div className="text-xs text-blue-700 mt-1">Self-paced</div>
-                      </td>
-                      <td className="p-3 sm:p-6 text-center">
-                        <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded mx-auto"></div>
-                        <div className="text-xs text-gray-500 mt-1">Scheduled</div>
                       </td>
                       <td className="p-3 sm:p-6 text-center">
                         <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mx-auto" />
