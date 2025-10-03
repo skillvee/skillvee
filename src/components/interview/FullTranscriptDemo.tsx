@@ -22,7 +22,7 @@ export function FullTranscriptDemo() {
   const geminiLive = useGeminiLive({
     config: {
       model: 'models/gemini-2.5-flash-native-audio-preview-09-2025',  // Native audio model with transcription support
-      responseModalities: ['AUDIO', 'TEXT'],  // Enable both for transcription
+      responseModalities: ['AUDIO'],  // CRITICAL: Can only use ONE modality (docs requirement)
       voice: 'Puck',
       systemInstruction: `You are a professional AI interviewer conducting a technical interview.
 
