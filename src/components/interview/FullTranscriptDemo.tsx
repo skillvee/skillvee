@@ -21,16 +21,33 @@ export function FullTranscriptDemo() {
 
   const geminiLive = useGeminiLive({
     config: {
-      responseModalities: ['AUDIO', 'TEXT'],
-      enableInputTranscription: true,
-      enableOutputTranscription: true,
+      model: 'models/gemini-2.0-flash-exp',
+      responseModalities: ['AUDIO'],  // Start with audio-only like working version
+      voice: 'Puck',
+      systemInstruction: `You are a professional AI interviewer conducting a technical interview.
+
+Guidelines:
+- Speak clearly and at a moderate pace
+- Ask follow-up questions to clarify responses
+- Be encouraging but maintain professional standards
+- Keep responses concise (10-30 seconds)
+- Focus on technical accuracy and problem-solving approach
+- Provide constructive feedback when appropriate`,
+      enableInputTranscription: false,  // Disable for now until audio works
+      enableOutputTranscription: false,
       enableScreenCapture: true,
     },
     onTextReceived: (data) => {
       console.log('AI Text:', data.text);
     },
+    onConnected: () => {
+      console.log('✅ Connected to Gemini Live!');
+    },
+    onDisconnected: () => {
+      console.log('❌ Disconnected from Gemini Live');
+    },
     onError: (error) => {
-      console.error('Gemini Live Error:', error);
+      console.error('❌ Gemini Live Error:', error);
     }
   });
 
@@ -80,7 +97,10 @@ export function FullTranscriptDemo() {
 
   const handleStartSession = async () => {
     try {
+      console.log('🚀 Starting demo session...');
+
       // Step 1: Create demo job description
+      console.log('📝 Step 1: Creating job description...');
       const demoJobDescription = await createDemoJobDescriptionMutation.mutateAsync({
         title: "Senior Data Scientist",
         company: "TechCorp AI",
@@ -94,18 +114,25 @@ export function FullTranscriptDemo() {
         isTemplate: false,
       });
 
+      console.log('✅ Job description created:', demoJobDescription.id);
+
       // Step 2: Create interview
+      console.log('📝 Step 2: Creating interview...');
       const interview = await createInterviewMutation.mutateAsync({
         jobDescriptionId: demoJobDescription.id,
         scheduledAt: new Date(),
       });
+      console.log('✅ Interview created:', interview.id);
 
       // Step 3: Get API key from server (secure)
+      console.log('🔑 Step 3: Getting API key from server...');
       const conversationResponse = await startConversationMutation.mutateAsync({
         interviewId: interview.id
       });
+      console.log('✅ API key received');
 
       // Step 4: Setup context
+      console.log('📋 Step 4: Setting up interview context...');
       const context = {
         interviewId: interview.id,
         jobTitle: 'Senior Data Scientist',
@@ -124,26 +151,32 @@ export function FullTranscriptDemo() {
       };
 
       // Step 5: Connect with API key from server
+      console.log('🔌 Step 5: Connecting to Gemini Live...');
       await geminiLive.connect(context, conversationResponse.config.apiKey);
-
-      console.log('Session connected! Now starting listening and screen recording...');
+      console.log('✅ Connected! isConnected:', geminiLive.isConnected);
 
       // Step 6: Auto-start listening
+      console.log('🎤 Step 6: Starting audio listening...');
       await geminiLive.startListening();
+      console.log('✅ Listening started! isListening:', geminiLive.isListening);
 
       // Step 7: Start screen recording
+      console.log('📹 Step 7: Starting screen recording...');
       try {
         await geminiLive.startScreenRecording();
+        console.log('✅ Screen recording started!');
       } catch (error) {
-        console.log('Screen recording not started (user may have declined):', error);
+        console.log('⚠️  Screen recording not started (user may have declined):', error);
       }
 
-      console.log('✅ Session fully started with transcription and screen recording!');
+      console.log('✅ Session fully started!');
 
       // Step 8: Send initial greeting to trigger AI response (crucial!)
+      console.log('🎬 Step 8: Sending initial greeting in 500ms...');
       setTimeout(() => {
+        console.log('📤 Sending initial greeting NOW...');
         geminiLive.sendInitialGreeting();
-        console.log('🎬 Initial greeting sent - AI should respond now!');
+        console.log('✅ Initial greeting sent - AI should respond now!');
       }, 500);
     } catch (error) {
       console.error('Failed to start session:', error);
@@ -180,9 +213,9 @@ export function FullTranscriptDemo() {
     <div className="space-y-6 p-6">
       <Card>
         <CardHeader>
-          <CardTitle>Full Conversation Transcription Demo</CardTitle>
+          <CardTitle>Gemini Live Audio Demo</CardTitle>
           <CardDescription>
-            This demo shows the new Gemini Live capabilities: full bidirectional transcription + screen recording
+            Testing Gemini Live real-time audio conversation + screen recording (transcription coming soon)
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
