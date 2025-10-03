@@ -1211,11 +1211,11 @@ Respond naturally as a human interviewer. The candidate is waiting for your resp
 export function createGeminiLiveClient(overrides: Partial<GeminiLiveConfig> & { apiKey: string }): GeminiLiveClient {
   const config: GeminiLiveConfig = {
     model: 'models/gemini-2.0-flash-exp',
-    responseModalities: ['AUDIO', 'TEXT'],
+    responseModalities: ['AUDIO'],
     voice: 'Puck',
-    enableInputTranscription: true,
-    enableOutputTranscription: true,
-    enableScreenCapture: true,
+    enableInputTranscription: false,
+    enableOutputTranscription: false,
+    enableScreenCapture: false,
     ...overrides,
   };
 

@@ -20,6 +20,12 @@ export function FullTranscriptDemo() {
   const [sessionData, setSessionData] = useState<any>(null);
 
   const geminiLive = useGeminiLive({
+    config: {
+      responseModalities: ['AUDIO', 'TEXT'],
+      enableInputTranscription: true,
+      enableOutputTranscription: true,
+      enableScreenCapture: true,
+    },
     onTextReceived: (data) => {
       console.log('AI Text:', data.text);
     },
