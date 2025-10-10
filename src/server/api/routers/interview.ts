@@ -885,4 +885,101 @@ export const interviewRouter = createTRPCRouter({
 
       return { success: true };
     }),
+
+  /**
+   * Save conversation transcript and screenshots from Gemini Live session
+   */
+  saveConversationData: protectedProcedure
+    .input(z.object({
+      interviewId: z.string(),
+      conversationData: z.object({
+        sessionId: z.string(),
+        model: z.string(),
+        duration: z.number().optional().nullable(),
+        turns: z.array(z.any()),
+        screenCaptures: z.array(z.any()),
+        analytics: z.any(),
+      }),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { interviewId, conversationData } = input;
+
+      // Verify interview belongs to user
+      const interview = await ctx.db.interview.findFirst({
+        where: {
+          id: interviewId,
+          userId: ctx.user.id,
+          deletedAt: null,
+        },
+      });
+
+      if (!interview) {
+        throw createError.notFound("Interview", interviewId);
+      }
+
+      // Save conversation transcript
+      const transcript = await ctx.db.conversationTranscript.create({
+        data: {
+          interviewId,
+          sessionId: conversationData.sessionId,
+          model: conversationData.model,
+          duration: conversationData.duration || 0,
+          turns: conversationData.turns,
+          screenshots: conversationData.screenCaptures,
+          analytics: conversationData.analytics,
+        },
+      });
+
+      // Update interview status and duration
+      await ctx.db.interview.update({
+        where: { id: interviewId },
+        data: {
+          status: 'COMPLETED',
+          completedAt: new Date(),
+          duration: conversationData.duration || undefined,
+          geminiSessionId: conversationData.sessionId,
+        },
+      });
+
+      return transcript;
+    }),
+
+  /**
+   * Get conversation data for an interview
+   */
+  getConversationData: protectedProcedure
+    .input(z.object({ interviewId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const transcript = await ctx.db.conversationTranscript.findUnique({
+        where: { interviewId: input.interviewId },
+        include: {
+          interview: {
+            include: {
+              jobDescription: {
+                select: {
+                  title: true,
+                  company: true,
+                  companyName: true,
+                  focusAreas: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!transcript) {
+        throw createError.notFound("Conversation transcript", input.interviewId);
+      }
+
+      // Verify ownership
+      if (transcript.interview.userId !== ctx.user.id && ctx.user.role !== "ADMIN") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to view this conversation",
+        });
+      }
+
+      return transcript;
+    }),
 });

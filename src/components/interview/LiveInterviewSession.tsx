@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useGeminiLiveInterview, useGeminiLivePermissions } from "~/hooks/useGeminiLive";
-import type { InterviewContext } from "~/lib/gemini-live";
+import type { InterviewContext, GeminiLiveConfig, ConversationSession } from "~/lib/gemini-live";
 import { api } from "~/trpc/react";
 import { CaseContextDisplay } from "./CaseContextDisplay";
 import { InterviewNotepad } from "./InterviewNotepad";
@@ -43,15 +43,17 @@ export interface LiveInterviewSessionProps {
     timeAllocation?: number;
     followUpQuestions?: string[];
   }>;
-  caseContext?: string; // Add case context prop
+  geminiConfig?: Partial<GeminiLiveConfig>;
+  caseContext?: string;
   onQuestionComplete?: (questionId: string, answer: string) => void;
-  onInterviewComplete?: () => void;
+  onInterviewComplete?: (conversationData?: ConversationSession | null) => void;
   onError?: (error: string) => void;
 }
 
 export function LiveInterviewSession({
   interview,
   questions,
+  geminiConfig,
   caseContext,
   onQuestionComplete,
   onInterviewComplete,
@@ -63,8 +65,46 @@ export function LiveInterviewSession({
   const [isSessionPaused, setIsSessionPaused] = useState(false);
   const [interviewNotes, setInterviewNotes] = useState("");
 
-  // Gemini Live integration
+  // Transcript tracking (hidden from UI but stored for database)
+  const [transcripts, setTranscripts] = useState<Array<{
+    speaker: 'user' | 'ai';
+    text: string;
+    timestamp: string;
+  }>>([]);
+  const [screenshots, setScreenshots] = useState<number>(0);
+
+  // Use ref to track current accumulation state to avoid stale closures
+  const accumulationRef = useRef<{
+    speaker: 'user' | 'ai' | null;
+    text: string;
+    timestamp: string;
+  }>({
+    speaker: null,
+    text: '',
+    timestamp: ''
+  });
+
+  // Helper function to finalize the current accumulated transcript
+  const finalizeCurrentTranscript = useCallback(() => {
+    const current = accumulationRef.current;
+    if (current.speaker && current.text.trim()) {
+      setTranscripts(prev => [...prev, {
+        speaker: current.speaker!,
+        text: current.text.trim(),
+        timestamp: current.timestamp
+      }]);
+      // Reset accumulation
+      accumulationRef.current = {
+        speaker: null,
+        text: '',
+        timestamp: ''
+      };
+    }
+  }, []);
+
+  // Gemini Live integration with config override
   const geminiLive = useGeminiLiveInterview({
+    config: geminiConfig,
     onError: (error) => {
       console.error('Gemini Live error:', error);
       onError?.(error);
@@ -88,6 +128,69 @@ export function LiveInterviewSession({
 
   // tRPC mutation to start conversation (get API key)
   const startConversationMutation = api.ai.startConversation.useMutation();
+
+  // Listen for transcript and screenshot events
+  useEffect(() => {
+    if (!geminiLive.client) return;
+
+    const handleUserTranscript = (data: any) => {
+      console.log('User transcript chunk:', data);
+
+      // If speaker changed from AI to user, finalize AI's transcript
+      if (accumulationRef.current.speaker === 'ai' && accumulationRef.current.text) {
+        finalizeCurrentTranscript();
+      }
+
+      // Start or continue accumulating user text
+      if (!accumulationRef.current.speaker) {
+        accumulationRef.current.speaker = 'user';
+        accumulationRef.current.timestamp = data.timestamp;
+        accumulationRef.current.text = data.transcript;
+      } else {
+        accumulationRef.current.text += ' ' + data.transcript;
+      }
+    };
+
+    const handleAITranscript = (data: any) => {
+      console.log('AI transcript chunk:', data);
+
+      // If speaker changed from user to AI, finalize user's transcript
+      if (accumulationRef.current.speaker === 'user' && accumulationRef.current.text) {
+        finalizeCurrentTranscript();
+      }
+
+      // Start or continue accumulating AI text
+      if (!accumulationRef.current.speaker) {
+        accumulationRef.current.speaker = 'ai';
+        accumulationRef.current.timestamp = data.timestamp;
+        accumulationRef.current.text = data.transcript;
+      } else {
+        accumulationRef.current.text += ' ' + data.transcript;
+      }
+    };
+
+    const handleTurnComplete = () => {
+      console.log('Turn complete - finalizing current transcript');
+      finalizeCurrentTranscript();
+    };
+
+    const handleScreenCapture = () => {
+      console.log('Screenshot captured');
+      setScreenshots(prev => prev + 1);
+    };
+
+    geminiLive.client.on('user-transcript', handleUserTranscript);
+    geminiLive.client.on('ai-transcript', handleAITranscript);
+    geminiLive.client.on('turn-complete', handleTurnComplete);
+    geminiLive.client.on('screen-capture', handleScreenCapture);
+
+    return () => {
+      geminiLive.client?.off?.('user-transcript', handleUserTranscript);
+      geminiLive.client?.off?.('ai-transcript', handleAITranscript);
+      geminiLive.client?.off?.('turn-complete', handleTurnComplete);
+      geminiLive.client?.off?.('screen-capture', handleScreenCapture);
+    };
+  }, [geminiLive.client, finalizeCurrentTranscript]);
 
   // Timer for elapsed time
   useEffect(() => {
@@ -147,7 +250,18 @@ export function LiveInterviewSession({
 
       console.log('🎤 Starting to listen for audio...');
       await geminiLive.startListening();
-      console.log('🎯 StartListening completed, isListening:', geminiLive.isListening);
+      console.log('✅ StartListening completed, isListening:', geminiLive.isListening);
+
+      // Start screen recording if enabled in config
+      if (geminiConfig?.enableScreenCapture) {
+        console.log('📹 Starting screen recording...');
+        try {
+          await geminiLive.startScreenRecording();
+          console.log('✅ Screen recording started!');
+        } catch (error) {
+          console.log('⚠️  Screen recording not started (user may have declined):', error);
+        }
+      }
 
       setSessionStarted(true);
       setInterviewStartTime(new Date());
@@ -191,14 +305,23 @@ export function LiveInterviewSession({
   // End interview session
   const endSession = useCallback(async () => {
     try {
+      // Finalize any remaining accumulated transcript
+      finalizeCurrentTranscript();
+
+      // Export conversation data before disconnecting
+      const conversationData = geminiLive.exportConversation();
+      console.log('📊 Conversation data exported:', conversationData);
+
       await geminiLive.disconnect();
       setSessionStarted(false);
       setIsSessionPaused(false);
-      onInterviewComplete?.();
+
+      // Pass conversation data to parent
+      onInterviewComplete?.(conversationData);
     } catch (error) {
       console.error('Failed to end session:', error);
     }
-  }, [geminiLive, onInterviewComplete]);
+  }, [geminiLive, onInterviewComplete, finalizeCurrentTranscript]);
 
   // Pause/Resume session
   const togglePause = useCallback(() => {

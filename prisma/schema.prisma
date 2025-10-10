@@ -64,32 +64,33 @@ model JobDescription {
 }
 
 model Interview {
-  id                String           @id @default(cuid())
-  userId            String
-  jobDescriptionId  String
-  status            InterviewStatus  @default(SCHEDULED)
-  scheduledAt       DateTime?
-  startedAt         DateTime?
-  completedAt       DateTime?
-  duration          Int?
-  geminiSessionId   String?
-  notes             String?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  deletedAt         DateTime?
-  endedAt           DateTime?
-  geminiConfig      String?
-  focusDomainId     String?
-  practiceSessionId String?
-  interview_case_id String?
-  interviewNotes    InterviewNote[]
-  interviewSkills   InterviewSkill[]
-  focusDomain       SkillDomain?     @relation(fields: [focusDomainId], references: [id])
-  jobDescription    JobDescription   @relation(fields: [jobDescriptionId], references: [id])
-  practiceSession   PracticeSession? @relation(fields: [practiceSessionId], references: [id])
-  user              User             @relation(fields: [userId], references: [id])
-  mediaRecordings   MediaRecording[]
-  questions         Question[]
+  id                     String                  @id @default(cuid())
+  userId                 String
+  jobDescriptionId       String
+  status                 InterviewStatus         @default(SCHEDULED)
+  scheduledAt            DateTime?
+  startedAt              DateTime?
+  completedAt            DateTime?
+  duration               Int?
+  geminiSessionId        String?
+  notes                  String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  deletedAt              DateTime?
+  endedAt                DateTime?
+  geminiConfig           String?
+  focusDomainId          String?
+  practiceSessionId      String?
+  interview_case_id      String?
+  conversationTranscript ConversationTranscript?
+  interviewNotes         InterviewNote[]
+  interviewSkills        InterviewSkill[]
+  focusDomain            SkillDomain?            @relation(fields: [focusDomainId], references: [id])
+  jobDescription         JobDescription          @relation(fields: [jobDescriptionId], references: [id])
+  practiceSession        PracticeSession?        @relation(fields: [practiceSessionId], references: [id])
+  user                   User                    @relation(fields: [userId], references: [id])
+  mediaRecordings        MediaRecording[]
+  questions              Question[]
 
   @@index([userId])
   @@index([jobDescriptionId])
@@ -224,6 +225,24 @@ model InterviewNote {
   @@index([userId])
   @@index([timestamp])
   @@map("interview_notes")
+}
+
+model ConversationTranscript {
+  id          String    @id @default(cuid())
+  interviewId String    @unique
+  sessionId   String
+  model       String
+  duration    Int
+  turns       Json
+  screenshots Json
+  analytics   Json
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  interview   Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+
+  @@index([interviewId])
+  @@index([sessionId])
+  @@map("conversation_transcripts")
 }
 
 model RoleArchetype {
