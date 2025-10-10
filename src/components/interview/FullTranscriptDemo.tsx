@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useGeminiLive } from '~/hooks/useGeminiLive';
 import { ConversationExportService } from '~/server/services/conversation-export.service';
 import { Button } from '~/components/ui/button';
@@ -18,6 +18,17 @@ export function FullTranscriptDemo() {
 
   const [screenshots, setScreenshots] = useState<number>(0);
   const [sessionData, setSessionData] = useState<any>(null);
+
+  // Use ref to track current accumulation state to avoid stale closures
+  const accumulationRef = useRef<{
+    speaker: 'user' | 'ai' | null;
+    text: string;
+    timestamp: string;
+  }>({
+    speaker: null,
+    text: '',
+    timestamp: ''
+  });
 
   const geminiLive = useGeminiLive({
     config: {
@@ -58,26 +69,67 @@ Guidelines:
   const createDemoJobDescriptionMutation = api.jobDescription.create.useMutation();
   const createInterviewMutation = api.interview.create.useMutation();
 
+  // Helper function to finalize the current accumulated transcript
+  const finalizeCurrentTranscript = useCallback(() => {
+    const current = accumulationRef.current;
+    if (current.speaker && current.text.trim()) {
+      setTranscripts(prev => [...prev, {
+        speaker: current.speaker!,
+        text: current.text.trim(),
+        timestamp: current.timestamp
+      }]);
+      // Reset accumulation
+      accumulationRef.current = {
+        speaker: null,
+        text: '',
+        timestamp: ''
+      };
+    }
+  }, []);
+
   // Listen for transcript events
   useEffect(() => {
     if (!geminiLive.client) return;
 
     const handleUserTranscript = (data: any) => {
-      console.log('User transcript:', data);
-      setTranscripts(prev => [...prev, {
-        speaker: 'user',
-        text: data.transcript,
-        timestamp: data.timestamp
-      }]);
+      console.log('User transcript chunk:', data);
+
+      // If speaker changed from AI to user, finalize AI's transcript
+      if (accumulationRef.current.speaker === 'ai' && accumulationRef.current.text) {
+        finalizeCurrentTranscript();
+      }
+
+      // Start or continue accumulating user text
+      if (!accumulationRef.current.speaker) {
+        accumulationRef.current.speaker = 'user';
+        accumulationRef.current.timestamp = data.timestamp;
+        accumulationRef.current.text = data.transcript;
+      } else {
+        accumulationRef.current.text += ' ' + data.transcript;
+      }
     };
 
     const handleAITranscript = (data: any) => {
-      console.log('AI transcript:', data);
-      setTranscripts(prev => [...prev, {
-        speaker: 'ai',
-        text: data.transcript,
-        timestamp: data.timestamp
-      }]);
+      console.log('AI transcript chunk:', data);
+
+      // If speaker changed from user to AI, finalize user's transcript
+      if (accumulationRef.current.speaker === 'user' && accumulationRef.current.text) {
+        finalizeCurrentTranscript();
+      }
+
+      // Start or continue accumulating AI text
+      if (!accumulationRef.current.speaker) {
+        accumulationRef.current.speaker = 'ai';
+        accumulationRef.current.timestamp = data.timestamp;
+        accumulationRef.current.text = data.transcript;
+      } else {
+        accumulationRef.current.text += ' ' + data.transcript;
+      }
+    };
+
+    const handleTurnComplete = () => {
+      console.log('Turn complete - finalizing current transcript');
+      finalizeCurrentTranscript();
     };
 
     const handleScreenCapture = () => {
@@ -86,14 +138,16 @@ Guidelines:
 
     geminiLive.client.on('user-transcript', handleUserTranscript);
     geminiLive.client.on('ai-transcript', handleAITranscript);
+    geminiLive.client.on('turn-complete', handleTurnComplete);
     geminiLive.client.on('screen-capture', handleScreenCapture);
 
     return () => {
       geminiLive.client?.off?.('user-transcript', handleUserTranscript);
       geminiLive.client?.off?.('ai-transcript', handleAITranscript);
+      geminiLive.client?.off?.('turn-complete', handleTurnComplete);
       geminiLive.client?.off?.('screen-capture', handleScreenCapture);
     };
-  }, [geminiLive.client]);
+  }, [geminiLive.client, finalizeCurrentTranscript]);
 
   const handleStartSession = async () => {
     try {
@@ -185,6 +239,9 @@ Guidelines:
 
   const handleEndSession = async () => {
     try {
+      // Finalize any remaining accumulated transcript
+      finalizeCurrentTranscript();
+
       const conversation = geminiLive.exportConversation();
       setSessionData(conversation);
       await geminiLive.disconnect();

@@ -78,16 +78,17 @@ model Interview {
   focusDomainId        String?
   practiceSessionId    String?
   interview_case_id    String?
-  assessment           Assessment?
-  interviewNotes       InterviewNote[]
-  interviewSkills      InterviewSkill[]
-  focusDomain          SkillDomain?          @relation(fields: [focusDomainId], references: [id])
-  jobDescription       JobDescription        @relation(fields: [jobDescriptionId], references: [id])
-  practiceSession      PracticeSession?      @relation(fields: [practiceSessionId], references: [id])
-  user                 User                  @relation(fields: [userId], references: [id])
-  mediaRecordings      MediaRecording[]
-  questions            Question[]
-  userSkillAssessments UserSkillAssessment[]
+  assessment             Assessment?
+  conversationTranscript ConversationTranscript?
+  interviewNotes         InterviewNote[]
+  interviewSkills        InterviewSkill[]
+  focusDomain            SkillDomain?          @relation(fields: [focusDomainId], references: [id])
+  jobDescription         JobDescription        @relation(fields: [jobDescriptionId], references: [id])
+  practiceSession        PracticeSession?      @relation(fields: [practiceSessionId], references: [id])
+  user                   User                  @relation(fields: [userId], references: [id])
+  mediaRecordings        MediaRecording[]
+  questions              Question[]
+  userSkillAssessments   UserSkillAssessment[]
 
   @@index([userId])
   @@index([jobDescriptionId])
@@ -181,6 +182,24 @@ model InterviewNote {
   @@index([userId])
   @@index([timestamp])
   @@map("interview_notes")
+}
+
+model ConversationTranscript {
+  id          String    @id @default(cuid())
+  interviewId String    @unique
+  sessionId   String
+  model       String
+  duration    Int
+  turns       Json
+  screenshots Json
+  analytics   Json
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  interview   Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+
+  @@index([interviewId])
+  @@index([sessionId])
+  @@map("conversation_transcripts")
 }
 
 model RoleArchetype {

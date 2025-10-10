@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
@@ -19,10 +19,11 @@ import {
   CheckCircle,
   Clock
 } from "lucide-react";
-import type { GeminiLiveConfig } from "~/lib/gemini-live";
+import type { GeminiLiveConfig, ConversationSession } from "~/lib/gemini-live";
 
 export default function LiveInterviewPage() {
   const { user: clerkUser, isLoaded } = useUser();
+  const router = useRouter();
   const [currentInterviewId, setCurrentInterviewId] = useState<string | null>(null);
   const [interviewData, setInterviewData] = useState<{ id: string } | null>(null);
   const [questionsData, setQuestionsData] = useState<Array<{ id: string; questionText: string; questionType: string; difficulty: string; expectedAnswer: string; evaluationCriteria: string[]; timeAllocation: number; followUpQuestions: string[] }>>([]);
@@ -33,15 +34,18 @@ export default function LiveInterviewPage() {
     console.log("State changed:", { pageState, currentInterviewId: !!currentInterviewId, interviewData: !!interviewData, questionsDataLength: questionsData.length });
   }, [pageState, currentInterviewId, interviewData, questionsData]);
   const [geminiConfig, setGeminiConfig] = useState<Partial<GeminiLiveConfig>>({
-    model: 'models/gemini-2.0-flash-exp',
+    model: 'models/gemini-2.5-flash-native-audio-preview-09-2025',
     responseModalities: ['AUDIO'],
     voice: 'Puck',
+    enableInputTranscription: true,
+    enableOutputTranscription: true,
+    enableScreenCapture: true,
     systemInstruction: `You are a professional AI interviewer conducting a technical interview.
 
 Guidelines:
 - Speak clearly and at a moderate pace
 - Ask follow-up questions to clarify responses
-- Be encouraging but maintain professional standards  
+- Be encouraging but maintain professional standards
 - Keep responses concise (10-30 seconds)
 - Focus on technical accuracy and problem-solving approach
 - Provide constructive feedback when appropriate`,
@@ -144,6 +148,9 @@ Guidelines:
   // Create demo job description mutation
   const createDemoJobDescriptionMutation = api.jobDescription.create.useMutation();
 
+  // Save conversation data mutation
+  const saveConversationMutation = api.interview.saveConversationData.useMutation();
+
   // Check browser compatibility
   const [browserCompatibility, setBrowserCompatibility] = useState({
     webSocket: false,
@@ -234,8 +241,37 @@ Guidelines:
     console.log(`Question ${questionId} completed with answer:`, answer);
   };
 
-  const handleInterviewComplete = () => {
-    setPageState("completed");
+  const handleInterviewComplete = async (conversationData?: ConversationSession | null) => {
+    if (!currentInterviewId || !conversationData) {
+      console.log('No conversation data to save, showing completed state');
+      setPageState("completed");
+      return;
+    }
+
+    try {
+      console.log('💾 Saving conversation data:', conversationData);
+
+      await saveConversationMutation.mutateAsync({
+        interviewId: currentInterviewId,
+        conversationData: {
+          sessionId: conversationData.sessionId,
+          model: conversationData.model,
+          duration: conversationData.duration,
+          turns: conversationData.turns,
+          screenCaptures: conversationData.screenCaptures,
+          analytics: conversationData.analytics,
+        },
+      });
+
+      console.log('✅ Conversation data saved successfully');
+
+      // Redirect to results page
+      router.push(`/interview/results/${currentInterviewId}`);
+    } catch (error) {
+      console.error('Failed to save conversation data:', error);
+      // Still show completed state even if save fails
+      setPageState("completed");
+    }
   };
 
   const handleError = (error: string) => {
@@ -495,6 +531,7 @@ Guidelines:
             },
           }}
           questions={questionsData}
+          geminiConfig={geminiConfig}
           onQuestionComplete={handleQuestionComplete}
           onInterviewComplete={handleInterviewComplete}
           onError={handleError}
