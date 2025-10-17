@@ -91,6 +91,7 @@ model Interview {
   practiceSession        PracticeSession?        @relation(fields: [practiceSessionId], references: [id])
   user                   User                    @relation(fields: [userId], references: [id])
   mediaRecordings        MediaRecording[]
+  questionRecordings     InterviewQuestionRecording[]
   questions              Question[]
 
   @@index([userId])
@@ -208,6 +209,36 @@ model MediaRecording {
   @@index([uploadStatus])
   @@index([transcriptionStatus])
   @@map("media_recordings")
+}
+
+model InterviewQuestionRecording {
+  id                  String              @id @default(cuid())
+  interviewId         String
+  questionId          String
+  questionText        String
+  questionOrder       Int
+  recordingType       RecordingType       @default(SCREEN_AND_AUDIO)
+  filePath            String
+  fileSize            BigInt
+  duration            Int?
+  uploadStatus        UploadStatus        @default(UPLOADING)
+  uploadStartedAt     DateTime?
+  uploadCompletedAt   DateTime?
+  uploadRetryCount    Int                 @default(0)
+  uploadError         String?
+  transcriptionStatus TranscriptionStatus @default(PENDING)
+  transcriptionText   String?
+  recordingStartedAt  DateTime
+  recordingEndedAt    DateTime?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  interview           Interview           @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+
+  @@index([interviewId])
+  @@index([questionId])
+  @@index([uploadStatus])
+  @@index([questionOrder])
+  @@map("interview_question_recordings")
 }
 
 model InterviewNote {

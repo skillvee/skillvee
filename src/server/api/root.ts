@@ -9,6 +9,7 @@ import { skillsNewRouter } from "~/server/api/routers/skills-new";
 import { practiceRouter } from "~/server/api/routers/practice";
 import { adminRouter } from "~/server/api/routers/admin";
 import { profileRouter } from "~/server/api/routers/profile";
+import { questionRecordingRouter } from "~/server/api/routers/questionRecording";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -28,6 +29,7 @@ export const appRouter = createTRPCRouter({
   practice: practiceRouter,
   admin: adminRouter,
   profile: profileRouter,
+  questionRecording: questionRecordingRouter,
 });
 
 // export type definition of API
