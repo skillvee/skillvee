@@ -326,17 +326,10 @@ export const practiceRouter = createTRPCRouter({
             interviews: {
               where: { deletedAt: null },
               orderBy: { createdAt: "desc" },
-              select: {
-                id: true,
-                status: true,
-                createdAt: true,
-                completedAt: true,
+              include: {
                 assessment: {
                   select: {
                     overallScore: true,
-                    technicalScore: true,
-                    communicationScore: true,
-                    problemSolvingScore: true,
                   },
                 },
               },
