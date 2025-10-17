@@ -22,6 +22,7 @@ import type { InterviewContext, GeminiLiveConfig, ConversationSession } from "~/
 import { api } from "~/trpc/react";
 import { CaseContextDisplay } from "./CaseContextDisplay";
 import { InterviewNotepad } from "./InterviewNotepad";
+import { PermissionsConsentDialog } from "./PermissionsConsentDialog";
 
 export interface LiveInterviewSessionProps {
   interview: {
@@ -64,6 +65,9 @@ export function LiveInterviewSession({
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isSessionPaused, setIsSessionPaused] = useState(false);
   const [interviewNotes, setInterviewNotes] = useState("");
+  const [showPermissionsDialog, setShowPermissionsDialog] = useState(false);
+  const [isStartingSession, setIsStartingSession] = useState(false);
+  const [hasConsentedToPermissions, setHasConsentedToPermissions] = useState(false);
 
   // Transcript tracking (hidden from UI but stored for database)
   const [transcripts, setTranscripts] = useState<Array<{
@@ -202,6 +206,14 @@ export function LiveInterviewSession({
 
     return () => clearInterval(interval);
   }, [sessionStarted, interviewStartTime, isSessionPaused]);
+
+  // Auto-show permissions dialog when caseContext exists (coming from practice flow)
+  useEffect(() => {
+    if (caseContext && !sessionStarted && !showPermissionsDialog && !hasConsentedToPermissions) {
+      console.log('📋 Case context detected, showing permissions dialog');
+      setShowPermissionsDialog(true);
+    }
+  }, [caseContext, sessionStarted, showPermissionsDialog, hasConsentedToPermissions]);
 
   // Start interview session
   const startSession = useCallback(async () => {
@@ -342,6 +354,33 @@ export function LiveInterviewSession({
     }
   }, [geminiLive]);
 
+  // Handle permissions consent from dialog
+  const handlePermissionsConsent = useCallback(async () => {
+    console.log('✅ User consented to permissions, starting session');
+    setHasConsentedToPermissions(true); // Prevent dialog from reopening
+    setShowPermissionsDialog(false);
+    setIsStartingSession(true);
+
+    try {
+      await startSession();
+    } catch (error) {
+      console.error('Failed to start session after consent:', error);
+      setIsStartingSession(false);
+      // Show error to user
+      onError?.('Failed to start interview session. Please try again.');
+    } finally {
+      setIsStartingSession(false);
+    }
+  }, [startSession, onError]);
+
+  // Handle permissions decline from dialog
+  const handlePermissionsDecline = useCallback(() => {
+    console.log('❌ User declined permissions');
+    setShowPermissionsDialog(false);
+    // Optionally navigate back or show a message
+    onError?.('Interview permissions are required to continue');
+  }, [onError]);
+
   // Format elapsed time
   const formatElapsedTime = (ms: number) => {
     const seconds = Math.floor(ms / 1000);
@@ -481,8 +520,80 @@ The company is considering launching a **group video chat** feature. You'll be u
         </Alert>
       )}
 
+      {/* Permissions Consent Dialog */}
+      <PermissionsConsentDialog
+        open={showPermissionsDialog}
+        onConsent={handlePermissionsConsent}
+        onDecline={handlePermissionsDecline}
+        isStarting={isStartingSession}
+      />
+
       {/* Session controls */}
-      {!sessionStarted ? (
+      {caseContext ? (
+        // When case context exists (from practice flow), always show case view
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Panel: Case Context */}
+          <div className="lg:col-span-1 h-[calc(100vh-12rem)]">
+            <CaseContextDisplay
+              caseContent={mockCaseContext}
+              title="Case Context"
+              isCollapsible={true}
+              className="h-full overflow-hidden"
+            />
+          </div>
+
+          {/* Right Panel: Interview notes and controls */}
+          <div className="lg:col-span-1 h-[calc(100vh-12rem)] flex flex-col">
+            {/* Interview Notepad */}
+            <InterviewNotepad
+              initialNotes={interviewNotes}
+              onChange={setInterviewNotes}
+              placeholder="Take notes during the interview...\n\nKey points:\n• \n• \n• "
+              className="flex-1"
+            />
+
+            {/* Interview controls - only show after session started */}
+            {sessionStarted && (
+              <Card className="mt-4 flex-shrink-0">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant={geminiLive.isListening ? "destructive" : "default"}
+                        size="sm"
+                        onClick={togglePause}
+                        disabled={!geminiLive.isConnected}
+                      >
+                        {isSessionPaused ? (
+                          <>
+                            <Play className="w-4 h-4 mr-2" />
+                            Resume
+                          </>
+                        ) : (
+                          <>
+                            <Pause className="w-4 h-4 mr-2" />
+                            Pause
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={endSession}
+                    >
+                      <PhoneOff className="w-4 h-4 mr-2" />
+                      End Interview
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      ) : !sessionStarted ? (
+        // Fallback for non-case interviews: show "Ready to start" card
         <Card className="mb-6">
           <CardContent className="p-8 text-center space-y-6">
             <div className="space-y-4">
@@ -520,6 +631,7 @@ The company is considering launching a **group video chat** feature. You'll be u
           </CardContent>
         </Card>
       ) : (
+        // Fallback for non-case interviews: show case view after session started
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Panel: Case Context */}
           <div className="lg:col-span-1 h-[calc(100vh-12rem)]">
@@ -533,7 +645,7 @@ The company is considering launching a **group video chat** feature. You'll be u
 
           {/* Right Panel: Interview notes and controls */}
           <div className="lg:col-span-1 h-[calc(100vh-12rem)] flex flex-col">
-            {/* Interview Notepad - Now in center */}
+            {/* Interview Notepad */}
             <InterviewNotepad
               initialNotes={interviewNotes}
               onChange={setInterviewNotes}
