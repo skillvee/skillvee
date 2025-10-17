@@ -342,7 +342,7 @@ INSTRUCTIONS:
 Please greet the candidate and begin with Question 1.`;
 
         // Send the context message
-        geminiLive.sendTextMessage(aiContext);
+        geminiLive.sendText(aiContext);
       }, 1000); // Brief delay to ensure UI has updated
 
     } catch (error) {
@@ -419,7 +419,7 @@ ${nextQuestion.followUpQuestions?.map((fu, i) => `${i + 1}. ${fu}`).join("\n") |
 
 Please acknowledge the transition and begin discussing this question with the candidate.`;
 
-          geminiLive.sendTextMessage(aiMessage);
+          geminiLive.sendText(aiMessage);
         }
       }
 

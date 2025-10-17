@@ -42,7 +42,7 @@ export default function LiveInterviewPage() {
     voice: 'Puck',
     enableInputTranscription: true,
     enableOutputTranscription: true,
-    enableScreenCapture: false, // DISABLED: Using question-level video recorder instead
+    enableScreenCapture: true, // AI needs to see your screen
     systemInstruction: `You are a professional AI interviewer conducting a technical interview.
 
 Guidelines:

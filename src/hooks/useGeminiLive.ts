@@ -270,6 +270,14 @@ export function useGeminiLive(options: UseGeminiLiveOptions = {}): UseGeminiLive
     clientRef.current.sendInitialGreeting();
   }, []);
 
+  const sendText = useCallback((text: string, endOfTurn = true) => {
+    if (!clientRef.current) {
+      console.warn('Cannot send text: client not initialized');
+      return;
+    }
+    clientRef.current.sendText(text, endOfTurn);
+  }, []);
+
   const clearError = useCallback(() => {
     setState(prev => ({ ...prev, error: null }));
   }, []);
@@ -305,7 +313,7 @@ export function useGeminiLive(options: UseGeminiLiveOptions = {}): UseGeminiLive
   return {
     // State
     ...state,
-    
+
     // Actions
     connect,
     disconnect,
@@ -315,10 +323,11 @@ export function useGeminiLive(options: UseGeminiLiveOptions = {}): UseGeminiLive
     stopScreenRecording,
     updateContext,
     sendInitialGreeting,
+    sendText,
     clearError,
     reconnect,
     exportConversation,
-    
+
     // Client reference (for advanced usage)
     client: clientRef.current,
   };
