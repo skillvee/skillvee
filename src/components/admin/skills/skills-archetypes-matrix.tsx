@@ -9,7 +9,7 @@ import {
   CardTitle 
 } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
-import { ScrollArea } from "~/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import {
   Tooltip,
   TooltipContent,
@@ -379,6 +379,7 @@ export function SkillsArchetypesMatrix({ data, isLoading }: SkillsArchetypesMatr
               </tbody>
             </table>
           </div>
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </CardContent>
     </Card>

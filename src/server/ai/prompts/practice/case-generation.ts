@@ -79,6 +79,7 @@ ${skillDescriptions}
 2. Write a **clear, challenging question** that demonstrates **1–3 skills** at the specified target proficiency level.
    - Questions should be designed to distinguish between levels (e.g., a Level 2 question should reveal if someone is at Level 1, 2, or 3)
    - Use the example responses and common mistakes to calibrate difficulty appropriately
+   - Questions should use the data and information provided in the context of the case to create a realistic scenario.
 3. Tag with the **exact skill numIds and names** from the provided list (see Tagging Rules below).
 4. Each question must be answerable in **5–10 minutes**.
 5. Include **2–4 follow-up questions** that probe different aspects (edge cases, tradeoffs, scaling, communication).
