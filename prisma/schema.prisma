@@ -85,6 +85,7 @@ model Interview {
   conversationTranscript ConversationTranscript?
   interviewNotes         InterviewNote[]
   interviewSkills        InterviewSkill[]
+  assessment             InterviewAssessment?
   focusDomain            SkillDomain?            @relation(fields: [focusDomainId], references: [id])
   jobDescription         JobDescription          @relation(fields: [jobDescriptionId], references: [id])
   practiceSession        PracticeSession?        @relation(fields: [practiceSessionId], references: [id])
@@ -146,6 +147,7 @@ model InterviewAssessment {
   updatedAt                 DateTime?              @default(now()) @updatedAt
   feedbackItems             AssessmentFeedback[]
   skillScores               AssessmentSkillScore[]
+  interview                 Interview              @relation(fields: [interviewId], references: [id])
 
   @@index([userId])
   @@map("InterviewAssessment")
