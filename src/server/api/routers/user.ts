@@ -157,7 +157,7 @@ export const userRouter = createTRPCRouter({
           deletedAt: null,
         },
       }),
-      ctx.db.assessment.aggregate({
+      ctx.db.interviewAssessment.aggregate({
         where: {
           interview: {
             userId: ctx.userId,

@@ -176,7 +176,7 @@ Guidelines:
 
       if (interviewCase && interviewCase.practiceSession) {
         // Check if we already have a job description for this practice session
-        const existingJobDesc = jobDescriptions?.[0];
+        const existingJobDesc = jobDescriptions?.items?.[0];
 
         if (existingJobDesc) {
           jobDescriptionId = existingJobDesc.id;

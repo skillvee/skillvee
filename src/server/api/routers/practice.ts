@@ -609,7 +609,8 @@ export const practiceRouter = createTRPCRouter({
               id: true,
               userId: true,
               jobTitle: true,
-              company: true
+              company: true,
+              focusAreas: true
             }
           }
         }

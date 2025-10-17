@@ -21,7 +21,7 @@ const SkillsSection: React.FC<SkillsSectionProps> = ({ skills }) => {
     if (!acc[skill.category]) {
       acc[skill.category] = [];
     }
-    acc[skill.category].push(skill);
+    acc[skill.category]!.push(skill);
     return acc;
   }, {} as Record<string, Skill[]>);
 

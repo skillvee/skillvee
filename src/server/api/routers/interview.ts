@@ -171,7 +171,7 @@ export const interviewRouter = createTRPCRouter({
         throw createError.notFound("Interview", id);
       }
 
-      return interview as InterviewOutput;
+      return interview as unknown as InterviewOutput;
     }),
 
   /**
@@ -446,9 +446,7 @@ export const interviewRouter = createTRPCRouter({
             select: {
               id: true,
               overallScore: true,
-              technicalScore: true,
-              communicationScore: true,
-              problemSolvingScore: true,
+              performanceLabel: true,
             },
           },
           _count: {
@@ -471,7 +469,7 @@ export const interviewRouter = createTRPCRouter({
       return {
         ...paginationResult,
         totalCount: await ctx.db.interview.count({ where: filters }),
-      } as InterviewListOutput;
+      } as unknown as InterviewListOutput;
     }),
 
   /**
@@ -519,7 +517,7 @@ export const interviewRouter = createTRPCRouter({
         }),
         
         // Average score from assessments
-        ctx.db.assessment.aggregate({
+        ctx.db.interviewAssessment.aggregate({
           where: {
             interview: baseFilter,
           },

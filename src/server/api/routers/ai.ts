@@ -10,7 +10,6 @@ import { env } from "~/env";
 import { createError } from "../types/errors";
 import {
   generateCaseSchema,
-  generateAssessmentSchema,
   startAIConversationSchema,
   transcribeAudioSchema,
   analyzeResponseSchema,
@@ -18,7 +17,6 @@ import {
   validateAnswerSchema,
   updateAIConfigSchema,
   type GeneratedCaseOutput,
-  type AssessmentOutput,
   type TranscriptionOutput,
   type AISuggestionsOutput,
   type AnswerValidationOutput,
@@ -108,140 +106,6 @@ export const aiRouter = createTRPCRouter({
       return mockCase;
     }),
 
-  /**
-   * Generate AI assessment for completed interview
-   */
-  generateAssessment: aiProcedure
-    .input(generateAssessmentSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { interviewId, includeTranscription, assessmentCriteria: _assessmentCriteria, weightings } = input;
-
-      // Verify interview exists and is completed
-      const interview = await ctx.db.interview.findFirst({
-        where: {
-          id: interviewId,
-          status: "COMPLETED",
-          deletedAt: null,
-          OR: [
-            { userId: ctx.user.id },
-            ...(ctx.user.role === "ADMIN" ? [{}] : []),
-          ],
-        },
-        include: {
-          questions: true,
-          mediaRecordings: includeTranscription ? {
-            where: {
-              transcriptionStatus: "COMPLETED",
-            },
-          } : false,
-          jobDescription: {
-            select: {
-              title: true,
-              focusAreas: true,
-            },
-          },
-        },
-      });
-
-      if (!interview) {
-        throw createError.notFound("Completed interview", interviewId);
-      }
-
-      // Check if assessment already exists
-      const existingAssessment = await ctx.db.assessment.findUnique({
-        where: { interviewId },
-      });
-
-      if (existingAssessment) {
-        throw createError.conflict("Assessment already exists for this interview");
-      }
-
-      // Simulate AI assessment generation
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      // Generate scores based on weightings
-      const baseScore = 7; // Mock base score
-      const variance = 2;
-      
-      const technicalScore = Math.max(1, Math.min(10, 
-        Math.round(baseScore + (Math.random() - 0.5) * variance)
-      ));
-      const communicationScore = Math.max(1, Math.min(10,
-        Math.round(baseScore + (Math.random() - 0.5) * variance)
-      ));
-      const problemSolvingScore = Math.max(1, Math.min(10,
-        Math.round(baseScore + (Math.random() - 0.5) * variance)
-      ));
-      
-      const overallScore = Math.round(
-        technicalScore * weightings.technical +
-        communicationScore * weightings.communication +
-        problemSolvingScore * weightings.problemSolving
-      );
-
-      // Create assessment in database
-      const assessment = await ctx.db.assessment.create({
-        data: {
-          interviewId,
-          overallScore,
-          technicalScore,
-          communicationScore,
-          problemSolvingScore,
-          strengthsAnalysis: "Strong technical foundation with good problem-solving skills.",
-          improvementAreas: "Could improve communication clarity and provide more specific examples.",
-          detailedFeedback: "The candidate demonstrated solid understanding of core concepts...",
-          recommendedNextSteps: "Focus on system design and advanced algorithms.",
-        },
-      });
-
-      // Return detailed assessment output
-      const result: AssessmentOutput = {
-        id: assessment.id,
-        interviewId,
-        overallScore,
-        technicalScore,
-        communicationScore,
-        problemSolvingScore,
-        strengths: [
-          "Strong analytical thinking",
-          "Good problem decomposition",
-          "Relevant experience examples"
-        ],
-        improvementAreas: [
-          "Communication clarity",
-          "Code optimization",
-          "Edge case handling"
-        ],
-        detailedFeedback: assessment.detailedFeedback,
-        questionAnalysis: interview.questions.map((q, _i) => ({
-          questionId: q.id,
-          question: q.questionText,
-          candidateAnswer: q.userAnswer ?? "No answer provided",
-          score: Math.max(1, Math.min(10, baseScore + (Math.random() - 0.5) * 2)),
-          feedback: "Good understanding demonstrated with room for improvement in implementation details.",
-          strengths: ["Clear explanation", "Correct approach"],
-          improvements: ["Add error handling", "Consider performance"],
-        })),
-        recommendedNextSteps: [
-          "Practice system design problems",
-          "Review data structures and algorithms",
-          "Work on communication skills"
-        ],
-        comparativeAnalysis: {
-          industryAverage: 6.8,
-          roleExpectation: 7.5,
-          percentile: 72,
-        },
-        metadata: {
-          assessmentTime: new Date(),
-          model: "gemini-2.5-pro",
-          confidence: 0.87,
-          processingDuration: 15.2,
-        },
-      };
-
-      return result;
-    }),
 
   /**
    * Start AI conversation session for real-time interview

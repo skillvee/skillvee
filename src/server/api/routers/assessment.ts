@@ -49,7 +49,7 @@ export const assessmentRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       // Check if user is admin or assessment owner
       const user = await ctx.db.user.findUnique({
-        where: { id: ctx.auth.userId },
+        where: { id: ctx.userId },
         select: { role: true }
       });
 
@@ -59,7 +59,7 @@ export const assessmentRouter = createTRPCRouter({
         where: {
           id: input.assessmentId,
           // Allow admins to access any assessment, regular users only their own
-          ...(isAdmin ? {} : { userId: ctx.auth.userId })
+          ...(isAdmin ? {} : { userId: ctx.userId })
         },
         include: {
           feedbackItems: {
@@ -69,20 +69,19 @@ export const assessmentRouter = createTRPCRouter({
             ]
           },
           skillScores: {
+            include: {
+              skill: {
+                include: {
+                  domain: true
+                }
+              }
+            },
             orderBy: [
               { categoryOrder: 'asc' },
               { skillOrder: 'asc' }
             ]
           },
-          interview: true,
-          case: {
-            include: {
-              caseQuestions: {
-                orderBy: { orderIndex: 'asc' }
-              },
-              practiceSession: true
-            }
-          }
+          interview: true
         }
       });
 
@@ -93,7 +92,23 @@ export const assessmentRouter = createTRPCRouter({
         });
       }
 
-      return assessment;
+      // Fetch the case data if caseId exists
+      let interviewCase = null;
+      if (assessment.caseId) {
+        interviewCase = await ctx.db.interviewCase.findUnique({
+          where: { id: assessment.caseId },
+          include: {
+            caseQuestions: {
+              orderBy: { orderIndex: 'asc' }
+            }
+          }
+        });
+      }
+
+      return {
+        ...assessment,
+        case: interviewCase
+      };
     }),
 
   // Get assessment by interview ID
@@ -104,7 +119,7 @@ export const assessmentRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       // Check if user is admin or assessment owner
       const user = await ctx.db.user.findUnique({
-        where: { id: ctx.auth.userId },
+        where: { id: ctx.userId },
         select: { role: true }
       });
 
@@ -114,7 +129,7 @@ export const assessmentRouter = createTRPCRouter({
         where: {
           interviewId: input.interviewId,
           // Allow admins to access any assessment, regular users only their own
-          ...(isAdmin ? {} : { userId: ctx.auth.userId })
+          ...(isAdmin ? {} : { userId: ctx.userId })
         },
         include: {
           feedbackItems: {
@@ -124,20 +139,19 @@ export const assessmentRouter = createTRPCRouter({
             ]
           },
           skillScores: {
+            include: {
+              skill: {
+                include: {
+                  domain: true
+                }
+              }
+            },
             orderBy: [
               { categoryOrder: 'asc' },
               { skillOrder: 'asc' }
             ]
           },
-          interview: true,
-          case: {
-            include: {
-              caseQuestions: {
-                orderBy: { orderIndex: 'asc' }
-              },
-              practiceSession: true
-            }
-          }
+          interview: true
         }
       });
 
@@ -148,7 +162,23 @@ export const assessmentRouter = createTRPCRouter({
         });
       }
 
-      return assessment;
+      // Fetch the case data if caseId exists
+      let interviewCase = null;
+      if (assessment.caseId) {
+        interviewCase = await ctx.db.interviewCase.findUnique({
+          where: { id: assessment.caseId },
+          include: {
+            caseQuestions: {
+              orderBy: { orderIndex: 'asc' }
+            }
+          }
+        });
+      }
+
+      return {
+        ...assessment,
+        case: interviewCase
+      };
     }),
 
   // Get all assessments for current user (or all if admin)
@@ -156,7 +186,7 @@ export const assessmentRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       // Check if user is admin
       const user = await ctx.db.user.findUnique({
-        where: { id: ctx.auth.userId },
+        where: { id: ctx.userId },
         select: { role: true }
       });
 
@@ -165,15 +195,14 @@ export const assessmentRouter = createTRPCRouter({
       const assessments = await ctx.db.interviewAssessment.findMany({
         where: {
           // Admins see all assessments, regular users only their own
-          ...(isAdmin ? {} : { userId: ctx.auth.userId })
+          ...(isAdmin ? {} : { userId: ctx.userId })
         },
         include: {
           interview: {
             include: {
               jobDescription: true
             }
-          },
-          case: true
+          }
         },
         orderBy: {
           completedAt: 'desc'
@@ -191,7 +220,7 @@ export const assessmentRouter = createTRPCRouter({
       const interview = await ctx.db.interview.findFirst({
         where: {
           id: input.interviewId,
-          userId: ctx.auth.userId
+          userId: ctx.userId
         }
       });
 
@@ -202,10 +231,58 @@ export const assessmentRouter = createTRPCRouter({
         });
       }
 
+      // For each skill in the input, find or create the corresponding Skill record
+      const skillScoresData = await Promise.all(
+        input.skillScores.map(async (skillInput) => {
+          // Find the skill domain by name (using categoryName as domain name)
+          let domain = await ctx.db.skillDomain.findFirst({
+            where: { name: skillInput.categoryName }
+          });
+
+          // If domain doesn't exist, create it
+          if (!domain) {
+            // Get the max order to set the new domain's order
+            const maxDomain = await ctx.db.skillDomain.findFirst({
+              orderBy: { order: 'desc' }
+            });
+            domain = await ctx.db.skillDomain.create({
+              data: {
+                name: skillInput.categoryName,
+                order: (maxDomain?.order ?? -1) + 1
+              }
+            });
+          }
+
+          // Find or create the skill
+          let skill = await ctx.db.skill.findFirst({
+            where: {
+              name: skillInput.skillName,
+              domainId: domain.id
+            }
+          });
+
+          if (!skill) {
+            skill = await ctx.db.skill.create({
+              data: {
+                name: skillInput.skillName,
+                domainId: domain.id
+              }
+            });
+          }
+
+          return {
+            skillId: skill.id,
+            skillScore: skillInput.skillScore,
+            categoryOrder: skillInput.categoryOrder,
+            skillOrder: skillInput.skillOrder
+          };
+        })
+      );
+
       // Create the assessment with all related data
       const assessment = await ctx.db.interviewAssessment.create({
         data: {
-          userId: ctx.auth.userId,
+          userId: ctx.userId,
           interviewId: input.interviewId,
           caseId: input.caseId,
           overallScore: input.overallScore,
@@ -233,15 +310,7 @@ export const assessmentRouter = createTRPCRouter({
             }))
           },
           skillScores: {
-            create: input.skillScores.map(skill => ({
-              categoryName: skill.categoryName,
-              categoryIcon: skill.categoryIcon,
-              categoryOrder: skill.categoryOrder,
-              skillName: skill.skillName,
-              skillScore: skill.skillScore,
-              isFocusArea: skill.isFocusArea,
-              skillOrder: skill.skillOrder
-            }))
+            create: skillScoresData
           }
         },
         include: {
@@ -263,7 +332,7 @@ export const assessmentRouter = createTRPCRouter({
       const assessment = await ctx.db.interviewAssessment.findFirst({
         where: {
           id: input.assessmentId,
-          userId: ctx.auth.userId
+          userId: ctx.userId
         }
       });
 

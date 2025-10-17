@@ -780,10 +780,10 @@ export default function FeedbackDemoPage() {
                       </div>
                       <div className="flex-1">
                         <h4 className="text-base font-semibold text-gray-900 mb-1">
-                          {mockAssessment.questions[selectedQuestionIndex].questionText}
+                          {mockAssessment.questions[selectedQuestionIndex]?.questionText}
                         </h4>
                         <p className="text-sm text-gray-500">
-                          <span className="font-mono">{mockAssessment.questions[selectedQuestionIndex].timeRange}</span>
+                          <span className="font-mono">{mockAssessment.questions[selectedQuestionIndex]?.timeRange}</span>
                         </p>
                       </div>
                     </div>
