@@ -297,18 +297,10 @@ export function LiveInterviewSession({
       await geminiLive.startListening();
       console.log('✅ StartListening completed, isListening:', geminiLive.isListening);
 
-      // Start screen recording if enabled in config
-      if (geminiConfig?.enableScreenCapture) {
-        console.log('📹 Starting screen recording...');
-        try {
-          await geminiLive.startScreenRecording();
-          console.log('✅ Screen recording started!');
-        } catch (error) {
-          console.log('⚠️  Screen recording not started (user may have declined):', error);
-        }
-      }
+      // NOTE: We're using our own question-level video recorder instead of Gemini's screen capture
+      // Do NOT enable geminiConfig.enableScreenCapture to avoid double screen sharing prompts
 
-      // Initialize question video recorder
+      // Initialize question video recorder BEFORE marking session as started
       console.log('🎥 Initializing question video recorder...');
       await questionRecorder.initialize();
       console.log('✅ Question video recorder initialized!');
@@ -318,6 +310,7 @@ export function LiveInterviewSession({
       await questionRecorder.startRecording(0);
       console.log('✅ Recording started for question 1!');
 
+      // IMPORTANT: Mark session as started AFTER video recorder is ready
       setSessionStarted(true);
       setInterviewStartTime(new Date());
       console.log('🎉 Interview session fully started!');
