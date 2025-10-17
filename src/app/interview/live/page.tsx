@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useUser } from "@clerk/nextjs";
 import { redirect, useRouter } from "next/navigation";
 
@@ -24,10 +24,13 @@ import type { GeminiLiveConfig, ConversationSession } from "~/lib/gemini-live";
 export default function LiveInterviewPage() {
   const { user: clerkUser, isLoaded } = useUser();
   const router = useRouter();
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const caseId = searchParams.get('caseId');
   const [currentInterviewId, setCurrentInterviewId] = useState<string | null>(null);
   const [interviewData, setInterviewData] = useState<{ id: string } | null>(null);
   const [questionsData, setQuestionsData] = useState<Array<{ id: string; questionText: string; questionType: string; difficulty: string; expectedAnswer: string; evaluationCriteria: string[]; timeAllocation: number; followUpQuestions: string[] }>>([]);
   const [pageState, setPageState] = useState<"setup" | "settings" | "active" | "completed">("setup");
+  const [caseContext, setCaseContext] = useState<string | null>(null);
   
   // Debug state changes
   useEffect(() => {
@@ -61,6 +64,12 @@ Guidelines:
   const { data: jobDescriptions, isLoading: jobDescriptionsLoading } = api.jobDescription.list.useQuery(
     { limit: 1 },
     { enabled: !!user }
+  );
+
+  // Fetch case data if caseId is provided
+  const { data: interviewCase, isLoading: caseLoading } = api.practice.getInterviewCase.useQuery(
+    { caseId: caseId! },
+    { enabled: !!caseId && !!user }
   );
 
   // Create interview mutation
@@ -159,11 +168,110 @@ Guidelines:
     overall: false
   });
 
+  // Handle starting interview (defined early so it can be used in useEffect)
+  const handleStartInterview = useCallback(async () => {
+    try {
+      // Use case data if available, otherwise create demo job description
+      let jobDescriptionId: string;
+
+      if (interviewCase && interviewCase.practiceSession) {
+        // Check if we already have a job description for this practice session
+        const existingJobDesc = jobDescriptions?.[0];
+
+        if (existingJobDesc) {
+          jobDescriptionId = existingJobDesc.id;
+        } else {
+          // Create job description from case data
+          const demoJobDescription = await createDemoJobDescriptionMutation.mutateAsync({
+            title: interviewCase.practiceSession.jobTitle || "Data Professional",
+            company: interviewCase.practiceSession.company || undefined,
+            description: interviewCase.caseContext,
+            requirements: interviewCase.practiceSession.focusAreas || ["Technical Interview Skills"],
+            focusAreas: interviewCase.practiceSession.focusAreas || [],
+            isTemplate: false,
+          });
+          jobDescriptionId = demoJobDescription.id;
+        }
+      } else {
+        // Fallback to demo job description
+        const demoJobDescription = await createDemoJobDescriptionMutation.mutateAsync({
+          title: "Senior Data Scientist",
+          company: "TechCorp AI",
+          description: "Join our AI team as a Senior Data Scientist to build cutting-edge machine learning models and drive data-driven insights across the organization.",
+          requirements: [
+            "Masters/PhD in Computer Science, Statistics, or related field",
+            "5+ years of experience in data science and machine learning",
+            "Expert proficiency in Python, SQL, and ML frameworks",
+            "Experience with deep learning, NLP, and computer vision",
+            "Strong communication and leadership skills"
+          ],
+          focusAreas: ["Python Programming", "Machine Learning", "Deep Learning", "Statistics", "SQL", "Data Engineering"],
+          isTemplate: false,
+        });
+        jobDescriptionId = demoJobDescription.id;
+      }
+
+      await createInterviewMutation.mutateAsync({
+        jobDescriptionId,
+        scheduledAt: new Date(),
+      });
+    } catch (error) {
+      console.error("Failed to create interview:", error);
+    }
+  }, [interviewCase, jobDescriptions, createDemoJobDescriptionMutation, createInterviewMutation]);
+
   useEffect(() => {
     if (isLoaded && !clerkUser) {
       redirect("/sign-in");
     }
   }, [isLoaded, clerkUser]);
+
+  // Process case data when loaded
+  useEffect(() => {
+    if (interviewCase && caseId) {
+      console.log('Case data loaded:', interviewCase);
+
+      // Set case context
+      setCaseContext(interviewCase.caseContext);
+
+      // Convert case questions to the format expected by LiveInterviewSession
+      const formattedQuestions = interviewCase.caseQuestions.map((q) => ({
+        id: q.id,
+        questionText: q.questionText,
+        questionType: "TECHNICAL",
+        difficulty: "MEDIUM",
+        expectedAnswer: q.questionContext || "",
+        evaluationCriteria: q.skillsToEvaluate,
+        timeAllocation: 300, // 5 minutes per question
+        followUpQuestions: Array.isArray(q.followUpQuestions) ? q.followUpQuestions as string[] : []
+      }));
+
+      setQuestionsData(formattedQuestions);
+    }
+  }, [interviewCase, caseId]);
+
+  // Auto-start interview when caseId is present and case data is loaded
+  useEffect(() => {
+    if (
+      interviewCase &&
+      caseId &&
+      !currentInterviewId &&
+      !createInterviewMutation.isPending &&
+      !createDemoJobDescriptionMutation.isPending &&
+      pageState === "setup" // Only auto-start if we're still in setup state
+    ) {
+      console.log('🚀 Auto-starting interview for case:', caseId);
+      handleStartInterview();
+    }
+  }, [
+    interviewCase,
+    caseId,
+    currentInterviewId,
+    createInterviewMutation.isPending,
+    createDemoJobDescriptionMutation.isPending,
+    pageState,
+    handleStartInterview
+  ]);
 
   useEffect(() => {
     // Check browser compatibility
@@ -178,7 +286,7 @@ Guidelines:
     setBrowserCompatibility(compatibility);
   }, []);
 
-  if (!isLoaded || userLoading || jobDescriptionsLoading) {
+  if (!isLoaded || userLoading || jobDescriptionsLoading || (caseId && caseLoading)) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
@@ -208,34 +316,6 @@ Guidelines:
       </div>
     );
   }
-
-  const handleStartInterview = async () => {
-    try {
-      // Always create a fresh demo job description for the live interview
-      // This ensures we don't have stale ID issues and provides a consistent experience
-      const demoJobDescription = await createDemoJobDescriptionMutation.mutateAsync({
-        title: "Senior Data Scientist",
-        company: "TechCorp AI",
-        description: "Join our AI team as a Senior Data Scientist to build cutting-edge machine learning models and drive data-driven insights across the organization.",
-        requirements: [
-          "Masters/PhD in Computer Science, Statistics, or related field",
-          "5+ years of experience in data science and machine learning",
-          "Expert proficiency in Python, SQL, and ML frameworks",
-          "Experience with deep learning, NLP, and computer vision",
-          "Strong communication and leadership skills"
-        ],
-        focusAreas: ["Python Programming", "Machine Learning", "Deep Learning", "Statistics", "SQL", "Data Engineering"],
-        isTemplate: false,
-      });
-
-      await createInterviewMutation.mutateAsync({
-        jobDescriptionId: demoJobDescription.id,
-        scheduledAt: new Date(),
-      });
-    } catch (error) {
-      console.error("Failed to create interview:", error);
-    }
-  };
 
   const handleQuestionComplete = (questionId: string, answer: string) => {
     console.log(`Question ${questionId} completed with answer:`, answer);
@@ -518,20 +598,27 @@ Guidelines:
   // Active interview
   if (pageState === "active" && currentInterviewId && interviewData) {
     console.log("Rendering active interview:", { pageState, currentInterviewId, interviewData });
+
+    // Use case data if available, otherwise use demo data
+    const jobTitle = interviewCase?.practiceSession?.jobTitle || "Senior Data Scientist";
+    const companyName = interviewCase?.practiceSession?.company || "TechCorp AI";
+    const focusAreas = interviewCase?.practiceSession?.focusAreas || ["Python Programming", "Machine Learning", "Deep Learning", "Statistics", "SQL", "Data Engineering"];
+
     return (
       <div className="min-h-screen bg-gray-50">
         <LiveInterviewSession
           interview={{
             id: interviewData?.id ?? '',
             jobDescription: {
-              title: "Senior Data Scientist",
-              companyName: "TechCorp AI",
-              focusAreas: ["Python Programming", "Machine Learning", "Deep Learning", "Statistics", "SQL", "Data Engineering"],
+              title: jobTitle,
+              companyName: companyName,
+              focusAreas: focusAreas,
               difficulty: "SENIOR" as const,
             },
           }}
           questions={questionsData}
           geminiConfig={geminiConfig}
+          caseContext={caseContext || undefined}
           onQuestionComplete={handleQuestionComplete}
           onInterviewComplete={handleInterviewComplete}
           onError={handleError}
