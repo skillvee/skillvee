@@ -20,6 +20,7 @@ interface RecorderState {
 interface UseQuestionVideoRecorderProps {
   interviewId: string;
   questions: Question[];
+  providedStream?: MediaStream;
   onError?: (error: string) => void;
   onRecordingStart?: (questionIndex: number) => void;
   onRecordingStop?: (questionIndex: number) => void;
@@ -29,6 +30,7 @@ interface UseQuestionVideoRecorderProps {
 export function useQuestionVideoRecorder({
   interviewId,
   questions,
+  providedStream,
   onError,
   onRecordingStart,
   onRecordingStop,
@@ -47,6 +49,7 @@ export function useQuestionVideoRecorder({
   // Refs to maintain across renders
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const ownsStreamRef = useRef<boolean>(false);
   const chunksRef = useRef<Blob[]>([]);
   const recordingStartTimeRef = useRef<number | null>(null);
 
@@ -60,13 +63,23 @@ export function useQuestionVideoRecorder({
     try {
       console.log("[Recorder] Initializing screen capture...");
 
-      // Request screen capture with audio
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: {
-          displaySurface: "monitor",
-        } as MediaTrackConstraints,
-        audio: true,
-      });
+      let stream: MediaStream;
+
+      // Use provided stream if available, otherwise request screen capture
+      if (providedStream) {
+        console.log("[Recorder] Using provided external stream");
+        stream = providedStream;
+        ownsStreamRef.current = false;
+      } else {
+        console.log("[Recorder] Requesting new screen capture");
+        stream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            displaySurface: "monitor",
+          } as MediaTrackConstraints,
+          audio: true,
+        });
+        ownsStreamRef.current = true;
+      }
 
       // Check if user has granted both video and audio
       const videoTrack = stream.getVideoTracks()[0];
@@ -134,7 +147,7 @@ export function useQuestionVideoRecorder({
       onError?.(errorMessage);
       throw error;
     }
-  }, [onError]);
+  }, [providedStream, onError]);
 
   // Start recording for a specific question
   const startRecording = useCallback(async (questionIndex: number) => {
@@ -327,12 +340,14 @@ export function useQuestionVideoRecorder({
       mediaRecorderRef.current.stop();
     }
 
-    if (streamRef.current) {
+    // Only stop tracks if we own the stream
+    if (streamRef.current && ownsStreamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
     }
 
     mediaRecorderRef.current = null;
     streamRef.current = null;
+    ownsStreamRef.current = false;
     chunksRef.current = [];
     recordingStartTimeRef.current = null;
 

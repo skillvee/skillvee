@@ -1,8 +1,9 @@
 # Question-Level Video Recording - Implementation Summary
 
 **Feature Branch:** `feat/question-level-video-recording`
-**Status:** ✅ **COMPLETE - Ready for Testing**
+**Status:** ✅ **COMPLETE - Testing in Progress**
 **Date:** 2025-10-17
+**Last Updated:** 2025-10-17 - Fixed AI greeting issue
 
 ---
 
@@ -15,6 +16,7 @@ Successfully implemented a complete question-level video recording system that:
 - Implements retry logic with exponential backoff
 - Displays all question videos in the results page
 - Integrates with AI for contextual question transitions
+- **Fixed:** AI now greets the candidate immediately after screen sharing
 
 ---
 
@@ -263,6 +265,7 @@ Please acknowledge the transition and begin discussing this question.
 - ✅ AI context switching
 - ✅ Results page with video gallery
 - ✅ TypeScript compilation
+- ✅ **Single screen sharing prompt** (AI + video recording share stream)
 
 ---
 
@@ -347,8 +350,75 @@ DATABASE_URL=
 ## 🔗 Related Documentation
 
 - **PRD:** [docs/PRD_Question_Level_Video_Recording.md](./PRD_Question_Level_Video_Recording.md)
+- **Single Screen Prompt Solution:** [docs/SINGLE_SCREEN_PROMPT_IMPLEMENTATION.md](./SINGLE_SCREEN_PROMPT_IMPLEMENTATION.md)
 - **Supabase Docs:** Storage policies and signed URLs
 - **MediaRecorder API:** MDN Web Docs
+
+---
+
+## 🐛 Bug Fixes
+
+### Issue #1: AI Not Greeting User First (Fixed 2025-10-17)
+
+**Problem:**
+After implementing the single screen sharing prompt, the AI stopped greeting the user immediately after screen sharing was granted. Instead, users had to speak first before the AI would respond.
+
+**Root Cause:**
+
+The sequence of operations in `startSession()` was incorrect:
+
+1. ✅ Connect to Gemini Live
+2. ❌ **Start listening for audio** (`startListening()`)
+3. ✅ Send initial greeting message (`sendText()`)
+
+When `startListening()` was called BEFORE the greeting message was sent, the microphone started capturing audio immediately. The Gemini Live API then waited for USER audio input first, rather than responding to the initial text prompt.
+
+**Solution:**
+
+After extensive debugging with comprehensive logging, the root cause was discovered: the AI was responding to context messages with empty output because the messages were structured incorrectly. The solution was to use the existing `sendInitialGreeting()` method which sends a message **from the user's perspective**, naturally prompting the AI interviewer to respond.
+
+```typescript
+// FINAL FIX (working):
+await geminiLive.connect(...)
+// ... setup ...
+geminiLive.sendInitialGreeting()    // ✅ Sends: "Hello! I'm here for the interview..."
+await geminiLive.startListening()   // ✅ THEN start listening
+```
+
+The `sendInitialGreeting()` method sends: `"Hello! I'm here for the [job title] interview. Please introduce yourself and let's begin!"` which is from the candidate's perspective, naturally triggering the AI to introduce themselves as the interviewer.
+
+**Changes Made:**
+
+1. **Added `sendText` method to `GeminiLiveClient` class**
+   - **File:** `src/lib/gemini-live.ts` (lines 1008-1014)
+   - Made `sendText` a public method for flexibility
+
+2. **Added `sendText` to TypeScript interface**
+   - **File:** `src/hooks/useGeminiLive.ts` (line 39)
+   - Added to `UseGeminiLiveActions` interface for proper type checking
+
+3. **Fixed session initialization to use `sendInitialGreeting()`**
+   - **File:** `src/components/interview/LiveInterviewSession.tsx` (lines 344-349)
+   - Use `sendInitialGreeting()` instead of sending context as user message
+   - Reordered: greeting BEFORE `startListening()`
+   - Removed verbose logging
+
+4. **Cleaned up excessive debugging logs**
+   - **File:** `src/lib/gemini-live.ts` (WebSocket client methods)
+   - Removed verbose console logs while keeping error logging
+
+**Result:**
+
+✅ AI now greets the candidate immediately after screen sharing
+✅ Natural conversation flow restored
+✅ No need for user to speak first
+✅ `sendText` method properly exposed through hook
+
+**Reference:**
+
+- Gemini Live API requires `clientContent` to trigger a response
+- Once `startListening()` is active, the API prioritizes audio input over text messages
+- Proper sequence: Connect → Send greeting → Start listening
 
 ---
 

@@ -77,6 +77,9 @@ export function LiveInterviewSession({
   const [showNextQuestionDialog, setShowNextQuestionDialog] = useState(false);
   const [recordingError, setRecordingError] = useState<string | null>(null);
 
+  // Shared MediaStream for both AI screen capture and video recording
+  const sharedStreamRef = useRef<MediaStream | null>(null);
+
   // Question video recorder
   const questionRecorder = useQuestionVideoRecorder({
     interviewId: interview.id,
@@ -85,6 +88,7 @@ export function LiveInterviewSession({
       questionText: q.questionText,
       questionOrder: idx,
     })),
+    providedStream: sharedStreamRef.current ?? undefined,
     onError: (error) => {
       console.error('Question recorder error:', error);
       setRecordingError(error);
@@ -240,6 +244,17 @@ export function LiveInterviewSession({
     return () => clearInterval(interval);
   }, [sessionStarted, interviewStartTime, isSessionPaused]);
 
+  // Cleanup shared stream on unmount
+  useEffect(() => {
+    return () => {
+      if (sharedStreamRef.current) {
+        console.log('[Cleanup] Stopping shared MediaStream tracks');
+        sharedStreamRef.current.getTracks().forEach(track => track.stop());
+        sharedStreamRef.current = null;
+      }
+    };
+  }, []);
+
   // Auto-show permissions dialog when caseContext exists (coming from practice flow)
   useEffect(() => {
     if (caseContext && !sessionStarted && !showPermissionsDialog && !hasConsentedToPermissions) {
@@ -293,15 +308,26 @@ export function LiveInterviewSession({
       await geminiLive.connect(context, conversationResult.config.apiKey);
       console.log('✅ Connection and setup completed!');
 
-      console.log('🎤 Starting to listen for audio...');
-      await geminiLive.startListening();
-      console.log('✅ StartListening completed, isListening:', geminiLive.isListening);
+      // Request screen sharing ONCE - this will be shared between both systems
+      console.log('🖥️ Requesting screen sharing (single prompt)...');
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          displaySurface: "monitor",
+        } as MediaTrackConstraints,
+        audio: true,
+      });
+      sharedStreamRef.current = stream;
+      console.log('✅ Screen sharing granted!');
 
-      // NOTE: We're using our own question-level video recorder instead of Gemini's screen capture
-      // Do NOT enable geminiConfig.enableScreenCapture to avoid double screen sharing prompts
+      // Start Gemini screen recording with the shared stream
+      if (geminiConfig?.enableScreenCapture) {
+        console.log('📸 Starting Gemini screen capture with shared stream...');
+        await geminiLive.startScreenRecording(stream);
+        console.log('✅ Gemini screen capture started!');
+      }
 
-      // Initialize question video recorder BEFORE marking session as started
-      console.log('🎥 Initializing question video recorder...');
+      // Initialize question video recorder with the shared stream
+      console.log('🎥 Initializing question video recorder with shared stream...');
       await questionRecorder.initialize();
       console.log('✅ Question video recorder initialized!');
 
@@ -315,35 +341,12 @@ export function LiveInterviewSession({
       setInterviewStartTime(new Date());
       console.log('🎉 Interview session fully started!');
 
-      // Now send the greeting WITH CONTEXT to start the actual interview conversation
-      console.log('🎬 Starting interview conversation with context...');
-      setTimeout(() => {
-        // Build comprehensive context for AI
-        const aiContext = `You are conducting a technical interview for the position of ${interview.jobDescription.title}${interview.jobDescription.companyName ? ` at ${interview.jobDescription.companyName}` : ''}.
+      // Use the built-in sendInitialGreeting method that sends a message FROM the user
+      // This naturally prompts the AI to respond as an interviewer
+      geminiLive.sendInitialGreeting();
 
-INTERVIEW STRUCTURE:
-This interview has ${questions.length} questions that you will ask one by one. The candidate will tell you when they're ready to move to the next question.
-
-${caseContext ? `CASE CONTEXT:\n${caseContext}\n\n` : ''}QUESTIONS:
-${questions.map((q, idx) => `
-Question ${idx + 1}: ${q.questionText}
-${q.evaluationCriteria?.length ? `Skills to Evaluate: ${q.evaluationCriteria.join(", ")}` : ''}
-${q.followUpQuestions?.length ? `Follow-up Questions (use if needed):\n${q.followUpQuestions.map((fu, i) => `  ${i + 1}. ${fu}`).join("\n")}` : ''}
-`).join('\n')}
-
-INSTRUCTIONS:
-- Start by greeting the candidate and asking Question 1
-- Listen carefully to their answers
-- Ask follow-up questions only if their answer lacks detail or clarity
-- When they indicate they're ready, acknowledge and move to the next question
-- Be encouraging but maintain professional standards
-- Keep your responses concise and natural
-
-Please greet the candidate and begin with Question 1.`;
-
-        // Send the context message
-        geminiLive.sendText(aiContext);
-      }, 1000); // Brief delay to ensure UI has updated
+      // THEN start listening for user audio (after AI has the prompt)
+      await geminiLive.startListening();
 
     } catch (error) {
       console.error('❌ Failed to start session:', error);
@@ -352,6 +355,13 @@ Please greet the candidate and begin with Question 1.`;
       // Cleanup on error
       try {
         questionRecorder.cleanup();
+
+        // Cleanup shared stream
+        if (sharedStreamRef.current) {
+          console.log('[Cleanup] Stopping shared MediaStream tracks (error handler)');
+          sharedStreamRef.current.getTracks().forEach(track => track.stop());
+          sharedStreamRef.current = null;
+        }
       } catch (cleanupError) {
         console.error('Cleanup error:', cleanupError);
       }
@@ -441,6 +451,13 @@ Please acknowledge the transition and begin discussing this question with the ca
 
       // Cleanup question recorder
       questionRecorder.cleanup();
+
+      // Cleanup shared stream
+      if (sharedStreamRef.current) {
+        console.log('[Cleanup] Stopping shared MediaStream tracks');
+        sharedStreamRef.current.getTracks().forEach(track => track.stop());
+        sharedStreamRef.current = null;
+      }
 
       // Finalize any remaining accumulated transcript
       finalizeCurrentTranscript();

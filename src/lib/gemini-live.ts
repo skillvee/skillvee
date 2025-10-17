@@ -218,31 +218,40 @@ class ScreenRecorder {
   private onScreenCapture: ((capture: ScreenCapture) => void) | null = null;
   private onVideoChunk: ((base64: string) => void) | null = null;
   private isRecording = false;
+  private isExternalStream = false;
 
   /**
    * Start screen recording
    * @param onScreenCapture Callback for periodic screenshots
    * @param onVideoChunk Callback for video stream data
    * @param captureIntervalMs Interval for taking screenshots (default: 5000ms)
+   * @param externalStream Optional external MediaStream to use instead of requesting new one
    */
   async start(
     onScreenCapture: (capture: ScreenCapture) => void,
     onVideoChunk?: (base64: string) => void,
-    captureIntervalMs: number = 5000
+    captureIntervalMs: number = 5000,
+    externalStream?: MediaStream
   ): Promise<void> {
     this.onScreenCapture = onScreenCapture;
     this.onVideoChunk = onVideoChunk || null;
 
     try {
-      // Request screen sharing permission
-      this.stream = await navigator.mediaDevices.getDisplayMedia({
-        video: {
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          frameRate: { ideal: 15 }
-        } as DisplayMediaStreamOptions['video'],
-        audio: false // We handle audio separately
-      });
+      // Use external stream if provided, otherwise request screen sharing permission
+      if (externalStream) {
+        this.stream = externalStream;
+        this.isExternalStream = true;
+      } else {
+        this.stream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            frameRate: { ideal: 15 }
+          } as DisplayMediaStreamOptions['video'],
+          audio: false // We handle audio separately
+        });
+        this.isExternalStream = false;
+      }
 
       // Setup video element for frame capture
       this.videoElement = document.createElement('video');
@@ -318,11 +327,12 @@ class ScreenRecorder {
         this.captureInterval = null;
       }
 
-      // Stop all tracks
-      if (this.stream) {
+      // Stop all tracks only if we own the stream
+      if (this.stream && !this.isExternalStream) {
         this.stream.getTracks().forEach(track => track.stop());
-        this.stream = null;
       }
+      this.stream = null;
+      this.isExternalStream = false;
 
       // Cleanup video element
       if (this.videoElement) {
@@ -576,7 +586,7 @@ class GeminiWebSocketClient {
     }
 
     this.isConnecting = true;
-    
+
     this.connectionPromise = new Promise((resolve, reject) => {
       const ws = new WebSocket(this.url);
 
@@ -590,6 +600,7 @@ class GeminiWebSocketClient {
       });
 
       ws.addEventListener('error', (error) => {
+        console.error('[WebSocketClient] Connection error:', error);
         this.isConnecting = false;
         reject(error);
       });
@@ -612,7 +623,7 @@ class GeminiWebSocketClient {
     try {
       const text = await blob.text();
       const response = JSON.parse(text);
-      
+
       // Handle setup completion
       if (response.setupComplete) {
         this.emit('connected', {});
@@ -669,6 +680,7 @@ class GeminiWebSocketClient {
         }
       }
     } catch (error) {
+      console.error('[WebSocketClient] Error processing message:', error);
       this.emit('error', { error: 'Failed to process message' });
     }
   }
@@ -686,14 +698,14 @@ class GeminiWebSocketClient {
   }
 
   async sendText(text: string, endOfTurn = true): Promise<void> {
-    const data = { 
-      clientContent: { 
+    const data = {
+      clientContent: {
         turns: [{
-          role: 'user', 
+          role: 'user',
           parts: [{ text: text }]
-        }], 
-        turnComplete: endOfTurn 
-      } 
+        }],
+        turnComplete: endOfTurn
+      }
     };
     await this.sendJSON(data);
   }
@@ -701,6 +713,8 @@ class GeminiWebSocketClient {
   private async sendJSON(json: any): Promise<void> {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(json));
+    } else {
+      console.warn('[WebSocketClient] Cannot send - WebSocket not open');
     }
   }
 
@@ -951,7 +965,7 @@ export class GeminiLiveClient {
     this.emit('listening-stop', {});
   }
 
-  async startScreenRecording(captureIntervalMs: number = 5000): Promise<void> {
+  async startScreenRecording(captureIntervalMs: number = 5000, externalStream?: MediaStream): Promise<void> {
     if (!this.config.enableScreenCapture) {
       throw new Error('Screen capture not enabled in config');
     }
@@ -966,7 +980,8 @@ export class GeminiLiveClient {
           this.emit('screen-capture', capture);
         },
         undefined,
-        captureIntervalMs
+        captureIntervalMs,
+        externalStream
       );
 
       this._isScreenRecording = true;
@@ -988,6 +1003,14 @@ export class GeminiLiveClient {
 
     const greeting = `Hello! I'm here for the ${this.context?.jobTitle} interview. Please introduce yourself and let's begin!`;
     this.client.sendText(greeting);
+  }
+
+  sendText(text: string, endOfTurn = true): void {
+    if (!this.client || !this._isConnected) {
+      console.warn('[GeminiLiveClient] Cannot send text: client not connected');
+      return;
+    }
+    this.client.sendText(text, endOfTurn);
   }
 
   private handleUserTranscript(transcript: string, timestamp: string): void {

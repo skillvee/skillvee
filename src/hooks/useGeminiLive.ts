@@ -32,10 +32,11 @@ export interface UseGeminiLiveActions {
   disconnect: () => Promise<void>;
   startListening: () => Promise<void>;
   stopListening: () => void;
-  startScreenRecording: () => Promise<void>;
+  startScreenRecording: (externalStream?: MediaStream) => Promise<void>;
   stopScreenRecording: () => void;
   updateContext: (context: Partial<InterviewContext>) => void;
   sendInitialGreeting: () => void;
+  sendText: (text: string, endOfTurn?: boolean) => void;
   clearError: () => void;
   reconnect: () => Promise<void>;
   exportConversation: () => any;
@@ -233,13 +234,13 @@ export function useGeminiLive(options: UseGeminiLiveOptions = {}): UseGeminiLive
     clientRef.current.stopListening();
   }, []);
 
-  const startScreenRecording = useCallback(async () => {
+  const startScreenRecording = useCallback(async (externalStream?: MediaStream) => {
     if (!clientRef.current) {
       throw new Error('Gemini Live client not initialized');
     }
 
     try {
-      await clientRef.current.startScreenRecording();
+      await clientRef.current.startScreenRecording(5000, externalStream);
       setState(prev => ({ ...prev, isScreenRecording: true }));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to start screen recording';
