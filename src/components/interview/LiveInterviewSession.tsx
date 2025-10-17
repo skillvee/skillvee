@@ -315,19 +315,53 @@ export function LiveInterviewSession({
       setInterviewStartTime(new Date());
       console.log('🎉 Interview session fully started!');
 
-      // Now send the greeting to start the actual interview conversation
-      console.log('🎬 Starting interview conversation...');
+      // Now send the greeting WITH CONTEXT to start the actual interview conversation
+      console.log('🎬 Starting interview conversation with context...');
       setTimeout(() => {
-        geminiLive.sendInitialGreeting();
-      }, 500); // Brief delay to ensure UI has updated
+        // Build comprehensive context for AI
+        const aiContext = `You are conducting a technical interview for the position of ${interview.jobDescription.title}${interview.jobDescription.companyName ? ` at ${interview.jobDescription.companyName}` : ''}.
+
+INTERVIEW STRUCTURE:
+This interview has ${questions.length} questions that you will ask one by one. The candidate will tell you when they're ready to move to the next question.
+
+${caseContext ? `CASE CONTEXT:\n${caseContext}\n\n` : ''}QUESTIONS:
+${questions.map((q, idx) => `
+Question ${idx + 1}: ${q.questionText}
+${q.evaluationCriteria?.length ? `Skills to Evaluate: ${q.evaluationCriteria.join(", ")}` : ''}
+${q.followUpQuestions?.length ? `Follow-up Questions (use if needed):\n${q.followUpQuestions.map((fu, i) => `  ${i + 1}. ${fu}`).join("\n")}` : ''}
+`).join('\n')}
+
+INSTRUCTIONS:
+- Start by greeting the candidate and asking Question 1
+- Listen carefully to their answers
+- Ask follow-up questions only if their answer lacks detail or clarity
+- When they indicate they're ready, acknowledge and move to the next question
+- Be encouraging but maintain professional standards
+- Keep your responses concise and natural
+
+Please greet the candidate and begin with Question 1.`;
+
+        // Send the context message
+        geminiLive.sendTextMessage(aiContext);
+      }, 1000); // Brief delay to ensure UI has updated
 
     } catch (error) {
-      console.error('Failed to start session:', error);
+      console.error('❌ Failed to start session:', error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+
+      // Cleanup on error
+      try {
+        questionRecorder.cleanup();
+      } catch (cleanupError) {
+        console.error('Cleanup error:', cleanupError);
+      }
 
       // Provide more specific error messages
       let errorMessage = 'Failed to start interview session';
       if (error instanceof Error) {
-        if (error.message.includes('API key')) {
+        if (error.message.includes('Recorder not initialized')) {
+          errorMessage = 'Failed to initialize screen recorder. Please refresh and try again. Make sure you grant screen sharing permissions.';
+        } else if (error.message.includes('API key')) {
           errorMessage = 'Google AI API key is missing or invalid. Please check your environment configuration.';
         } else if (error.message.includes('Connection timeout')) {
           errorMessage = 'Connection to Gemini Live API timed out. Please check your internet connection and try again.';
@@ -339,6 +373,7 @@ export function LiveInterviewSession({
       }
 
       onError?.(errorMessage);
+      setIsStartingSession(false);
     }
   }, [
     permissions.hasMicrophoneAccess,
@@ -347,6 +382,8 @@ export function LiveInterviewSession({
     questions,
     geminiLive,
     startConversationMutation,
+    questionRecorder,
+    caseContext,
     onError
   ]);
 

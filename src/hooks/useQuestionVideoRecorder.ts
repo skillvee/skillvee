@@ -138,7 +138,13 @@ export function useQuestionVideoRecorder({
 
   // Start recording for a specific question
   const startRecording = useCallback(async (questionIndex: number) => {
-    if (!mediaRecorderRef.current || !state.isInitialized) {
+    // Check refs directly since state updates are async
+    if (!mediaRecorderRef.current || !streamRef.current) {
+      console.error("[Recorder] startRecording called but recorder not ready:", {
+        hasRecorder: !!mediaRecorderRef.current,
+        hasStream: !!streamRef.current,
+        stateInitialized: state.isInitialized
+      });
       throw new Error("Recorder not initialized");
     }
 
