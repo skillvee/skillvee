@@ -23,6 +23,9 @@ import { api } from "~/trpc/react";
 import { CaseContextDisplay } from "./CaseContextDisplay";
 import { InterviewNotepad } from "./InterviewNotepad";
 import { PermissionsConsentDialog } from "./PermissionsConsentDialog";
+import { CurrentQuestionDisplay } from "./CurrentQuestionDisplay";
+import { NextQuestionDialog } from "./NextQuestionDialog";
+import { useQuestionVideoRecorder } from "~/hooks/useQuestionVideoRecorder";
 
 export interface LiveInterviewSessionProps {
   interview: {
@@ -68,6 +71,36 @@ export function LiveInterviewSession({
   const [showPermissionsDialog, setShowPermissionsDialog] = useState(false);
   const [isStartingSession, setIsStartingSession] = useState(false);
   const [hasConsentedToPermissions, setHasConsentedToPermissions] = useState(false);
+
+  // Question progression state
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [showNextQuestionDialog, setShowNextQuestionDialog] = useState(false);
+  const [recordingError, setRecordingError] = useState<string | null>(null);
+
+  // Question video recorder
+  const questionRecorder = useQuestionVideoRecorder({
+    interviewId: interview.id,
+    questions: questions.map((q, idx) => ({
+      id: q.id,
+      questionText: q.questionText,
+      questionOrder: idx,
+    })),
+    onError: (error) => {
+      console.error('Question recorder error:', error);
+      setRecordingError(error);
+      onError?.(error);
+    },
+    onRecordingStart: (questionIndex) => {
+      console.log(`Started recording question ${questionIndex + 1}`);
+    },
+    onRecordingStop: (questionIndex) => {
+      console.log(`Stopped recording question ${questionIndex + 1}`);
+    },
+    onTransitionComplete: (nextQuestionIndex) => {
+      console.log(`Transitioned to question ${nextQuestionIndex + 1}`);
+      setCurrentQuestionIndex(nextQuestionIndex);
+    },
+  });
 
   // Transcript tracking (hidden from UI but stored for database)
   const [transcripts, setTranscripts] = useState<Array<{
@@ -275,6 +308,16 @@ export function LiveInterviewSession({
         }
       }
 
+      // Initialize question video recorder
+      console.log('🎥 Initializing question video recorder...');
+      await questionRecorder.initialize();
+      console.log('✅ Question video recorder initialized!');
+
+      // Start recording first question
+      console.log('🔴 Starting recording for question 1...');
+      await questionRecorder.startRecording(0);
+      console.log('✅ Recording started for question 1!');
+
       setSessionStarted(true);
       setInterviewStartTime(new Date());
       console.log('🎉 Interview session fully started!');
@@ -314,9 +357,61 @@ export function LiveInterviewSession({
     onError
   ]);
 
-  // End interview session
-  const endSession = useCallback(async () => {
+  // Handle next question button click
+  const handleNextQuestion = useCallback(() => {
+    setShowNextQuestionDialog(true);
+  }, []);
+
+  // Handle confirm next question transition
+  const handleConfirmNextQuestion = useCallback(async () => {
     try {
+      const isLastQuestion = currentQuestionIndex >= questions.length - 1;
+
+      if (isLastQuestion) {
+        // Last question - end interview
+        await handleEndInterview();
+      } else {
+        // Transition to next question
+        const nextIndex = currentQuestionIndex + 1;
+        await questionRecorder.transitionToNextQuestion(nextIndex);
+
+        // Notify AI about question change
+        const nextQuestion = questions[nextIndex];
+        if (nextQuestion) {
+          const aiMessage = `QUESTION_TRANSITION: We are now moving to Question ${nextIndex + 1}.
+
+Question ${nextIndex + 1}: ${nextQuestion.questionText}
+
+Skills to Evaluate: ${nextQuestion.evaluationCriteria?.join(", ") || "General assessment"}
+
+Available Follow-ups (use if needed):
+${nextQuestion.followUpQuestions?.map((fu, i) => `${i + 1}. ${fu}`).join("\n") || "None"}
+
+Please acknowledge the transition and begin discussing this question with the candidate.`;
+
+          geminiLive.sendTextMessage(aiMessage);
+        }
+      }
+
+      setShowNextQuestionDialog(false);
+    } catch (error) {
+      console.error("Failed to transition to next question:", error);
+      setRecordingError("Failed to save video. Please try again.");
+    }
+  }, [currentQuestionIndex, questions, questionRecorder, geminiLive]);
+
+  // Handle end interview
+  const handleEndInterview = useCallback(async () => {
+    try {
+      // Stop current question recording
+      if (questionRecorder.isRecording) {
+        console.log('🛑 Stopping final question recording...');
+        await questionRecorder.stopRecording();
+      }
+
+      // Cleanup question recorder
+      questionRecorder.cleanup();
+
       // Finalize any remaining accumulated transcript
       finalizeCurrentTranscript();
 
@@ -331,9 +426,14 @@ export function LiveInterviewSession({
       // Pass conversation data to parent
       onInterviewComplete?.(conversationData);
     } catch (error) {
-      console.error('Failed to end session:', error);
+      console.error('Failed to end interview:', error);
     }
-  }, [geminiLive, onInterviewComplete, finalizeCurrentTranscript]);
+  }, [questionRecorder, geminiLive, onInterviewComplete, finalizeCurrentTranscript]);
+
+  // Legacy end session (for compatibility)
+  const endSession = useCallback(async () => {
+    await handleEndInterview();
+  }, [handleEndInterview]);
 
   // Pause/Resume session
   const togglePause = useCallback(() => {
@@ -441,6 +541,16 @@ The company is considering launching a **group video chat** feature. You'll be u
 
   return (
     <div className="min-h-screen bg-background p-6">
+      {/* Recording Error Alert */}
+      {recordingError && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {recordingError}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Header with session status - Full width */}
       <Card className="mb-6">
         <CardHeader className="pb-4">
@@ -542,8 +652,18 @@ The company is considering launching a **group video chat** feature. You'll be u
             />
           </div>
 
-          {/* Right Panel: Interview notes and controls */}
+          {/* Right Panel: Question, notes, and controls */}
           <div className="lg:col-span-1 h-[calc(100vh-12rem)] flex flex-col">
+            {/* Current Question Display */}
+            {sessionStarted && questions.length > 0 && (
+              <CurrentQuestionDisplay
+                questionText={questions[currentQuestionIndex]?.questionText || ""}
+                currentIndex={currentQuestionIndex}
+                totalQuestions={questions.length}
+                className="mb-4"
+              />
+            )}
+
             {/* Interview Notepad */}
             <InterviewNotepad
               initialNotes={interviewNotes}
@@ -579,18 +699,29 @@ The company is considering launching a **group video chat** feature. You'll be u
                     </div>
 
                     <Button
-                      variant="destructive"
+                      variant="default"
                       size="sm"
-                      onClick={endSession}
+                      onClick={handleNextQuestion}
+                      disabled={questionRecorder.isTransitioning}
                     >
-                      <PhoneOff className="w-4 h-4 mr-2" />
-                      End Interview
+                      {currentQuestionIndex >= questions.length - 1 ? "End Interview" : "Next Question"}
                     </Button>
                   </div>
                 </CardContent>
               </Card>
             )}
           </div>
+
+          {/* Next Question Dialog */}
+          <NextQuestionDialog
+            open={showNextQuestionDialog}
+            currentQuestion={currentQuestionIndex}
+            totalQuestions={questions.length}
+            isLastQuestion={currentQuestionIndex >= questions.length - 1}
+            onConfirm={handleConfirmNextQuestion}
+            onCancel={() => setShowNextQuestionDialog(false)}
+            isTransitioning={questionRecorder.isTransitioning}
+          />
         </div>
       ) : !sessionStarted ? (
         // Fallback for non-case interviews: show "Ready to start" card

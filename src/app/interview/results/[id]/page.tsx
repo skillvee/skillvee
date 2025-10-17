@@ -7,8 +7,9 @@ import { Badge } from "~/components/ui/badge";
 import { Separator } from "~/components/ui/separator";
 import { api } from "~/trpc/react";
 import { ConversationExportService } from "~/server/services/conversation-export.service";
-import { ArrowLeft, Download, FileText, MessageSquare, Camera } from "lucide-react";
+import { ArrowLeft, Download, FileText, MessageSquare, Camera, Video, AlertCircle, RefreshCw } from "lucide-react";
 import type { ConversationSession } from "~/lib/gemini-live";
+import { Alert, AlertDescription } from "~/components/ui/alert";
 
 export default function InterviewResultsPage() {
   const params = useParams();
@@ -19,6 +20,12 @@ export default function InterviewResultsPage() {
   const { data: conversationTranscript, isLoading, error } = api.interview.getConversationData.useQuery(
     { interviewId },
     { enabled: !!interviewId }
+  );
+
+  // Fetch question recordings
+  const { data: questionRecordings, isLoading: recordingsLoading } = api.questionRecording.getByInterviewId.useQuery(
+    { interviewId, includeTranscription: false },
+    { enabled: !!interviewId, refetchInterval: 5000 } // Poll for upload progress
   );
 
   if (isLoading) {
@@ -263,6 +270,91 @@ export default function InterviewResultsPage() {
                 <p className="text-sm text-gray-600 mt-4 text-center">
                   + {screenshots.length - 8} more screenshots
                 </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Question Recordings */}
+        {questionRecordings && questionRecordings.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Video className="w-5 h-5 mr-2" />
+                Question Recordings
+              </CardTitle>
+              <CardDescription>
+                Video recordings for each interview question
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {questionRecordings.map((recording) => (
+                  <div key={recording.id} className="border rounded-lg p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <Badge variant="outline" className="mb-2">
+                          Question {recording.questionOrder + 1}
+                        </Badge>
+                        <p className="text-sm font-medium">{recording.questionText}</p>
+                      </div>
+                      <Badge
+                        variant={
+                          recording.uploadStatus === "COMPLETED" ? "default" :
+                          recording.uploadStatus === "UPLOADING" ? "secondary" :
+                          "destructive"
+                        }
+                      >
+                        {recording.uploadStatus}
+                      </Badge>
+                    </div>
+
+                    {recording.uploadStatus === "COMPLETED" && recording.videoUrl && (
+                      <div className="mt-3">
+                        <video
+                          src={recording.videoUrl}
+                          controls
+                          className="w-full rounded border bg-black"
+                          style={{ maxHeight: "400px" }}
+                        />
+                        <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+                          <span>
+                            Duration: {recording.duration ? `${Math.floor(recording.duration / 60)}:${(recording.duration % 60).toString().padStart(2, '0')}` : 'N/A'}
+                          </span>
+                          <span>
+                            Size: {recording.fileSize ? `${(Number(recording.fileSize) / 1024 / 1024).toFixed(2)} MB` : 'N/A'}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {recording.uploadStatus === "UPLOADING" && (
+                      <div className="mt-3 text-center text-sm text-muted-foreground py-4">
+                        <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                        <p>Uploading video...</p>
+                        {recording.uploadRetryCount > 0 && (
+                          <p className="text-xs mt-1">Retry attempt {recording.uploadRetryCount}</p>
+                        )}
+                      </div>
+                    )}
+
+                    {recording.uploadStatus === "FAILED" && (
+                      <Alert variant="destructive" className="mt-3">
+                        <AlertCircle className="w-4 h-4" />
+                        <AlertDescription>
+                          Upload failed{recording.uploadError ? `: ${recording.uploadError}` : ''}
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {recordingsLoading && (
+                <div className="text-center text-sm text-muted-foreground py-4">
+                  <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                  <p>Loading recordings...</p>
+                </div>
               )}
             </CardContent>
           </Card>
