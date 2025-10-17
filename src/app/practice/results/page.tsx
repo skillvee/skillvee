@@ -366,9 +366,9 @@ function PracticeResultsContent() {
         selectedSkills: skills
       });
 
-      // Navigate to interview page with the case ID
+      // Navigate directly to live interview with the case ID
       if (result.caseId) {
-        router.push(`/interview/case/${result.caseId}`);
+        router.push(`/interview/live?caseId=${result.caseId}`);
       }
     } catch (error) {
       console.error('Failed to create interview case:', error);
