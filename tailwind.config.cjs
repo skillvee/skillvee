@@ -10,7 +10,7 @@ module.exports = {
   safelist: [
     'animate-on-scroll',
     'animate-on-scroll-left',
-    'animate-on-scroll-right', 
+    'animate-on-scroll-right',
     'animate-on-scroll-zoom',
     'in-view',
     'card-hover',
@@ -18,9 +18,6 @@ module.exports = {
     'stagger-animation',
     'company-logo',
     'text-gradient-animate',
-    {
-      pattern: /animate-on-scroll-.*/,
-    },
   ],
   theme: {
     container: {
