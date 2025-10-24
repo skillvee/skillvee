@@ -20,6 +20,7 @@ import {
   type QuestionRecordingOutput,
   type UploadUrlOutput,
 } from "../schemas/questionRecording";
+import { processQuestionRecording } from "~/server/ai/services/video-assessment.service";
 
 // Initialize Supabase client for storage operations
 const getSupabaseClient = () => {
@@ -309,6 +310,12 @@ export const questionRecordingRouter = createTRPCRouter({
           uploadError: null,
         },
       });
+
+      // Trigger video assessment asynchronously (don't await - background processing)
+      processQuestionRecording({ recordingId })
+        .catch((error) => {
+          console.error(`[Upload Hook] Failed to trigger assessment for ${recordingId}:`, error);
+        });
 
       return {
         success: true,
