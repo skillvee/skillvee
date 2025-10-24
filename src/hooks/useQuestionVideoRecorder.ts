@@ -20,7 +20,6 @@ interface RecorderState {
 interface UseQuestionVideoRecorderProps {
   interviewId: string;
   questions: Question[];
-  providedStream?: MediaStream;
   onError?: (error: string) => void;
   onRecordingStart?: (questionIndex: number) => void;
   onRecordingStop?: (questionIndex: number) => void;
@@ -30,7 +29,6 @@ interface UseQuestionVideoRecorderProps {
 export function useQuestionVideoRecorder({
   interviewId,
   questions,
-  providedStream,
   onError,
   onRecordingStart,
   onRecordingStop,
@@ -59,16 +57,16 @@ export function useQuestionVideoRecorder({
   const updateStatusMutation = api.questionRecording.updateStatus.useMutation();
 
   // Initialize recorder with screen capture
-  const initialize = useCallback(async () => {
+  const initialize = useCallback(async (externalStream?: MediaStream) => {
     try {
       console.log("[Recorder] Initializing screen capture...");
 
       let stream: MediaStream;
 
-      // Use provided stream if available, otherwise request screen capture
-      if (providedStream) {
+      // Use external stream if provided, otherwise request screen capture
+      if (externalStream) {
         console.log("[Recorder] Using provided external stream");
-        stream = providedStream;
+        stream = externalStream;
         ownsStreamRef.current = false;
       } else {
         console.log("[Recorder] Requesting new screen capture");
@@ -81,16 +79,12 @@ export function useQuestionVideoRecorder({
         ownsStreamRef.current = true;
       }
 
-      // Check if user has granted both video and audio
+      // Check available tracks
       const videoTrack = stream.getVideoTracks()[0];
-      const audioTrack = stream.getAudioTracks()[0];
+      const audioTracks = stream.getAudioTracks();
 
       if (!videoTrack) {
         throw new Error("Screen capture video track not available");
-      }
-
-      if (!audioTrack) {
-        console.warn("[Recorder] No audio track available - recording screen only");
       }
 
       // Handle stream end (user stops sharing)
@@ -112,6 +106,7 @@ export function useQuestionVideoRecorder({
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType,
         videoBitsPerSecond: 2500000, // 2.5 Mbps
+        audioBitsPerSecond: 128000,  // 128 kbps for clear voice
       });
 
       // Handle data available
@@ -147,7 +142,7 @@ export function useQuestionVideoRecorder({
       onError?.(errorMessage);
       throw error;
     }
-  }, [providedStream, onError]);
+  }, [onError]);
 
   // Start recording for a specific question
   const startRecording = useCallback(async (questionIndex: number) => {
@@ -260,7 +255,8 @@ export function useQuestionVideoRecorder({
           resolve();
         } catch (error) {
           console.error("[Recorder] Error during stop:", error);
-          reject(error);
+          const errorToReject = error instanceof Error ? error : new Error(String(error));
+          reject(errorToReject);
         }
       };
 

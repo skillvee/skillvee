@@ -26,6 +26,7 @@ import { PermissionsConsentDialog } from "./PermissionsConsentDialog";
 import { CurrentQuestionDisplay } from "./CurrentQuestionDisplay";
 import { NextQuestionDialog } from "./NextQuestionDialog";
 import { useQuestionVideoRecorder } from "~/hooks/useQuestionVideoRecorder";
+import { AudioMixer } from "~/lib/audio-mixer";
 
 export interface LiveInterviewSessionProps {
   interview: {
@@ -80,6 +81,9 @@ export function LiveInterviewSession({
   // Shared MediaStream for both AI screen capture and video recording
   const sharedStreamRef = useRef<MediaStream | null>(null);
 
+  // Audio mixer for combining microphone and AI audio into single track
+  const audioMixerRef = useRef<AudioMixer | null>(null);
+
   // Question video recorder
   const questionRecorder = useQuestionVideoRecorder({
     interviewId: interview.id,
@@ -88,7 +92,6 @@ export function LiveInterviewSession({
       questionText: q.questionText,
       questionOrder: idx,
     })),
-    providedStream: sharedStreamRef.current ?? undefined,
     onError: (error) => {
       console.error('Question recorder error:', error);
       setRecordingError(error);
@@ -244,13 +247,16 @@ export function LiveInterviewSession({
     return () => clearInterval(interval);
   }, [sessionStarted, interviewStartTime, isSessionPaused]);
 
-  // Cleanup shared stream on unmount
   useEffect(() => {
     return () => {
       if (sharedStreamRef.current) {
-        console.log('[Cleanup] Stopping shared MediaStream tracks');
         sharedStreamRef.current.getTracks().forEach(track => track.stop());
         sharedStreamRef.current = null;
+      }
+
+      if (audioMixerRef.current) {
+        audioMixerRef.current.cleanup();
+        audioMixerRef.current = null;
       }
     };
   }, []);
@@ -310,43 +316,53 @@ export function LiveInterviewSession({
 
       // Request screen sharing ONCE - this will be shared between both systems
       console.log('🖥️ Requesting screen sharing (single prompt)...');
-      const stream = await navigator.mediaDevices.getDisplayMedia({
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({
         video: {
           displaySurface: "monitor",
         } as MediaTrackConstraints,
-        audio: true,
+        audio: true,  // System/tab audio (optional)
       });
-      sharedStreamRef.current = stream;
-      console.log('✅ Screen sharing granted!');
+      sharedStreamRef.current = displayStream;
 
-      // Start Gemini screen recording with the shared stream
       if (geminiConfig?.enableScreenCapture) {
-        console.log('📸 Starting Gemini screen capture with shared stream...');
-        await geminiLive.startScreenRecording(stream);
-        console.log('✅ Gemini screen capture started!');
+        await geminiLive.startScreenRecording(displayStream);
       }
 
-      // Initialize question video recorder with the shared stream
-      console.log('🎥 Initializing question video recorder with shared stream...');
-      await questionRecorder.initialize();
-      console.log('✅ Question video recorder initialized!');
+      await geminiLive.startListening();
 
-      // Start recording first question
-      console.log('🔴 Starting recording for question 1...');
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      const microphoneStream = geminiLive.getMicrophoneStream();
+
+      if (!microphoneStream) {
+        throw new Error('Failed to acquire microphone stream from Gemini. Check if microphone permissions were granted.');
+      }
+
+      const aiAudioStream = geminiLive.getAIAudioStream();
+
+      const audioMixer = new AudioMixer(48000);
+      audioMixerRef.current = audioMixer;
+
+      audioMixer.addStream(microphoneStream, 1.0);
+      if (aiAudioStream) {
+        audioMixer.addStream(aiAudioStream, 1.0);
+      }
+
+      const mixedAudioStream = audioMixer.getOutputStream();
+
+      const compositeStream = new MediaStream([
+        ...displayStream.getVideoTracks(),
+        ...displayStream.getAudioTracks(),
+        ...mixedAudioStream.getAudioTracks(),
+      ]);
+
+      await questionRecorder.initialize(compositeStream);
       await questionRecorder.startRecording(0);
-      console.log('✅ Recording started for question 1!');
 
-      // IMPORTANT: Mark session as started AFTER video recorder is ready
       setSessionStarted(true);
       setInterviewStartTime(new Date());
-      console.log('🎉 Interview session fully started!');
 
-      // Use the built-in sendInitialGreeting method that sends a message FROM the user
-      // This naturally prompts the AI to respond as an interviewer
       geminiLive.sendInitialGreeting();
-
-      // THEN start listening for user audio (after AI has the prompt)
-      await geminiLive.startListening();
 
     } catch (error) {
       console.error('❌ Failed to start session:', error);

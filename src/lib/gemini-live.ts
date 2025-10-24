@@ -125,18 +125,20 @@ class AudioRecorder {
    */
   async start(onAudioData: (base64: string) => void): Promise<void> {
     this.onAudioData = onAudioData;
-    
+
     try {
+      console.log('[AudioRecorder] Requesting microphone access...');
       // Request microphone access
-      this.stream = await navigator.mediaDevices.getUserMedia({ 
+      this.stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           channelCount: 1,
           sampleRate: 16000,
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true
-        } 
+        }
       });
+      console.log('[AudioRecorder] ✅ Microphone stream acquired:', this.stream.id);
       
       // Initialize Web Audio API
       this.audioContext = new AudioContext({ sampleRate: 16000 });
@@ -198,6 +200,15 @@ class AudioRecorder {
     }
     return btoa(binary);
   }
+
+  /**
+   * Get the underlying microphone MediaStream
+   * Useful for combining with other streams (e.g., screen recording)
+   * @returns The microphone MediaStream, or null if not recording
+   */
+  get microphoneStream(): MediaStream | null {
+    return this.stream;
+  }
 }
 
 /**
@@ -224,13 +235,13 @@ class ScreenRecorder {
    * Start screen recording
    * @param onScreenCapture Callback for periodic screenshots
    * @param onVideoChunk Callback for video stream data
-   * @param captureIntervalMs Interval for taking screenshots (default: 5000ms)
+   * @param captureIntervalMs Interval for taking screenshots (default: 1000ms for 1 FPS)
    * @param externalStream Optional external MediaStream to use instead of requesting new one
    */
   async start(
     onScreenCapture: (capture: ScreenCapture) => void,
     onVideoChunk?: (base64: string) => void,
-    captureIntervalMs: number = 5000,
+    captureIntervalMs: number = 1000,
     externalStream?: MediaStream
   ): Promise<void> {
     this.onScreenCapture = onScreenCapture;
@@ -376,6 +387,7 @@ class AudioStreamer {
   private processingBuffer = new Float32Array(0);
   private scheduledTime = 0;
   private gainNode: GainNode;
+  private destination: MediaStreamAudioDestinationNode;
   private isInitialized = false;
   private scheduledSources = new Set<AudioBufferSourceNode>();
   private onFinishCallback: (() => void) | null = null;
@@ -384,7 +396,13 @@ class AudioStreamer {
     this.context = context;
     this.bufferSize = Math.floor(this.sampleRate * 0.32); // 320ms buffer
     this.gainNode = this.context.createGain();
-    this.gainNode.connect(this.context.destination);
+
+    // Create MediaStreamDestination to capture AI audio for recording
+    this.destination = this.context.createMediaStreamDestination();
+
+    // Connect to BOTH speakers (for user to hear) and destination (for recording)
+    this.gainNode.connect(this.context.destination);  // Speakers
+    this.gainNode.connect(this.destination);          // Capture stream
   }
 
   async initialize(): Promise<void> {
@@ -536,7 +554,7 @@ class AudioStreamer {
     this.isPlaying = false;
     this.isFinishing = false; // Reset finishing flag
     this.onFinishCallback = null; // Clear any pending finish callback
-    
+
     // Stop all active sources
     for (const source of this.scheduledSources) {
       try {
@@ -547,10 +565,18 @@ class AudioStreamer {
       }
     }
     this.scheduledSources.clear();
-    
+
     this.audioQueue = [];
     this.processingBuffer = new Float32Array(0);
     this.scheduledTime = this.context.currentTime;
+  }
+
+  /**
+   * Get the AI audio output stream for recording
+   * @returns MediaStream containing the AI's audio output
+   */
+  get audioStream(): MediaStream {
+    return this.destination.stream;
   }
 }
 
@@ -707,6 +733,19 @@ class GeminiWebSocketClient {
         turnComplete: endOfTurn
       }
     };
+    await this.sendJSON(data);
+  }
+
+  async sendVideo(base64Data: string, mimeType: string = "image/jpeg"): Promise<void> {
+    const data = {
+      realtimeInput: {
+        mediaChunks: [{
+          mimeType,
+          data: base64Data
+        }]
+      }
+    };
+    console.log(`[WebSocketClient] Sending video frame (${mimeType}, ${Math.round(base64Data.length / 1024)}KB)`);
     await this.sendJSON(data);
   }
 
@@ -936,7 +975,9 @@ export class GeminiLiveClient {
   }
 
   async startListening(): Promise<void> {
-    if (this._isListening || !this._isConnected) return;
+    if (this._isListening || !this._isConnected) {
+      return;
+    }
 
     try {
       this.audioRecorder = new AudioRecorder();
@@ -945,10 +986,11 @@ export class GeminiLiveClient {
           this.client.sendAudio(base64Audio);
         }
       });
-      
+
       this._isListening = true;
       this.emit('listening-start', {});
     } catch (error) {
+      console.error('[GeminiLive] Failed to start listening:', error);
       throw error;
     }
   }
@@ -965,7 +1007,7 @@ export class GeminiLiveClient {
     this.emit('listening-stop', {});
   }
 
-  async startScreenRecording(captureIntervalMs: number = 5000, externalStream?: MediaStream): Promise<void> {
+  async startScreenRecording(captureIntervalMs: number = 1000, externalStream?: MediaStream): Promise<void> {
     if (!this.config.enableScreenCapture) {
       throw new Error('Screen capture not enabled in config');
     }
@@ -1060,7 +1102,15 @@ export class GeminiLiveClient {
   private handleScreenCapture(capture: ScreenCapture): void {
     if (!this.conversationSession) return;
 
+    // Store locally for conversation export
     this.conversationSession.screenCaptures.push(capture);
+
+    if (this.client && this._isConnected) {
+      this.client.sendVideo(capture.data, capture.mimeType)
+        .catch(error => {
+          console.error('[GeminiLive] Failed to send screen capture to API:', error);
+        });
+    }
   }
 
   updateContext(contextUpdate: Partial<InterviewContext>): void {
@@ -1225,6 +1275,24 @@ Respond naturally as a human interviewer. The candidate is waiting for your resp
 
   get conversationData(): ConversationSession | null {
     return this.conversationSession;
+  }
+
+  /**
+   * Get the microphone MediaStream from the audio recorder
+   * Useful for combining with screen recording to create composite streams
+   * @returns The microphone MediaStream, or null if not listening
+   */
+  get microphoneStream(): MediaStream | null {
+    return this.audioRecorder?.microphoneStream || null;
+  }
+
+  /**
+   * Get the AI audio output stream
+   * Useful for combining with video recording to capture AI's voice
+   * @returns The AI audio MediaStream, or null if not initialized
+   */
+  get aiAudioStream(): MediaStream | null {
+    return this.audioStreamer?.audioStream || null;
   }
 }
 

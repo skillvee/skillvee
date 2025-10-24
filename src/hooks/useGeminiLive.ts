@@ -40,10 +40,13 @@ export interface UseGeminiLiveActions {
   clearError: () => void;
   reconnect: () => Promise<void>;
   exportConversation: () => any;
+  getMicrophoneStream: () => MediaStream | null;
+  getAIAudioStream: () => MediaStream | null;
 }
 
 export interface UseGeminiLiveReturn extends UseGeminiLiveState, UseGeminiLiveActions {
   client: GeminiLiveClient | null;
+  microphoneStream: MediaStream | null;
 }
 
 /**
@@ -301,6 +304,16 @@ export function useGeminiLive(options: UseGeminiLiveOptions = {}): UseGeminiLive
     return clientRef.current.exportConversation();
   }, []);
 
+  const getMicrophoneStream = useCallback(() => {
+    if (!clientRef.current) return null;
+    return clientRef.current.microphoneStream;
+  }, []);
+
+  const getAIAudioStream = useCallback(() => {
+    if (!clientRef.current) return null;
+    return clientRef.current.aiAudioStream;
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -328,9 +341,14 @@ export function useGeminiLive(options: UseGeminiLiveOptions = {}): UseGeminiLive
     clearError,
     reconnect,
     exportConversation,
+    getMicrophoneStream,
+    getAIAudioStream,
 
     // Client reference (for advanced usage)
     client: clientRef.current,
+
+    // Microphone stream (for combining with other streams)
+    microphoneStream: clientRef.current?.microphoneStream || null,
   };
 }
 
