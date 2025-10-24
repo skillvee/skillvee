@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/
 import { TRPCError } from "@trpc/server";
 import type { FeedbackType } from "@prisma/client";
 import { processQuestionRecording } from "~/server/ai/services/video-assessment.service";
+import { aggregateInterviewAssessment as aggregateAssessment } from "~/server/ai/services/assessment-aggregation.service";
 
 // Input schemas
 const createAssessmentSchema = z.object({
@@ -540,7 +541,7 @@ export const assessmentRouter = createTRPCRouter({
 
   /**
    * Aggregate all question assessments into final interview assessment
-   * This will be implemented in Phase 2
+   * Phase 2: Synthesizes all per-question assessments into a comprehensive final assessment
    */
   aggregateInterviewAssessment: protectedProcedure
     .input(
@@ -567,10 +568,41 @@ export const assessmentRouter = createTRPCRouter({
         });
       }
 
-      // TODO: Implement aggregation service in Phase 2
-      throw new TRPCError({
-        code: 'NOT_IMPLEMENTED',
-        message: 'Assessment aggregation not yet implemented (Phase 2)',
+      // Verify all questions are assessed
+      const recordings = await ctx.db.interviewQuestionRecording.findMany({
+        where: { interviewId },
+        select: {
+          assessmentStatus: true,
+        },
       });
+
+      const totalQuestions = recordings.length;
+      const completedCount = recordings.filter((r) => r.assessmentStatus === "COMPLETED").length;
+
+      if (completedCount < totalQuestions) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: `Cannot aggregate: ${completedCount}/${totalQuestions} questions completed`,
+        });
+      }
+
+      // Call aggregation service
+      const result = await aggregateAssessment({
+        interviewId: input.interviewId,
+        userId: ctx.userId,
+      });
+
+      if (!result.success) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: result.error || 'Failed to aggregate assessment',
+        });
+      }
+
+      return {
+        success: true,
+        assessmentId: result.assessmentId,
+        message: "Assessment aggregation completed successfully",
+      };
     }),
 });
