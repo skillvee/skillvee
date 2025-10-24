@@ -14,6 +14,7 @@ export default {
         allowSyntheticDefaultImports: true,
         esModuleInterop: true,
         jsx: 'react-jsx',
+        verbatimModuleSyntax: false,
       },
     }],
   },
