@@ -94,9 +94,15 @@ ${skillDescriptions}
 
 ---
 
-## Output Format — Return ONLY valid JSON (no Markdown outside strings)
-Return **only** a JSON object in exactly this structure (no extra keys, no missing keys, no comments):
+## Output Format
+  - Return only one JSON object (no extra text, no Markdown outside strings).
+  - Any Markdown (including Markdown tables) must appear inside string values and be escaped/newline-encoded so the JSON remains valid. Example within a string: "| col1 | col2 |\n|------|------|\n| A | B |".
+  - context must contain 2–3 paragraphs, each 120–220 words. Paragraphs are plain text strings (may include escaped Markdown tables).
+  - Questions must be an object where every question is an independent JSON object keyed by a unique identifier (e.g., "q1", "q2"). This ensures each question is its own {}.
+  - Each question object must contain exactly the fields shown below.
+  - There must be at least one question object.
 
+Sample output:
 {
   "title": "Brief case title (e.g., 'Customer Churn Prediction Pipeline')",
   "context": "2–3 paragraphs (each 120–220 words) describing the detailed business scenario. Include dataset schemas and 5–10 sample rows per table as Markdown tables if useful.",
