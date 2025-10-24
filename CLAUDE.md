@@ -97,6 +97,7 @@ src/
 │   └── useTimer.ts             # Interview timer logic
 │
 ├── lib/
+│   ├── gemini-live/             # Gemini Live WebSocket integration (see below)
 │   ├── ai/                     # AI service integrations
 │   │   ├── gemini.ts          # Gemini API client
 │   │   └── prompts.ts         # AI prompt templates
@@ -274,7 +275,48 @@ supabase gen types typescript       # Generate TypeScript types
 supabase migration new <name>       # Create new migration
 ```
 
-## AI Integration Architecture
+## Gemini Live Integration (`src/lib/gemini-live/`)
+
+**Client-side real-time WebSocket API** for audio/video streaming with Gemini Live.
+**Note**: Separate from `server/ai/` which handles server-side text-based AI processing.
+
+### Modular Architecture
+
+```
+src/lib/gemini-live/
+├── types.ts                          # All TypeScript interfaces and types
+├── audio/                            # Audio recording and playback
+│   ├── recorder.ts                   # Microphone capture using AudioWorklet
+│   ├── streamer.ts                   # Audio playback with smart buffering
+│   ├── __tests__/                    # Audio module tests
+│   └── index.ts                      # Audio module exports
+├── video/                            # Video capture
+│   ├── screen-recorder.ts            # Screen sharing and screenshot capture
+│   ├── __tests__/                    # Video module tests
+│   └── index.ts                      # Video module exports
+├── client/                           # API communication
+│   ├── websocket-client.ts           # WebSocket connection management
+│   ├── gemini-client.ts              # Main orchestrator class
+│   ├── __tests__/                    # Client module tests
+│   └── index.ts                      # Client module exports
+├── index.ts                          # Public API (use for imports)
+└── CLAUDE.md                         # Detailed module documentation
+```
+
+**Usage**: Always import from `~/lib/gemini-live` for backward compatibility
+**Modification guide**: See `src/lib/gemini-live/CLAUDE.md` for detailed architecture
+
+### Key Differences: lib/gemini-live vs server/ai
+
+| Feature | lib/gemini-live | server/ai |
+|---------|----------------|-----------|
+| **Purpose** | Real-time interview conversations | Job analysis, case generation |
+| **API** | Gemini Live WebSocket | Google Generative AI SDK |
+| **Location** | Client-side (browser) | Server-side (tRPC) |
+| **Communication** | Bidirectional streaming | Request/response |
+| **Data** | Audio/video streams | Text prompts/responses |
+
+## AI Integration Architecture (Server-side)
 
 ### Folder Structure
 ```
