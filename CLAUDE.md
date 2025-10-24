@@ -61,75 +61,352 @@ AI-powered mock interview platform for data science roles:
 
 ```bash
 src/
-├── app/                           # Next.js App Router pages
-│   ├── (auth)/                   # Authentication-protected routes
-│   │   ├── dashboard/           # User dashboard
-│   │   ├── interview/           # Interview session pages
-│   │   │   ├── [id]/           # Dynamic interview routes
-│   │   │   └── prepare/        # Interview preparation
-│   │   ├── jobs/               # Job description management
-│   │   └── results/            # Interview results & feedback
-│   ├── api/                     # API routes
-│   │   ├── trpc/               # tRPC endpoints
-│   │   └── webhooks/           # External service webhooks
-│   ├── layout.tsx              # Root layout
-│   └── page.tsx                # Landing page
+├── middleware.ts                     # Next.js middleware for request handling
+├── env.js                            # Environment variable validation (T3 pattern)
 │
-├── components/
-│   ├── ui/                      # Shadcn/ui components
-│   │   ├── interview-recorder.tsx
-│   │   ├── media-recorder.tsx
-│   │   ├── job-form.tsx
-│   │   └── [shadcn components]
-│   ├── interview/               # Interview-specific components
-│   │   ├── question-display.tsx
-│   │   ├── timer.tsx
-│   │   └── controls.tsx
-│   └── shared/                  # Reusable components
-│       ├── navigation.tsx
-│       └── footer.tsx
+├── app/                              # Next.js App Router pages and routes
+│   ├── layout.tsx                    # Root layout component
+│   ├── page.tsx                      # Landing page
+│   ├── globals.css                   # Global styles
+│   │
+│   ├── admin/                        # Admin management dashboard
+│   │   ├── layout.tsx                # Admin layout with sidebar
+│   │   ├── page.tsx                  # Admin homepage
+│   │   ├── archetypes/
+│   │   │   └── page.tsx              # Archetypes management
+│   │   ├── logs/
+│   │   │   └── page.tsx              # System logs viewer
+│   │   ├── setup/
+│   │   │   └── page.tsx              # Admin setup page
+│   │   └── skills/
+│   │       └── page.tsx              # Skills management interface
+│   │
+│   ├── api/                          # API routes
+│   │   ├── trpc/
+│   │   │   └── [trpc]/
+│   │   │       └── route.ts          # tRPC HTTP endpoint handler
+│   │   └── webhooks/
+│   │       └── clerk/
+│   │           └── route.ts          # Clerk authentication webhooks
+│   │
+│   ├── interview/                    # Interview session routes
+│   │   ├── page.tsx                  # Interview selection/launcher
+│   │   ├── __tests__/
+│   │   │   └── page.test.tsx         # Interview page tests
+│   │   ├── case/
+│   │   │   └── [caseId]/
+│   │   │       └── page.tsx          # Dynamic case detail page
+│   │   ├── live/
+│   │   │   └── page.tsx              # Live interview session
+│   │   └── results/
+│   │       └── [id]/
+│   │           └── page.tsx          # Interview results & feedback
+│   │
+│   ├── practice/                     # Practice interview routes
+│   │   ├── page.tsx                  # Practice selection page
+│   │   ├── cases/
+│   │   │   └── page.tsx              # Available practice cases
+│   │   ├── feedback/
+│   │   │   └── page.tsx              # Practice feedback page
+│   │   ├── feedback-demo/
+│   │   │   └── page.tsx              # Demo feedback display
+│   │   └── results/
+│   │       └── page.tsx              # Practice session results
+│   │
+│   ├── profile/                      # User profile routes
+│   │   └── [username]/
+│   │       ├── page.tsx              # Public profile page
+│   │       └── fallback-page.tsx     # Profile fallback/loading
+│   │
+│   ├── sign-in/                      # Authentication routes
+│   │   └── [[...sign-in]]/
+│   │       ├── page.tsx              # Sign-in page
+│   │       └── custom-page.tsx       # Custom sign-in UI
+│   │
+│   ├── sign-up/
+│   │   └── [[...sign-up]]/
+│   │       └── page.tsx              # Sign-up page
+│   │
+│   ├── dashboard/
+│   │   └── page.tsx                  # User dashboard
+│   │
+│   ├── demo/                         # Demo/testing routes
+│   │   ├── page.tsx                  # Demo launcher page
+│   │   └── full-transcript/
+│   │       └── page.tsx              # Full transcript demo display
+│   │
+│   ├── candidates/
+│   │   └── page.tsx                  # Candidates listing page
+│   │
+│   ├── companies/
+│   │   └── page.tsx                  # Companies listing page
+│   │
+│   ├── pricing/
+│   │   └── page.tsx                  # Pricing page
+│   │
+│   ├── faq/
+│   │   └── page.tsx                  # FAQ page
+│   │
+│   ├── privacy/
+│   │   └── page.tsx                  # Privacy policy page
+│   │
+│   ├── terms/
+│   │   └── page.tsx                  # Terms of service page
+│   │
+│   ├── candidate-terms/
+│   │   └── page.tsx                  # Candidate-specific terms
+│   │
+│   ├── company-terms/
+│   │   └── page.tsx                  # Company-specific terms
+│   │
+│   └── unauthorized/
+│       └── page.tsx                  # Unauthorized access page
 │
-├── hooks/
-│   ├── useMediaCapture.ts      # Core recording functionality
-│   ├── usePermissions.ts       # Browser permissions
-│   ├── useMediaUpload.ts       # Upload to storage
-│   ├── useInterview.ts         # Interview state management
-│   └── useTimer.ts             # Interview timer logic
+├── components/                       # Reusable React components
+│   ├── animation-provider.tsx        # Animation context provider
+│   ├── hero-lottie.tsx               # Hero section with Lottie animation
+│   ├── navigation.tsx                # Main navigation component
+│   │
+│   ├── ui/                           # Shadcn/ui components library
+│   │   ├── __tests__/
+│   │   │   └── interview-recorder.test.tsx  # Recorder component tests
+│   │   ├── auto-resize-textarea.tsx  # Auto-resizing textarea
+│   │   ├── alert.tsx                 # Alert component
+│   │   ├── audio-visualizer.tsx      # Audio waveform visualizer
+│   │   ├── avatar.tsx                # User avatar component
+│   │   ├── badge.tsx                 # Badge/tag component
+│   │   ├── breadcrumb.tsx            # Breadcrumb navigation
+│   │   ├── button.tsx                # Button component
+│   │   ├── card.tsx                  # Card container
+│   │   ├── checkbox.tsx              # Checkbox input
+│   │   ├── collapsible.tsx           # Collapsible panel
+│   │   ├── default-templates.tsx     # Default template definitions
+│   │   ├── dialog.tsx                # Modal dialog
+│   │   ├── dropdown-menu.tsx         # Dropdown menu
+│   │   ├── focus-area-selector.tsx   # Focus area selection component
+│   │   ├── input.tsx                 # Text input
+│   │   ├── interview-recorder.tsx    # Interview recording UI component
+│   │   ├── label.tsx                 # Form label
+│   │   ├── media-recorder.tsx        # Media recording component
+│   │   ├── progress.tsx              # Progress bar
+│   │   ├── scroll-area.tsx           # Scrollable area
+│   │   ├── select.tsx                # Select dropdown
+│   │   ├── separator.tsx             # Visual separator
+│   │   ├── sheet.tsx                 # Sliding sheet/drawer
+│   │   ├── sidebar.tsx               # Sidebar navigation
+│   │   ├── skeleton.tsx              # Loading skeleton
+│   │   ├── slider.tsx                # Slider control
+│   │   ├── switch.tsx                # Toggle switch
+│   │   ├── table.tsx                 # Table component
+│   │   ├── tabs.tsx                  # Tabbed interface
+│   │   ├── textarea.tsx              # Multi-line text input
+│   │   └── tooltip.tsx               # Tooltip component
+│   │
+│   ├── admin/                        # Admin-specific components
+│   │   ├── site-header.tsx           # Admin page header
+│   │   ├── app-sidebar.tsx           # Admin sidebar navigation
+│   │   └── skills/
+│   │       ├── __tests__/
+│   │       │   └── skills-archetypes-matrix.test.tsx  # Archetype matrix tests
+│   │       ├── create-domain-form.tsx     # Domain creation form
+│   │       ├── csv-import-dialog.tsx      # CSV import modal
+│   │       ├── section-cards.tsx          # Section card display
+│   │       ├── skills-archetypes-matrix.tsx   # Skills/archetype matrix visualization
+│   │       ├── skills-data-table.tsx      # Skills data table
+│   │       ├── skills-stats.tsx           # Skills statistics display
+│   │       └── skills-tree-view.tsx       # Hierarchical tree view
+│   │
+│   ├── interview/                    # Interview-specific components
+│   │   ├── __tests__/
+│   │   │   └── LiveInterviewSession.test.tsx  # Interview session tests
+│   │   ├── CaseContextDisplay.tsx    # Case problem context display
+│   │   ├── CurrentQuestionDisplay.tsx    # Current question renderer
+│   │   ├── FullTranscriptDemo.tsx    # Full transcript demo viewer
+│   │   ├── GeminiLiveSettings.tsx    # Gemini Live configuration UI
+│   │   ├── InterviewNotepad.tsx      # Candidate note-taking area
+│   │   ├── LiveInterviewSession.tsx  # Main interview session component
+│   │   ├── NextQuestionDialog.tsx    # Next question confirmation dialog
+│   │   └── PermissionsConsentDialog.tsx  # Browser permissions consent
+│   │
+│   ├── profile/                      # Profile-specific components
+│   │   ├── EducationSection.tsx      # Education history section
+│   │   ├── ExperienceSection.tsx     # Work experience section
+│   │   ├── ProfileHeader.tsx         # Profile header/intro
+│   │   └── SkillsSection.tsx         # Skills display section
+│   │
+│   ├── analytics/                    # Analytics tracking components
+│   │   ├── index.ts                  # Analytics exports
+│   │   ├── clarity.tsx               # Microsoft Clarity integration
+│   │   └── google-analytics.tsx      # Google Analytics integration
+│   │
+│   ├── hooks/
+│   │   └── use-mobile.tsx            # Mobile detection hook
+│   │
+│   └── lib/
+│       └── utils.ts                  # Component utility functions
 │
-├── lib/
-│   ├── gemini-live/             # Gemini Live WebSocket integration (see below)
-│   ├── ai/                     # AI service integrations
-│   │   ├── gemini.ts          # Gemini API client
-│   │   └── prompts.ts         # AI prompt templates
-│   ├── db/                    # Database utilities
-│   │   └── prisma.ts         # Prisma client singleton
-│   ├── media/                 # Media handling
-│   │   ├── compatibility.ts  # Browser compatibility
-│   │   └── processing.ts     # Video/audio processing
-│   ├── utils.ts               # General utilities
-│   └── validators.ts          # Zod schemas & validation
+├── hooks/                            # Custom React hooks
+│   ├── __tests__/
+│   │   ├── connection-state-sync.test.ts   # Connection state tests
+│   │   ├── error-scenarios.test.ts         # Error handling tests
+│   │   ├── useGeminiLive-new.test.ts       # New Gemini Live hook tests
+│   │   ├── useGeminiLive.test.ts           # Gemini Live hook tests
+│   │   ├── useMediaCapture.test.ts         # Media capture tests
+│   │   ├── useMediaUpload.test.ts          # Upload functionality tests
+│   │   └── usePermissions.test.ts          # Permission checking tests
+│   ├── useCSVValidation.ts           # CSV validation logic hook
+│   ├── useGeminiLive.ts              # Gemini Live API integration hook
+│   ├── useMediaCapture.ts            # Recording capture functionality
+│   ├── useMediaUpload.ts             # Media upload to storage
+│   ├── usePermissions.ts             # Browser permissions checking
+│   ├── useQuestionVideoRecorder.ts   # Question-specific video recording
+│   └── useQuestionVideoUpload.ts     # Question video upload
 │
-├── server/
-│   ├── api/
-│   │   ├── routers/          # tRPC routers
-│   │   │   ├── interview.ts
-│   │   │   ├── job.ts
-│   │   │   └── assessment.ts
-│   │   ├── root.ts          # Root router
-│   │   └── trpc.ts          # tRPC configuration
-│   └── services/             # Business logic services
-│       ├── interview.service.ts
-│       ├── assessment.service.ts
-│       └── job.service.ts
+├── lib/                              # Utility libraries and helpers
+│   ├── __tests__/
+│   │   ├── gemini-live-audio.test.ts         # Audio module tests
+│   │   ├── gemini-live-core.test.ts          # Core functionality tests
+│   │   ├── gemini-live-integration.test.ts   # Integration tests
+│   │   ├── gemini-live.test.ts               # Main module tests
+│   │   └── media-compatibility.test.ts       # Compatibility tests
+│   ├── animations.ts                 # Animation utilities
+│   ├── audio-mixer.ts                # Audio mixing utility
+│   ├── clerk-theme.ts                # Clerk authentication theme
+│   ├── csv-parser.ts                 # CSV parsing utility
+│   ├── gemini-live.ts                # Gemini Live client wrapper
+│   ├── media-compatibility.ts        # Browser compatibility checking
+│   ├── supabase.ts                   # Supabase client initialization
+│   ├── utils.ts                      # General utility functions
+│   │
+│   └── gemini-live/                  # Gemini Live WebSocket integration
+│       ├── CLAUDE.md                 # Detailed module documentation
+��       ├── index.ts                  # Public API exports
+│       ├── types.ts                  # TypeScript interfaces and types
+│       │
+│       ├── audio/                    # Audio recording and playback
+│       │   ├── __tests__/
+│       │   │   ├── recorder.test.ts  # Audio recorder tests
+│       │   │   └── streamer.test.ts  # Audio playback tests
+│       │   ├── index.ts              # Audio module exports
+│       │   ├── recorder.ts           # AudioWorklet-based microphone capture
+│       │   └── streamer.ts           # Audio playback with buffering
+│       │
+│       ├── video/                    # Video capture
+│       │   ├── __tests__/
+│       │   │   └── screen-recorder.test.ts  # Video capture tests
+│       │   ├── index.ts              # Video module exports
+│       │   └── screen-recorder.ts    # Screen sharing and screenshot capture
+│       │
+│       └── client/                   # WebSocket and API communication
+│           ├── __tests__/
+│           │   ├── gemini-client.test.ts     # Client tests
+│           │   └── websocket-client.test.ts  # WebSocket tests
+│           ├── index.ts              # Client module exports
+│           ├── gemini-client.ts      # Main orchestrator class
+│           └── websocket-client.ts   # WebSocket connection management
 │
-├── styles/
-│   └── globals.css           # Tailwind CSS v4
+├── server/                           # Server-side code
+│   ├── db.ts                         # Prisma client singleton
+│   │
+│   ├── ai/                           # AI integration services
+│   │   ├── index.ts                  # AI module exports
+│   │   │
+│   │   ├── providers/
+│   │   │   └── gemini/
+│   │   │       ├── index.ts          # Gemini provider exports
+│   │   │       ├── client.ts         # Gemini API client initialization
+│   │   │       └── types.ts          # Response schemas and interfaces
+│   │   │
+│   │   ├── prompts/
+│   │   │   ├── assessment/
+│   │   │   │   ├── index.ts          # Assessment prompts exports
+│   │   │   │   ├── types.ts          # Assessment response types
+│   │   │   │   ├── assessment-aggregation.ts  # Aggregation logic prompts
+│   │   │   │   └── video-assessment.ts        # Video assessment evaluation prompts
+│   │   │   └── practice/
+│   │   │       ├── case-generation.ts    # Case generation prompts
+│   │   │       ├── focus-areas.ts        # Focus area identification prompts
+│   │   │       └── job-analysis.ts       # Job description analysis prompts
+│   │   │
+│   │   └── services/
+│   │       ├── case-generation.service.ts    # Case generation business logic
+│   │       ├── job-analysis.service.ts       # Job analysis service
+│   │       └── role-focus.service.ts         # Role focus identification service
+│   │
+│   ├── api/                          # API layer (tRPC)
+│   │   ├── trpc.ts                   # tRPC configuration
+│   │   ├── root.ts                   # Root router combining all routers
+│   │   │
+│   │   ├── routers/                  # tRPC route handlers
+│   │   │   ├── __tests__/
+│   │   │   │   ├── ai-gemini-live.test.ts    # Gemini Live API tests
+│   │   │   │   ├── interview.test.ts         # Interview router tests
+│   │   │   │   └── jobDescription.test.ts    # Job description router tests
+│   │   │   ├── admin.ts              # Admin management endpoints
+│   │   │   ├── ai.ts                 # AI service endpoints
+│   │   │   ├── assessment.ts         # Assessment endpoints
+│   │   │   ├── example.ts            # Example/template router
+│   │   │   ├── interview.ts          # Interview management endpoints
+│   │   │   ├── jobDescription.ts     # Job description endpoints
+│   │   │   ├── media.ts              # Media upload/processing endpoints
+│   │   │   ├── practice.ts           # Practice session endpoints
+│   │   │   ├── profile.ts            # User profile endpoints
+│   │   │   ├── questionRecording.ts  # Question recording endpoints
+│   │   │   ├── skills-new.ts         # New skills management endpoints
+│   │   │   └── user.ts               # User management endpoints
+│   │   │
+│   │   ├── middleware/
+│   │   │   ├── __tests__/
+│   │   │   │   ├── rateLimit.test.ts # Rate limiting tests
+│   │   │   │   └── validation.test.ts    # Validation middleware tests
+│   │   │   ├── rateLimit.ts          # Rate limiting middleware
+│   │   │   └── validation.ts         # Request validation middleware
+│   │   │
+│   │   ├── schemas/                  # Zod validation schemas
+│   │   │   ├── ai.ts                 # AI request schemas
+│   │   │   ├── assessment.ts         # Assessment schemas
+│   │   │   ├── common.ts             # Common/shared schemas
+│   │   │   ├── interview.ts          # Interview schemas
+│   │   │   ├── jobDescription.ts     # Job description schemas
+│   │   │   ├── media.ts              # Media upload schemas
+│   │   │   ├── questionRecording.ts  # Question recording schemas
+│   │   │   └── skills.ts             # Skills management schemas
+│   │   │
+│   │   ├── types/
+│   │   │   └── errors.ts             # Custom error types
+│   │   │
+│   │   └── utils/
+│   │       ├── __tests__/
+│   │       │   └── csv-parser.test.ts    # CSV parsing tests
+│   │       ├── csv-parser.ts         # CSV file parsing utility
+│   │       ├── gemini-db-logger.ts   # Database logging for Gemini calls
+│   │       ├── interview-categories.ts   # Interview category definitions
+│   │       ├── log-store.ts          # Logging storage utility
+│   │       └── pagination.ts         # Pagination helpers
+│   │
+│   └── services/                     # Business logic services
+│       ├── brandfetch.service.ts     # Brand/company data fetching
+│       └── conversation-export.service.ts  # Conversation export functionality
 │
-└── types/
-    ├── interview.ts          # Interview-related types
-    ├── job.ts               # Job description types
-    └── api.ts               # API response types
+├── styles/                           # Global stylesheets
+│   ├── clerk-custom.css              # Clerk authentication styling
+│   └── globals.css                   # Global Tailwind/CSS styles
+│
+├── trpc/                             # tRPC client configuration
+│   ├── query-client.ts               # React Query client setup
+│   ├── react.tsx                     # React hooks for tRPC
+│   └── server.ts                     # Server-side tRPC caller
+│
+└── test/                             # Test utilities and setup
+    ├── setup.ts                      # Jest configuration setup
+    ├── __mocks__/
+    │   ├── env.js                    # Environment variable mocks
+    │   └── superjson.js              # SuperJSON serialization mock
+    └── helpers/
+        └── trpc.ts                   # tRPC test helpers
 ```
+
+**Summary**: 69+ directories, 151+ TypeScript/TSX files across 8 major sections
 
 ### Configuration Files
 

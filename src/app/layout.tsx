@@ -6,6 +6,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import AnimationProvider from "~/components/animation-provider";
+import { MicrosoftClarity } from "~/components/analytics/clarity";
+import { GoogleAnalytics } from "~/components/analytics/google-analytics";
 
 export const metadata: Metadata = {
   title: "SkillVee - AI-Powered Data Science Interview Practice",
@@ -81,6 +83,8 @@ export default function RootLayout({
               {children}
             </AnimationProvider>
           </TRPCReactProvider>
+          <GoogleAnalytics />
+          <MicrosoftClarity />
           <script
             dangerouslySetInnerHTML={{
               __html: `
