@@ -537,14 +537,26 @@ export const practiceRouter = createTRPCRouter({
       }
 
       // 3. Generate case with new AI service
-      const caseResult = await generateInterviewCase({
-        jobTitle: session.jobTitle || "Data Professional",
-        company: session.company || undefined,
-        experience: session.experience || undefined,
-        userId: ctx.user.id,
-        sessionId,
-        skillRequirements,
-      });
+      let caseResult;
+      try {
+        caseResult = await generateInterviewCase({
+          jobTitle: session.jobTitle || "Data Professional",
+          company: session.company || undefined,
+          experience: session.experience || undefined,
+          userId: ctx.user.id,
+          sessionId,
+          skillRequirements,
+        });
+      } catch (error) {
+        // Check for rate limit errors
+        if (error && typeof error === 'object' && 'isRateLimit' in error) {
+          throw new Error(
+            'Rate limit exceeded. Gemini Pro allows 5 requests per minute on the free tier. ' +
+            'Please wait 60 seconds before generating another case.'
+          );
+        }
+        throw error;
+      }
 
       if (!caseResult.success || !caseResult.data) {
         throw createError.internal(`Failed to generate interview case: ${caseResult.error}`);

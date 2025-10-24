@@ -1,4 +1,4 @@
-import { geminiClient, DEFAULT_MODEL_CONFIG } from "../providers/gemini/client";
+import { geminiClient, DEFAULT_MODEL_CONFIG, withRetry, GEMINI_MODELS } from "../providers/gemini/client";
 import { caseGenerationSchema, type CaseGenerationResponse } from "../providers/gemini/types";
 import { createCaseGenerationPrompt, type SkillRequirement } from "../prompts/practice/case-generation";
 import { geminiDbLogger } from "../../api/utils/gemini-db-logger";
@@ -36,8 +36,10 @@ export async function generateInterviewCase(
       skillRequirements,
     });
 
+    const MODEL = GEMINI_MODELS.PRO; // Use Gemini 2.5 Pro for better quality case generation
+
     console.log(`[CaseGeneration] Prompt length: ${prompt.length} chars`);
-    console.log(`[CaseGeneration] Using model: ${DEFAULT_MODEL_CONFIG.model}`);
+    console.log(`[CaseGeneration] Using model: ${MODEL}`);
 
     // Log request to database
     dbLogId = await geminiDbLogger.logRequest({
@@ -48,40 +50,44 @@ export async function generateInterviewCase(
       jobTitle,
       company,
       skills: skillRequirements.map(s => `${s.skillName} (Level ${s.targetProficiency})`),
-      modelUsed: DEFAULT_MODEL_CONFIG.model,
+      modelUsed: MODEL,
       metadata: {
         experience: experience || 'Not specified',
-        skillDetails: skillRequirements,
+        skillCount: skillRequirements.length,
       },
     });
 
     const apiStartTime = performance.now();
 
-    // Try with schema validation first
+    // Try with schema validation first, wrapped in retry logic
     let response;
     try {
-      const model = geminiClient.getGenerativeModel({
-        model: DEFAULT_MODEL_CONFIG.model,
-        generationConfig: {
-          responseMimeType: "application/json",
-          responseSchema: caseGenerationSchema as any,
-          temperature: 0.3, // Slightly higher for creative case generation
-          maxOutputTokens: 4000, // More tokens for complex cases
-        },
-      });
-      response = await model.generateContent(prompt);
+      response = await withRetry(async () => {
+        const model = geminiClient.getGenerativeModel({
+          model: MODEL,
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: caseGenerationSchema as any,
+            temperature: 0.3, // Slightly higher for creative case generation
+            maxOutputTokens: 8000, // Increased to prevent JSON truncation
+          },
+        });
+        return await model.generateContent(prompt);
+      }, 'CaseGeneration with schema');
     } catch (schemaError) {
       console.log(`[CaseGeneration] Schema validation failed, retrying without schema:`, schemaError);
 
-      // Fallback without schema
-      const model = geminiClient.getGenerativeModel({
-        model: DEFAULT_MODEL_CONFIG.model,
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 4000,
-        },
-      });
-      response = await model.generateContent(prompt);
+      // Fallback without schema, also wrapped in retry logic
+      response = await withRetry(async () => {
+        const model = geminiClient.getGenerativeModel({
+          model: MODEL,
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 8000, // Increased to prevent JSON truncation
+          },
+        });
+        return await model.generateContent(prompt);
+      }, 'CaseGeneration without schema');
     }
 
     const apiEndTime = performance.now();

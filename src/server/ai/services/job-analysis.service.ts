@@ -1,5 +1,5 @@
 import { type RoleArchetype } from "@prisma/client";
-import { geminiClient, DEFAULT_MODEL_CONFIG } from "../providers/gemini/client";
+import { geminiClient, DEFAULT_MODEL_CONFIG, withRetry } from "../providers/gemini/client";
 import { jobAnalysisSchema, type JobAnalysisResponse } from "../providers/gemini/types";
 import { createJobAnalysisPrompt } from "../prompts/practice/job-analysis";
 import { geminiDbLogger } from "../../api/utils/gemini-db-logger";
@@ -55,31 +55,35 @@ export async function analyzeJobDescription(
 
     const apiStartTime = performance.now();
 
-    // Try with schema validation first
+    // Try with schema validation first, wrapped in retry logic
     let response;
     try {
-      const model = geminiClient.getGenerativeModel({
-        model: DEFAULT_MODEL_CONFIG.model,
-        generationConfig: {
-          responseMimeType: "application/json",
-          responseSchema: jobAnalysisSchema as any,
-          temperature: DEFAULT_MODEL_CONFIG.temperature,
-          maxOutputTokens: DEFAULT_MODEL_CONFIG.maxOutputTokens,
-        },
-      });
-      response = await model.generateContent(prompt);
+      response = await withRetry(async () => {
+        const model = geminiClient.getGenerativeModel({
+          model: DEFAULT_MODEL_CONFIG.model,
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: jobAnalysisSchema as any,
+            temperature: DEFAULT_MODEL_CONFIG.temperature,
+            maxOutputTokens: DEFAULT_MODEL_CONFIG.maxOutputTokens,
+          },
+        });
+        return await model.generateContent(prompt);
+      }, 'JobAnalysis with schema');
     } catch (schemaError) {
       console.log(`[JobAnalysis] Schema validation failed, retrying without schema:`, schemaError);
 
-      // Fallback without schema
-      const model = geminiClient.getGenerativeModel({
-        model: DEFAULT_MODEL_CONFIG.model,
-        generationConfig: {
-          temperature: DEFAULT_MODEL_CONFIG.temperature,
-          maxOutputTokens: DEFAULT_MODEL_CONFIG.maxOutputTokens,
-        },
-      });
-      response = await model.generateContent(prompt);
+      // Fallback without schema, also wrapped in retry logic
+      response = await withRetry(async () => {
+        const model = geminiClient.getGenerativeModel({
+          model: DEFAULT_MODEL_CONFIG.model,
+          generationConfig: {
+            temperature: DEFAULT_MODEL_CONFIG.temperature,
+            maxOutputTokens: DEFAULT_MODEL_CONFIG.maxOutputTokens,
+          },
+        });
+        return await model.generateContent(prompt);
+      }, 'JobAnalysis without schema');
     }
 
     const apiEndTime = performance.now();
