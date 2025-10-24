@@ -21,7 +21,8 @@ import {
   FileText,
   ChevronRight,
   X,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 
 function PracticeFeedbackContent() {
@@ -30,12 +31,38 @@ function PracticeFeedbackContent() {
   const { user, isLoaded } = useUser();
   const [selectedTab, setSelectedTab] = useState('ai-feedback');
   const [showCelebrationAlert, setShowCelebrationAlert] = useState(true);
+  const [aggregationTriggered, setAggregationTriggered] = useState(false);
 
   // Get params from URL
   const assessmentId = searchParams.get('assessmentId');
   const interviewId = searchParams.get('interviewId');
 
-  // Fetch assessment data
+  // Poll for assessment status if we have an interviewId but no assessmentId
+  const { data: assessmentStatus, isLoading: statusLoading } = api.assessment.getInterviewAssessmentStatus.useQuery(
+    { interviewId: interviewId! },
+    {
+      enabled: !!interviewId && !assessmentId,
+      refetchInterval: (data) => {
+        // Stop polling when all complete or if assessment exists
+        if (data && 'overallStatus' in data && data.overallStatus === 'COMPLETED') return false;
+        return 3000; // Poll every 3 seconds
+      },
+    }
+  );
+
+  // Trigger aggregation mutation
+  const aggregationMutation = api.assessment.aggregateInterviewAssessment.useMutation({
+    onSuccess: (data) => {
+      console.log('[Feedback] Aggregation completed:', data.assessmentId);
+      // Refetch assessment data
+      refetchByInterview();
+    },
+    onError: (error) => {
+      console.error('[Feedback] Aggregation failed:', error.message);
+    },
+  });
+
+  // Fetch assessment data by ID
   const { data: assessment, isLoading, error } = api.assessment.getById.useQuery(
     { assessmentId: assessmentId! },
     {
@@ -45,17 +72,33 @@ function PracticeFeedbackContent() {
   );
 
   // Alternative: fetch by interview ID if no assessment ID
-  const { data: assessmentByInterview, isLoading: interviewLoading, error: interviewError } = api.assessment.getByInterviewId.useQuery(
+  const { data: assessmentByInterview, isLoading: interviewLoading, error: interviewError, refetch: refetchByInterview } = api.assessment.getByInterviewId.useQuery(
     { interviewId: interviewId! },
     {
       enabled: !assessmentId && !!interviewId,
-      retry: false
+      retry: false,
+      refetchOnMount: true,
     }
   );
 
+  // Auto-trigger aggregation when all questions are complete
+  useEffect(() => {
+    if (
+      !aggregationTriggered &&
+      !assessmentId &&
+      interviewId &&
+      assessmentStatus?.overallStatus === 'COMPLETED' &&
+      !assessmentByInterview
+    ) {
+      console.log('[Feedback] All questions complete, triggering aggregation...');
+      setAggregationTriggered(true);
+      aggregationMutation.mutate({ interviewId });
+    }
+  }, [aggregationTriggered, assessmentId, interviewId, assessmentStatus, assessmentByInterview, aggregationMutation]);
+
   // Use whichever assessment we got
   const currentAssessment = assessment || assessmentByInterview;
-  const isLoadingData = isLoading || interviewLoading;
+  const isLoadingData = isLoading || interviewLoading || statusLoading;
   const hasError = error || interviewError;
 
   // Redirect to sign-in if not authenticated
@@ -82,6 +125,101 @@ function PracticeFeedbackContent() {
         </div>
       </div>
     );
+  }
+
+  // Show processing state while assessments are being generated
+  if (!currentAssessment && interviewId && assessmentStatus) {
+    const { totalQuestions, completedCount, overallStatus } = assessmentStatus;
+    const isProcessing = overallStatus === 'IN_PROGRESS' || overallStatus === 'PENDING';
+    const isAggregating = aggregationMutation.isPending;
+
+    if (isProcessing || isAggregating) {
+      return (
+        <div className="min-h-screen bg-background p-4 md:p-8">
+          <div className="max-w-4xl mx-auto space-y-6">
+            {/* Status header */}
+            <Card className="border-blue-200 bg-blue-50">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                  <div>
+                    <CardTitle className="text-blue-900">
+                      {isAggregating ? 'Creating Your Final Assessment' : 'Analyzing Your Interview'}
+                    </CardTitle>
+                    <CardDescription className="text-blue-700">
+                      {isAggregating
+                        ? 'Synthesizing insights from all your responses... This usually takes 10-15 seconds.'
+                        : `Processing question ${completedCount}/${totalQuestions}... This usually takes 20-30 seconds per question.`
+                      }
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+
+            {/* Question progress */}
+            {assessmentStatus.questions && assessmentStatus.questions.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium text-gray-600">Question Assessment Progress</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {assessmentStatus.questions.map((q, idx) => (
+                    <div key={q.recordingId} className="flex items-center gap-3">
+                      {q.status === 'COMPLETED' ? (
+                        <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                      ) : q.status === 'IN_PROGRESS' ? (
+                        <Loader2 className="w-5 h-5 animate-spin text-blue-600 flex-shrink-0" />
+                      ) : q.status === 'FAILED' ? (
+                        <X className="w-5 h-5 text-red-600 flex-shrink-0" />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Question {idx + 1}</p>
+                        <p className="text-xs text-gray-500">
+                          {q.status === 'COMPLETED' && 'Assessment complete'}
+                          {q.status === 'IN_PROGRESS' && 'Analyzing response...'}
+                          {q.status === 'FAILED' && `Error: ${q.error || 'Assessment failed'}`}
+                          {q.status === 'PENDING' && 'Waiting to process'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Loading skeleton */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-purple-600 animate-pulse" />
+                  Your Feedback Will Appear Here
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4 animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  <div className="mt-6 grid md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-20 bg-gray-100 rounded"></div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-20 bg-gray-100 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      );
+    }
   }
 
   // Show error state if assessment not found
