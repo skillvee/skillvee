@@ -8,6 +8,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 import AnimationProvider from "~/components/animation-provider";
 import { MicrosoftClarity } from "~/components/analytics/clarity";
 import { GoogleAnalytics } from "~/components/analytics/google-analytics";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   title: "SkillVee - AI-Powered Data Science Interview Practice",
@@ -85,6 +86,7 @@ export default function RootLayout({
           </TRPCReactProvider>
           <GoogleAnalytics />
           <MicrosoftClarity />
+          <Analytics />
           <script
             dangerouslySetInnerHTML={{
               __html: `
