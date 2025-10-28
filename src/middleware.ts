@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 const isProtectedRoute = createRouteMatcher([
   "/interview(.*)",
@@ -8,6 +9,15 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
+  // Redirect all .vercel.app domains to main domain
+  const hostname = request.headers.get("host") || "";
+  if (hostname.includes(".vercel.app")) {
+    const url = request.nextUrl.clone();
+    url.host = "www.skillvee.com";
+    url.protocol = "https:";
+    return NextResponse.redirect(url, 308); // 308 = Permanent Redirect
+  }
+
   if (isProtectedRoute(request)) {
     await auth.protect();
   }

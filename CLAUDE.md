@@ -5,7 +5,7 @@
 **Name**: Skillvee - AI-Powered Technical Interview Platform
 **Type**: T3 Stack Application
 **Repository**: <https://github.com/skillvee/skillvee>
-**Live URL**: <https://skillvee-rouge.vercel.app>  
+**Live URL**: <https://www.skillvee.com>  
 
 ## What Skillvee Does
 
