@@ -4,8 +4,8 @@ export const siteConfig = {
   name: "SkillVee",
   description:
     "Turn interview prep into real job offers. Practice with realistic, AI-powered interviews tailored to your target roles and unlock new job opportunities through our partner network.",
-  url: "https://skillvee.com",
-  ogImage: "https://skillvee.com/og-image.jpg",
+  url: "https://www.skillvee.com",
+  ogImage: "https://www.skillvee.com/og-image.jpg",
   links: {
     twitter: "https://twitter.com/skillvee",
     github: "https://github.com/skillvee/skillvee",

@@ -1,7 +1,7 @@
 import { type MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://skillvee.com";
+  const baseUrl = "https://www.skillvee.com";
 
   // Static routes with their priorities and change frequencies
   const staticRoutes: MetadataRoute.Sitemap = [

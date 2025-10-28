@@ -18,4 +18,4 @@ Disallow: /sign-up/
 Disallow: /unauthorized/
 
 # Sitemap
-Sitemap: https://skillvee.com/sitemap.xml
+Sitemap: https://www.skillvee.com/sitemap.xml
