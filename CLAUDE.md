@@ -5,7 +5,13 @@
 **Name**: Skillvee - AI-Powered Technical Interview Platform
 **Type**: T3 Stack Application
 **Repository**: <https://github.com/skillvee/skillvee>
-**Live URL**: <https://www.skillvee.com>  
+**Live URL**: <https://www.skillvee.com>
+
+**IMPORTANT**:
+- Only use `www.skillvee.com` or `skillvee.com` for all references
+- **IGNORE** all `.vercel.app` domains (e.g., `skillvee-rouge.vercel.app`)
+- `.vercel.app` URLs are automatically redirected to the main domain
+- Analytics, testing, and documentation should ONLY reference the main domain
 
 ## What Skillvee Does
 
