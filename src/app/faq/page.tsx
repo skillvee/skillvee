@@ -187,7 +187,7 @@ export default function FAQPage() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 relative z-10">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6 py-16 sm:py-20 relative z-10">
           <div className="text-center">
             {/* Badge - Matching Homepage Style */}
             <Badge className="bg-blue-50 text-blue-700 border-blue-200 w-fit mx-auto mb-6 animate-bounce-in hover:scale-105 transition-transform duration-300">
@@ -244,7 +244,7 @@ export default function FAQPage() {
 
       {/* FAQ Content - Updated Style */}
       <section className="py-16 sm:py-20 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-6">
           <div className="space-y-16">
             {faqSections.map((section, sectionIndex) => (
               <div
@@ -293,7 +293,7 @@ export default function FAQPage() {
           <div className="absolute bottom-10 right-10 w-24 h-24 border border-white rounded-full"></div>
         </div>
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center relative z-10">
+        <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-6 text-center relative z-10">
           <Badge className="bg-yellow-400 text-yellow-900 mb-6 sm:mb-8 text-sm font-semibold">
             💡 Still have questions?
           </Badge>

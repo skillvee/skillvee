@@ -1,5 +1,15 @@
 import Link from "next/link";
+import { type Metadata } from "next";
 import { Button } from "~/components/ui/button";
+import { generateMetadata as genMeta } from "~/lib/seo/metadata";
+
+export const metadata: Metadata = genMeta({
+  title: "Privacy Policy - Your Data, Your Control",
+  description:
+    "Learn how SkillVee protects your privacy and handles your data. Our commitment to transparency and data security in AI-powered interview practice.",
+  path: "/privacy",
+  noIndex: false,
+});
 
 export default function PrivacyPolicyPage() {
   return (

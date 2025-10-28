@@ -2,20 +2,36 @@ import { currentUser } from "@clerk/nextjs/server";
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
+import { type Metadata } from "next";
 import { HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import { 
-  CheckCircle, 
-  Users, 
-  Briefcase, 
+import {
+  CheckCircle,
+  Users,
+  Briefcase,
   Zap,
   Shield,
   Clock,
   ArrowRight
 } from "lucide-react";
 import Navigation from "~/components/navigation";
+import { generateMetadata as genMeta } from "~/lib/seo/metadata";
+
+export const metadata: Metadata = genMeta({
+  title: "Pricing - Free for Data Scientists, Premium for Companies",
+  description:
+    "SkillVee is free forever for data scientists. Premium talent acquisition plans for companies looking to hire top data science talent fast. Transparent pricing, no hidden fees.",
+  path: "/pricing",
+  keywords: [
+    "interview practice pricing",
+    "free mock interviews",
+    "data science hiring",
+    "talent acquisition pricing",
+    "technical interview platform cost",
+  ],
+});
 
 export default async function PricingPage() {
   const user = await currentUser();
@@ -29,7 +45,7 @@ export default async function PricingPage() {
         <main className="flex-1">
           {/* Hero Section */}
           <section className="bg-white py-20">
-            <div className="max-w-7xl mx-auto px-6 text-center">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6 text-center">
               <Badge className="bg-teal-50 text-teal-700 border-teal-200 w-fit mx-auto mb-6 animate-bounce-in">
                 ✨ Free Forever for Data Scientists
               </Badge>
@@ -44,7 +60,7 @@ export default async function PricingPage() {
 
           {/* Pricing Cards */}
           <section className="py-20 bg-gray-50">
-            <div className="max-w-7xl mx-auto px-6">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* For Data Scientists */}
                 <Card className="bg-white hover:shadow-lg transition-shadow border-2 border-transparent hover:border-blue-100 relative animate-on-scroll-left card-hover">
@@ -174,7 +190,7 @@ export default async function PricingPage() {
 
         {/* Footer */}
         <footer className="bg-gray-100 text-gray-800 py-8 sm:py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
               <div>
                 <div className="mb-4">

@@ -1,0 +1,21 @@
+# *
+User-agent: *
+Allow: /
+
+# Disallow API routes
+Disallow: /api/
+
+# Disallow authenticated routes
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /interview/live/
+
+# Disallow auth pages
+Disallow: /sign-in/
+Disallow: /sign-up/
+
+# Disallow unauthorized page
+Disallow: /unauthorized/
+
+# Sitemap
+Sitemap: https://skillvee.com/sitemap.xml

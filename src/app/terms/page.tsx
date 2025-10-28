@@ -1,8 +1,18 @@
 import Link from "next/link";
+import { type Metadata } from "next";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Users, Building2, FileText, ArrowRight } from "lucide-react";
+import { generateMetadata as genMeta } from "~/lib/seo/metadata";
+
+export const metadata: Metadata = genMeta({
+  title: "Terms of Service - Usage Guidelines",
+  description:
+    "Review SkillVee's terms of service for candidates and companies. Understand your rights and responsibilities when using our AI-powered interview platform.",
+  path: "/terms",
+  noIndex: false,
+});
 
 export default function TermsPage() {
   return (

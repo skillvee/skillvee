@@ -2,29 +2,46 @@ import { currentUser } from "@clerk/nextjs/server";
 import { SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
+import { type Metadata } from "next";
 import { HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import { 
-  CheckCircle, 
-  MessageSquare, 
-  Users, 
-  Target, 
-  TrendingUp, 
-  BarChart, 
-  Brain, 
-  Database, 
-  Award, 
-  Star, 
-  ArrowRight, 
-  Sparkles, 
-  Briefcase, 
-  Zap, 
-  Clock, 
-  FileSearch, 
-  ChartBar 
+import {
+  CheckCircle,
+  MessageSquare,
+  Users,
+  Target,
+  TrendingUp,
+  BarChart,
+  Brain,
+  Database,
+  Award,
+  Star,
+  ArrowRight,
+  Sparkles,
+  Briefcase,
+  Zap,
+  Clock,
+  FileSearch,
+  ChartBar
 } from "lucide-react";
+import { generateMetadata as genMeta } from "~/lib/seo/metadata";
+
+export const metadata: Metadata = genMeta({
+  title: "For Candidates - Master Your Data Science Interviews",
+  description:
+    "Practice realistic AI-powered mock interviews tailored to your target data science roles. Get detailed feedback, improve your skills, and unlock job opportunities through our partner network.",
+  path: "/candidates",
+  keywords: [
+    "data science interview preparation",
+    "mock interview practice",
+    "AI interview coach",
+    "technical interview training",
+    "data analyst preparation",
+    "job interview skills",
+  ],
+});
 
 export default async function CandidatesPage() {
   const user = await currentUser();

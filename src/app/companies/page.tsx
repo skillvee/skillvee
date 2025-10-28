@@ -1,24 +1,41 @@
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import Image from "next/image";
+import { type Metadata } from "next";
 import { HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
-import { 
-  Search, 
-  Users, 
-  CheckCircle, 
-  Zap, 
-  Briefcase, 
-  Clock, 
-  ThumbsUp, 
+import {
+  Search,
+  Users,
+  CheckCircle,
+  Zap,
+  Briefcase,
+  Clock,
+  ThumbsUp,
   Shield,
   Star,
   ArrowRight,
   Brain
 } from "lucide-react";
 import Navigation from "~/components/navigation";
+import { generateMetadata as genMeta } from "~/lib/seo/metadata";
+
+export const metadata: Metadata = genMeta({
+  title: "For Companies - Hire Pre-Vetted Data Science Talent Fast",
+  description:
+    "Access a pool of interview-ready data scientists who have proven their skills through AI-powered assessments. Streamline your hiring process and find qualified candidates faster.",
+  path: "/companies",
+  keywords: [
+    "hire data scientists",
+    "data science recruitment",
+    "technical hiring platform",
+    "pre-vetted candidates",
+    "AI-powered hiring",
+    "talent acquisition",
+  ],
+});
 
 export default async function CompaniesPage() {
   const user = await currentUser();
@@ -32,7 +49,7 @@ export default async function CompaniesPage() {
         <main className="flex-1">
           {/* Hero Section */}
           <div className="bg-white py-16 md:py-24">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6">
               <div className="md:flex md:items-center md:justify-between">
                 <div className="md:w-1/2 mb-10 md:mb-0 animate-fade-in">
                   <h1 className="text-4xl md:text-5xl font-bold mb-4 animate-slide-up">
@@ -164,7 +181,7 @@ export default async function CompaniesPage() {
 
           {/* How It Works Section */}
           <section className="py-16 bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6">
               <div className="text-center mb-16 animate-on-scroll">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">From job req to team member in 48 hours ⚡</h2>
                 <p className="text-lg text-gray-500 max-w-2xl mx-auto">
@@ -237,7 +254,7 @@ export default async function CompaniesPage() {
 
           {/* Problem Agitation Section */}
           <section className="py-16 bg-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6">
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">The hidden cost of traditional data science hiring</h2>
                 <p className="text-lg text-gray-600 max-w-3xl mx-auto">
@@ -281,7 +298,7 @@ export default async function CompaniesPage() {
 
           {/* Risk Reversal Section */}
           <section className="py-16 bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6">
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">We guarantee your success 🛡️</h2>
                 <p className="text-lg text-gray-600 max-w-3xl mx-auto">
@@ -331,7 +348,7 @@ export default async function CompaniesPage() {
 
           {/* Key Benefits Section */}
           <section className="py-20 bg-white overflow-hidden">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6">
               <div className="text-center mb-20">
                 <div className="inline-flex items-center gap-2 bg-blue-50 px-6 py-2 rounded-full mb-6">
                   <Star className="w-5 h-5 text-primary" />
@@ -465,8 +482,8 @@ export default async function CompaniesPage() {
               <div className="absolute bottom-20 left-1/4 w-12 h-12 border-2 border-white rounded-full"></div>
               <div className="absolute bottom-10 right-10 w-24 h-24 border border-white rounded-full"></div>
             </div>
-            
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center relative z-10">
+
+            <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-6 text-center relative z-10">
               <Badge className="bg-yellow-400 text-yellow-900 mb-6 sm:mb-8 text-sm font-semibold">
                 ✨ Available now
               </Badge>
@@ -494,7 +511,7 @@ export default async function CompaniesPage() {
         
         {/* Footer */}
         <footer className="bg-gray-100 text-gray-800 py-8 sm:py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
               <div>
                 <div className="mb-4">

@@ -9,14 +9,80 @@ import AnimationProvider from "~/components/animation-provider";
 import { MicrosoftClarity } from "~/components/analytics/clarity";
 import { GoogleAnalytics } from "~/components/analytics/google-analytics";
 import { Analytics } from "@vercel/analytics/react";
+import { siteConfig } from "~/lib/seo/metadata";
+import StructuredData from "~/components/seo/StructuredData";
+import { generateOrganizationSchema } from "~/lib/seo/schemas/organization";
 
 export const metadata: Metadata = {
-  title: "SkillVee - AI-Powered Data Science Interview Practice",
-  description: "Turn interview prep into real job offers. Practice with realistic, AI-powered interviews tailored to your target roles and unlock new job opportunities through our partner network.",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: "SkillVee - AI-Powered Data Science Interview Practice",
+    template: "%s | SkillVee",
+  },
+  description:
+    "Turn interview prep into real job offers. Practice with realistic, AI-powered interviews tailored to your target roles and unlock new job opportunities through our partner network.",
+  keywords: [
+    "AI interview practice",
+    "data science interviews",
+    "technical interview prep",
+    "mock interviews",
+    "job preparation",
+    "interview coaching",
+    "data analyst interviews",
+    "machine learning interviews",
+  ],
+  authors: [{ name: "SkillVee" }],
+  creator: "SkillVee",
+  publisher: "SkillVee",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteConfig.url,
+    title: "SkillVee - AI-Powered Data Science Interview Practice",
+    description:
+      "Turn interview prep into real job offers. Practice with realistic, AI-powered interviews tailored to your target roles.",
+    siteName: siteConfig.name,
+    images: [
+      {
+        url: siteConfig.ogImage,
+        width: 1200,
+        height: 630,
+        alt: "SkillVee - AI-Powered Interview Platform",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SkillVee - AI-Powered Data Science Interview Practice",
+    description:
+      "Turn interview prep into real job offers with AI-powered mock interviews.",
+    images: [siteConfig.ogImage],
+    creator: "@skillvee",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: [
     { rel: "icon", url: "/Skillvee favicon.png" },
     { rel: "apple-touch-icon", url: "/Skillvee webclip.png" },
   ],
+  manifest: "/site.webmanifest",
+  verification: {
+    google: "google-site-verification-code", // Replace with actual code from Google Search Console
+    // yandex: "yandex-verification-code",
+    // bing: "bing-verification-code",
+  },
 };
 
 
@@ -84,6 +150,7 @@ export default function RootLayout({
               {children}
             </AnimationProvider>
           </TRPCReactProvider>
+          <StructuredData data={generateOrganizationSchema()} />
           <GoogleAnalytics />
           <MicrosoftClarity />
           <Analytics />

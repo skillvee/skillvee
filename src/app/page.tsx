@@ -9,12 +9,15 @@ import { Badge } from "~/components/ui/badge";
 import { CheckCircle, MessageSquare, Users, Target, TrendingUp, BarChart, Brain, Database, Award, Star, ArrowRight, Sparkles, FileText, Bot, UserX, Zap } from "lucide-react";
 import HeroLottie from "~/components/hero-lottie";
 import Navigation from "~/components/navigation";
+import StructuredData from "~/components/seo/StructuredData";
+import { generateWebApplicationSchema } from "~/lib/seo/schemas/webapp";
 
 export default async function Home() {
   const user = await currentUser();
 
   return (
     <HydrateClient>
+      <StructuredData data={generateWebApplicationSchema()} />
       <div className="min-h-screen bg-white">
         {/* Navigation */}
         <Navigation />
@@ -43,7 +46,7 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-24 relative z-10">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6 py-16 sm:py-20 lg:py-24 relative z-10">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
               {/* Left Column */}
               <div className="space-y-6 sm:space-y-8 animate-fade-in text-center lg:text-left">
@@ -130,7 +133,7 @@ export default async function Home() {
 
         {/* Social Proof Banner */}
         <section className="py-6 bg-gradient-to-r from-blue-50 to-blue-100 border-y border-blue-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6">
             <div className="text-center">
               <p className="text-sm sm:text-base font-medium text-gray-700">
                 Join <span className="font-bold text-blue-600">500+ professionals</span> on early access
@@ -143,7 +146,7 @@ export default async function Home() {
 
         {/* Companies section with Smart Social Proof */}
         <section className="py-16 sm:py-20 lg:py-24 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6">
             <div className="text-center mb-8 sm:mb-12">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
                 Our candidates get amazing jobs at the top tech companies
@@ -256,7 +259,7 @@ export default async function Home() {
 
         {/* The Broken Hiring Game - Visual Flow */}
         <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-white to-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6">
             <div className="text-center mb-16 sm:mb-20">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
                 The Broken Hiring Game
@@ -422,7 +425,7 @@ export default async function Home() {
 
           {/* Step 1 - Practice Like It's Real */}
           <div className="mb-24 lg:mb-32">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 lg:pl-6">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-0 lg:pl-6">
               <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
                 <div className="w-full lg:w-[40%] space-y-6 px-4 lg:px-6">
                   <div className="flex items-center gap-4 mb-6">
@@ -480,7 +483,7 @@ export default async function Home() {
 
           {/* Step 2 - Stand Out Instantly */}
           <div className="mb-24 lg:mb-32">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 lg:pr-6">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-0 lg:pr-6">
               <div className="flex flex-col lg:flex-row-reverse items-center gap-8 lg:gap-12">
                 <div className="w-full lg:w-[40%] space-y-6 px-4 lg:px-6">
                   <div className="flex items-center gap-4 mb-6">
@@ -538,7 +541,7 @@ export default async function Home() {
 
           {/* Step 3 - Jobs Find You */}
           <div className="mb-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 lg:pl-6">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-0 lg:pl-6">
               <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
                 <div className="w-full lg:w-[40%] space-y-6 px-4 lg:px-6">
                   <div className="flex items-center gap-4 mb-6">
@@ -636,7 +639,7 @@ export default async function Home() {
 
         {/* Key Features */}
         <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 relative">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
               <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100">
                 <div className="flex flex-col items-center text-center">
@@ -676,7 +679,7 @@ export default async function Home() {
             <div className="absolute -top-24 -left-24 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
             <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
           </div>
-          <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-6">
             <div className="text-center mb-12 sm:mb-16">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
                 Frequently Asked Questions
@@ -756,7 +759,7 @@ export default async function Home() {
 
         {/* Comparison Table */}
         <section className="py-16 sm:py-20 lg:py-24 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6">
             <div className="text-center mb-12 sm:mb-16">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
                 Why Choose SkillVee? 🤔
@@ -916,8 +919,8 @@ export default async function Home() {
             <div className="absolute bottom-20 left-1/4 w-12 h-12 border-2 border-white rounded-full"></div>
             <div className="absolute bottom-10 right-10 w-24 h-24 border border-white rounded-full"></div>
           </div>
-          
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center relative z-10">
+
+          <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-6 text-center relative z-10">
             <Badge className="bg-yellow-400 text-yellow-900 mb-6 sm:mb-8 text-sm font-semibold">
               🚀 Join 12,000+ Data Scientists
             </Badge>
@@ -954,7 +957,7 @@ export default async function Home() {
 
         {/* Footer */}
         <footer className="bg-gray-100 text-gray-800 py-8 sm:py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
               <div>
                 <div className="mb-4">
