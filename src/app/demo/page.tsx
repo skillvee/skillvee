@@ -1,13 +1,14 @@
 import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import Image from "next/image";
+import { type Metadata } from "next";
 import { HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { Label } from "~/components/ui/label";
-import { 
+import {
   Calendar,
   Clock,
   Users,
@@ -15,6 +16,19 @@ import {
   ArrowRight
 } from "lucide-react";
 import Navigation from "~/components/navigation";
+import { generateMetadata as genMeta } from "~/lib/seo/metadata";
+
+export const metadata: Metadata = genMeta({
+  title: "Demo - See SkillVee in Action",
+  description: "Try SkillVee's AI-powered interview platform. Experience realistic mock interviews, instant feedback, and personalized coaching for data science roles.",
+  path: "/demo",
+  keywords: [
+    "interview demo",
+    "AI interview practice demo",
+    "mock interview example",
+    "data science interview preview",
+  ],
+});
 
 export default async function DemoPage() {
   const user = await currentUser();

@@ -1,7 +1,16 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { type Metadata } from "next";
 
 import { api } from "~/trpc/server";
+import { generateMetadata as genMeta } from "~/lib/seo/metadata";
+
+export const metadata: Metadata = genMeta({
+  title: "Dashboard",
+  description: "Your SkillVee dashboard. Track your interview practice progress, view results, and manage your profile.",
+  path: "/dashboard",
+  noIndex: true, // Private page - don't index
+});
 
 export default async function DashboardPage() {
   const clerkUser = await currentUser();
