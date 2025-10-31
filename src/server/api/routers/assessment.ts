@@ -2,6 +2,8 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import type { FeedbackType } from "@prisma/client";
+import { processQuestionRecording } from "~/server/ai/services/video-assessment.service";
+import { aggregateInterviewAssessment as aggregateAssessment } from "~/server/ai/services/assessment-aggregation.service";
 
 // Input schemas
 const createAssessmentSchema = z.object({
@@ -348,5 +350,259 @@ export const assessmentRouter = createTRPCRouter({
       });
 
       return { success: true };
+    }),
+
+  // ===== VIDEO ASSESSMENT ENDPOINTS (Phase 1) =====
+
+  /**
+   * Process a single question recording
+   * Triggers video upload to Gemini and AI assessment
+   */
+  processQuestionRecording: protectedProcedure
+    .input(
+      z.object({
+        recordingId: z.string().min(1, "Recording ID is required"),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { recordingId } = input;
+
+      // Verify recording exists and user has permission
+      const recording = await ctx.db.interviewQuestionRecording.findFirst({
+        where: {
+          id: recordingId,
+        },
+        include: {
+          interview: {
+            select: {
+              userId: true,
+            },
+          },
+        },
+      });
+
+      if (!recording) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Recording not found',
+        });
+      }
+
+      if (recording.interview.userId !== ctx.userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Not authorized to access this recording',
+        });
+      }
+
+      // Trigger processing asynchronously (don't await)
+      processQuestionRecording({ recordingId })
+        .catch((error) => {
+          console.error(`[Assessment API] Failed to process recording ${recordingId}:`, error);
+        });
+
+      return { success: true, message: "Assessment processing started" };
+    }),
+
+  /**
+   * Get assessment status for a specific recording
+   */
+  getQuestionAssessmentStatus: protectedProcedure
+    .input(
+      z.object({
+        recordingId: z.string().min(1, "Recording ID is required"),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { recordingId } = input;
+
+      const recording = await ctx.db.interviewQuestionRecording.findFirst({
+        where: {
+          id: recordingId,
+        },
+        select: {
+          id: true,
+          assessmentStatus: true,
+          assessmentStartedAt: true,
+          assessmentCompletedAt: true,
+          assessmentError: true,
+          assessmentData: true,
+          interview: {
+            select: {
+              userId: true,
+            },
+          },
+        },
+      });
+
+      if (!recording) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Recording not found',
+        });
+      }
+
+      if (recording.interview.userId !== ctx.userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Not authorized to access this recording',
+        });
+      }
+
+      return {
+        recordingId: recording.id,
+        status: recording.assessmentStatus,
+        startedAt: recording.assessmentStartedAt,
+        completedAt: recording.assessmentCompletedAt,
+        error: recording.assessmentError,
+        data: recording.assessmentData,
+      };
+    }),
+
+  /**
+   * Get overall assessment status for an interview
+   * Returns status for all question recordings
+   */
+  getInterviewAssessmentStatus: protectedProcedure
+    .input(
+      z.object({
+        interviewId: z.string().min(1, "Interview ID is required"),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { interviewId } = input;
+
+      // Verify interview exists and user has permission
+      const interview = await ctx.db.interview.findFirst({
+        where: {
+          id: interviewId,
+          userId: ctx.userId,
+          deletedAt: null,
+        },
+      });
+
+      if (!interview) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Interview not found',
+        });
+      }
+
+      // Get all question recordings for this interview
+      const recordings = await ctx.db.interviewQuestionRecording.findMany({
+        where: {
+          interviewId,
+        },
+        select: {
+          id: true,
+          questionOrder: true,
+          assessmentStatus: true,
+          assessmentStartedAt: true,
+          assessmentCompletedAt: true,
+          assessmentError: true,
+        },
+        orderBy: {
+          questionOrder: "asc",
+        },
+      });
+
+      // Calculate overall status
+      const totalQuestions = recordings.length;
+      const completedCount = recordings.filter((r) => r.assessmentStatus === "COMPLETED").length;
+      const failedCount = recordings.filter((r) => r.assessmentStatus === "FAILED").length;
+      const inProgressCount = recordings.filter((r) => r.assessmentStatus === "IN_PROGRESS").length;
+
+      let overallStatus: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "FAILED" = "PENDING";
+      if (completedCount === totalQuestions) {
+        overallStatus = "COMPLETED";
+      } else if (failedCount > 0) {
+        overallStatus = "FAILED";
+      } else if (inProgressCount > 0 || completedCount > 0) {
+        overallStatus = "IN_PROGRESS";
+      }
+
+      return {
+        interviewId,
+        overallStatus,
+        totalQuestions,
+        completedCount,
+        failedCount,
+        inProgressCount,
+        questions: recordings.map((r) => ({
+          recordingId: r.id,
+          questionOrder: r.questionOrder,
+          status: r.assessmentStatus,
+          startedAt: r.assessmentStartedAt,
+          completedAt: r.assessmentCompletedAt,
+          error: r.assessmentError,
+        })),
+      };
+    }),
+
+  /**
+   * Aggregate all question assessments into final interview assessment
+   * Phase 2: Synthesizes all per-question assessments into a comprehensive final assessment
+   */
+  aggregateInterviewAssessment: protectedProcedure
+    .input(
+      z.object({
+        interviewId: z.string().min(1, "Interview ID is required"),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { interviewId } = input;
+
+      // Verify interview exists and user has permission
+      const interview = await ctx.db.interview.findFirst({
+        where: {
+          id: interviewId,
+          userId: ctx.userId,
+          deletedAt: null,
+        },
+      });
+
+      if (!interview) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Interview not found',
+        });
+      }
+
+      // Verify all questions are assessed
+      const recordings = await ctx.db.interviewQuestionRecording.findMany({
+        where: { interviewId },
+        select: {
+          assessmentStatus: true,
+        },
+      });
+
+      const totalQuestions = recordings.length;
+      const completedCount = recordings.filter((r) => r.assessmentStatus === "COMPLETED").length;
+
+      if (completedCount < totalQuestions) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: `Cannot aggregate: ${completedCount}/${totalQuestions} questions completed`,
+        });
+      }
+
+      // Call aggregation service
+      const result = await aggregateAssessment({
+        interviewId: input.interviewId,
+        userId: ctx.userId,
+      });
+
+      if (!result.success) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: result.error || 'Failed to aggregate assessment',
+        });
+      }
+
+      return {
+        success: true,
+        assessmentId: result.assessmentId,
+        message: "Assessment aggregation completed successfully",
+      };
     }),
 });

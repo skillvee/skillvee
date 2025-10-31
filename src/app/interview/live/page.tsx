@@ -345,8 +345,8 @@ Guidelines:
 
       console.log('✅ Conversation data saved successfully');
 
-      // Redirect to results page
-      router.push(`/interview/results/${currentInterviewId}`);
+      // Redirect to feedback page for AI assessment
+      router.push(`/practice/feedback?interviewId=${currentInterviewId}`);
     } catch (error) {
       console.error('Failed to save conversation data:', error);
       // Still show completed state even if save fails

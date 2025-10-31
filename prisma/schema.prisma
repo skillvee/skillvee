@@ -212,32 +212,40 @@ model MediaRecording {
 }
 
 model InterviewQuestionRecording {
-  id                  String              @id @default(cuid())
-  interviewId         String
-  questionId          String
-  questionText        String
-  questionOrder       Int
-  recordingType       RecordingType       @default(SCREEN_AND_AUDIO)
-  filePath            String
-  fileSize            BigInt
-  duration            Int?
-  uploadStatus        UploadStatus        @default(UPLOADING)
-  uploadStartedAt     DateTime?
-  uploadCompletedAt   DateTime?
-  uploadRetryCount    Int                 @default(0)
-  uploadError         String?
-  transcriptionStatus TranscriptionStatus @default(PENDING)
-  transcriptionText   String?
-  recordingStartedAt  DateTime
-  recordingEndedAt    DateTime?
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  interview           Interview           @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  id                    String              @id @default(cuid())
+  interviewId           String
+  questionId            String
+  questionText          String
+  questionOrder         Int
+  recordingType         RecordingType       @default(SCREEN_AND_AUDIO)
+  filePath              String
+  fileSize              BigInt
+  duration              Int?
+  uploadStatus          UploadStatus        @default(UPLOADING)
+  uploadStartedAt       DateTime?
+  uploadCompletedAt     DateTime?
+  uploadRetryCount      Int                 @default(0)
+  uploadError           String?
+  transcriptionStatus   TranscriptionStatus @default(PENDING)
+  transcriptionText     String?
+  recordingStartedAt    DateTime
+  recordingEndedAt      DateTime?
+  geminiFileUri         String?
+  geminiFileUploadedAt  DateTime?
+  assessmentStatus      AssessmentStatus    @default(PENDING)
+  assessmentStartedAt   DateTime?
+  assessmentCompletedAt DateTime?
+  assessmentError       String?
+  assessmentData        Json?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  interview             Interview           @relation(fields: [interviewId], references: [id], onDelete: Cascade)
 
   @@index([interviewId])
   @@index([questionId])
   @@index([uploadStatus])
   @@index([questionOrder])
+  @@index([assessmentStatus])
   @@map("interview_question_recordings")
 }
 
@@ -672,4 +680,11 @@ enum FitLevel {
   HIGH
   MEDIUM
   LOW
+}
+
+enum AssessmentStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
 }
